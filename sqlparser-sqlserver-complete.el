@@ -1,10 +1,14 @@
-;; -*- coding:utf-8 -*-
-;;; sqlparser-sqlserver-complete.el --- complete tablename and columnname when editing sql
+;;; sqlparser-sqlserver-complete.el --- complete tablename and columnname when editing sql -*- coding:utf-8 -*-
 
 ;; Copyright (C) 2011 孤峰独秀
 
 ;; Author: 孤峰独秀  jixiuf@gmail.com
 ;; Keywords: sql complete sqlserver
+;; Created: 2011年08月19日 星期五 00时38分17秒
+;; Version: 0.1.0
+;; URL:http://www.emacswiki.org/emacs/down/sqlparser-sqlserver-complete.el
+;;     https://github.com/jixiuf/sqlparser
+;; screencast: http://screencast-repos.googlecode.com/files/emacs-sqlparse-mysql-complete.mkv.bz2
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -20,6 +24,36 @@
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
+;; it can parsing current sql sentence ,it is smart enough to choose to
+;; completing table name or column name depending on your position.
+;; 1 after keyword 'use'   :complete schema name (on mysql)
+;; 2 after keyword 'select' 'set' 'where'    :complete  columnname.
+;; 3 after keyword 'alter', 'from' 'update' 'desc'  'show' : complete tablename
+;; 4 after keyword 'into' and and there isn't a
+;; "\\(" between 'into' and current postion :complete tablename
+;; 4.1 after keyword 'into' but there is a "(" between 'into' and current
+;; position  :complete columnname
+;; 5 after keyword 'values'  :complete nothing.
+;;; Installation
+;; 1 it required sqlserver-query.el you should download and add it to you load-path.
+;; http://www.emacswiki.org/emacs/download/sqlserver-query.el
+
+;; 2  (setq sqlserver-username "sa")
+;;    (setq  sqlserver-password "sa")
+;;    (setq sqlserver-server-instance "localhost\\SQLEXPRESS" )
+;;    or  (setq sqlserver-server-instance "localhost" )
+;;    (setq sqlserver-dbname "master")
+;;    (setq sqlserver-cmd 'sqlcmd) or  (setq sqlserver-cmd 'osql)
+;;    or call command:(sqlserver-query-init-interactive)
+;;
+;; keybinding
+
+;;  1). if you using anything.el  you can binding it like this .
+;;     (define-key sql-mode-map (quote [tab]) 'anything-sqlserver-complete)
+;;     (define-key sql-interactive-mode-map  (quote [tab]) 'anything-sqlserver-complete)
+;;  2). use Emacs default completing system.
+;;     (define-key sql-mode-map (quote [tab]) 'sqlparser-sqlserver-complete)
+;;     (define-key sql-interactive-mode-map  (quote [tab]) 'sqlparser-sqlserver-complete)
 
 ;;
 
@@ -29,8 +63,6 @@
 ;;
 ;;  `sqlparser-sqlserver-complete'
 ;;    complete tablename or column name depending on current point
-;;  `abcd'
-;;    thisandthat.
 ;;
 ;;; Customizable Options:
 ;;
@@ -46,23 +78,23 @@
   "complete tablename or column name depending on current point
 position ."
   (interactive)
-  (let ((prefix  (sqlparser-get-prefix) )
+  (let ((prefix  (sqlparser-word-before-point))
         (init-pos (point))
         last-mark)
-    (insert (completing-read "complete:" (  sqlparser-sqlserver-context-candidates) nil t prefix ))
+    (insert (completing-read "complete:" ( sqlparser-sqlserver-context-candidates) nil t prefix))
     (setq last-mark (point-marker))
     (goto-char init-pos)
     (backward-delete-char (length prefix))
     (goto-char (marker-position last-mark))
-    ))
+   ))
 
 (when (featurep 'anything)
   (defvar anything-c-source-sqlserver-candidates nil)
   (defvar anything-c-source-sqlserver
     '((name . "SQL Object:")
-      (init (lambda() (setq anything-c-source-sqlserver-candidates ( sqlparser-sqlserver-context-candidates))))
+      (init (lambda() (setq anything-c-source-sqlserver-candidates (sqlparser-sqlserver-context-candidates))))
       (candidates . anything-c-source-sqlserver-candidates)
-      (action . (("Complete" . (lambda(candidate) (backward-delete-char (length ( sqlparser-get-prefix))) (insert candidate)))))))
+      (action . (("Complete" . (lambda(candidate) (backward-delete-char (length (sqlparser-word-before-point))) (insert candidate)))))))
 
   (defun anything-sqlserver-complete()
     "call `anything' to complete tablename and column name for sqlserver."
@@ -77,89 +109,89 @@ position ."
 (defun  sqlparser-sqlserver-context-candidates()
   "it will decide to complete tablename or columnname depend on
   current position."
-  (let ((context ( sqlparser-parse-4-sqlserver)) candidats)
+  (let ((context (sqlparser-parse-4-sqlserver)) candidats)
     (cond
      ((string= "database" context)
       (setq candidats (sqlparser-sqlserver-all-databasename-candidates))
-      )
+     )
      ((string= "table" context)
-      (setq candidats ( sqlparser-sqlserver-tablename-schemaname-databasename-candidates))
-      )
+      (setq candidats (sqlparser-sqlserver-tablename-schemaname-databasename-candidates))
+     )
      ((string= "column" context)
-      (setq candidats (  sqlparser-sqlserver-column-candidates))
-      )
+      (setq candidats ( sqlparser-sqlserver-column-candidates))
+     )
      ((null context) nil))
     candidats))
 
 ;; Test
-;; ( sqlparser-sqlserver-tablename-schemaname-databasename-candidates "")
-;; ( sqlparser-sqlserver-tablename-schemaname-databasename-candidates "d")
-;; ( sqlparser-sqlserver-tablename-schemaname-databasename-candidates "[d")
-;; ( sqlparser-sqlserver-tablename-schemaname-databasename-candidates "m")
+;; (sqlparser-sqlserver-tablename-schemaname-databasename-candidates "")
+;; (sqlparser-sqlserver-tablename-schemaname-databasename-candidates "d")
+;; (sqlparser-sqlserver-tablename-schemaname-databasename-candidates "[d")
+;; (sqlparser-sqlserver-tablename-schemaname-databasename-candidates "m")
 
-;; ( sqlparser-sqlserver-tablename-schemaname-databasename-candidates "[master].[dbo")
-;; ( sqlparser-sqlserver-tablename-schemaname-databasename-candidates "[master].dbo")
-;; ( sqlparser-sqlserver-tablename-schemaname-databasename-candidates "master.db_o")
-;; ( sqlparser-sqlserver-tablename-schemaname-databasename-candidates "dbo.spt_f")
-;; ( sqlparser-sqlserver-tablename-schemaname-databasename-candidates "master.dbo.spt")
-;; ( sqlparser-sqlserver-tablename-schemaname-databasename-candidates "master.dbo.[spt")
-;; ( sqlparser-sqlserver-tablename-schemaname-databasename-candidates "[master].dbo.[spt")
+;; (sqlparser-sqlserver-tablename-schemaname-databasename-candidates "[master].[dbo")
+;; (sqlparser-sqlserver-tablename-schemaname-databasename-candidates "[master].dbo")
+;; (sqlparser-sqlserver-tablename-schemaname-databasename-candidates "master.db_o")
+;; (sqlparser-sqlserver-tablename-schemaname-databasename-candidates "dbo.spt_f")
+;; (sqlparser-sqlserver-tablename-schemaname-databasename-candidates "master.dbo.spt")
+;; (sqlparser-sqlserver-tablename-schemaname-databasename-candidates "master.dbo.[spt")
+;; (sqlparser-sqlserver-tablename-schemaname-databasename-candidates "[master].dbo.[spt")
 
 (defun sqlparser-sqlserver-tablename-schemaname-databasename-candidates (&optional prefix)
   "complete table name or schemanmae or databasename ."
   (let* ((prefix (or prefix  (sqlparser-get-prefix))); maybe master.dbo.tablename ,dbo.tablename tablename [dbo].[tablename]
          (sub-prefix (split-string prefix "\\." nil))
          sql result)
-    (cond ( (= (length sub-prefix) 1)
-            (let* ( (tablefullname (sqlparser-sqlserver-split-three  (car sub-prefix)) )
-                    ( name-prefix (car tablefullname))
-                    (name-suffix   (if (equal "[" name-prefix) "]" "" ))
+    (cond ((= (length sub-prefix) 1)
+            (let* ((tablefullname (sqlparser-sqlserver-split-three  (car sub-prefix)))
+                    (name-prefix (car tablefullname))
+                    (name-suffix   (if (equal "[" name-prefix) "]" ""))
                     (name  (nth 1 tablefullname)))
               (setq sql (format "select '%s'+  name  + '%s' from sys.tables where name like '%s%%' union all select '%s' + name + '%s.' from sys.databases where name like '%s%%' union all select '%s' + name + '%s.' from sys.schemas where name like '%s%%'"
-                                name-prefix  name-suffix (replace-regexp-in-string "_" "[_]" name )
-                                name-prefix  name-suffix (replace-regexp-in-string "_" "[_]" name )
-                                name-prefix  name-suffix  (replace-regexp-in-string "_" "[_]" name )))))
+                                name-prefix  name-suffix (replace-regexp-in-string "_" "[_]" name)
+                                name-prefix  name-suffix (replace-regexp-in-string "_" "[_]" name)
+                                name-prefix  name-suffix  (replace-regexp-in-string "_" "[_]" name)))))
 
-          ( (= (length sub-prefix) 2); maybe databasename.schename or schename.tablename
+          ((= (length sub-prefix) 2); maybe databasename.schename or schename.tablename
             (let* ((fullname1 (sqlparser-sqlserver-split-three (car sub-prefix)))
                    (name1-prefix (car fullname1))
                    (name1 (nth 1 fullname1))
-                   (name1-suffix  (if (equal "[" name1-prefix) "]" "" ))
+                   (name1-suffix  (if (equal "[" name1-prefix) "]" ""))
                    (fullname2 (sqlparser-sqlserver-split-three (nth 1 sub-prefix)))
                    (name2-prefix (car fullname2))
                    (name2 (nth 1 fullname2))
-                   (name2-suffix  (if (equal "[" name2-prefix) "]" "" ))
+                   (name2-suffix  (if (equal "[" name2-prefix) "]" ""))
                    (db-exists
                     (>  (string-to-number (caar (sqlserver-query
-                                                 (format  "select count(name) from sys.databases where name='%s'" name1) ))) 0)))
+                                                 (format  "select count(name) from sys.databases where name='%s'" name1)))) 0)))
               (if db-exists
                   (setq sql (format
-                             "(select dbname_tab.dbname + '.' + schemaname_tab.schemaname  + '.' from  (select '%s' + name + '%s' dbname from sys.databases where name ='%s') as dbname_tab, (select '%s' + name + '%s' schemaname from [%s].[sys].[schemas] where name like '%s%%') schemaname_tab) union all (select schemaname_tab2.schemaname + '.' + tablename_tab.tablename from (select '%s' + name + '%s' schemaname from sys.schemas where name = '%s' ) schemaname_tab2, (select '%s' + name +'%s' tablename from sys.tables where name like '%s%%' ) tablename_tab )"
-                             name1-prefix name1-suffix name1 name2-prefix name2-suffix name1  (replace-regexp-in-string "_" "[_]" name2 )
-                             name1-prefix name1-suffix name1 name2-prefix name2-suffix  (replace-regexp-in-string "_" "[_]" name2 )))
+                             "(select '%s' + name + '%s.' schemaname from [%s].[sys].[schemas] where name like '%s%%' and exists (select name from sys.databases where name='%s')) union all (select '%s' + name +'%s' tablename from sys.tables where schema_name(schema_id) ='%s' and name like '%s%%')"
+                             name2-prefix name2-suffix name1  (replace-regexp-in-string "_" "[_]" name2) name1
+                             name2-prefix name2-suffix name1 (replace-regexp-in-string "_" "[_]" name2
+                            )))
                 (setq sql (format
-                           "select schemaname_tab2.schemaname + '.' + tablename_tab.tablename from (select '%s' + name + '%s' schemaname from sys.schemas where name = '%s' ) schemaname_tab2, (select '%s' + name +'%s' tablename from sys.tables where name like '%s%%' ) tablename_tab "
-                           name1-prefix name1-suffix name1 name2-prefix name2-suffix  (replace-regexp-in-string "_" "[_]" name2 ) ))
-                )
-              )
-            )
-          ( (= (length sub-prefix) 3)
+                           "select '%s' + name +'%s' tablename from sys.tables where schema_name(schema_id) ='%s' and name like '%s%%'"
+                             name2-prefix name2-suffix name1  (replace-regexp-in-string "_" "[_]" name2)))
+               )
+             )
+           )
+          ((= (length sub-prefix) 3)
             (let* ((fullname1 (sqlparser-sqlserver-split-three (car sub-prefix)))
                    (name1-prefix (car fullname1))
                    (name1 (nth 1 fullname1))
-                   (name1-suffix  (if (equal "[" name1-prefix) "]" "" ))
+                   (name1-suffix  (if (equal "[" name1-prefix) "]" ""))
                    (fullname2 (sqlparser-sqlserver-split-three (nth 1 sub-prefix)))
                    (name2-prefix (car fullname2))
                    (name2 (nth 1 fullname2))
-                   (name2-suffix  (if (equal "[" name2-prefix) "]" "" ))
+                   (name2-suffix  (if (equal "[" name2-prefix) "]" ""))
                    (fullname3 (sqlparser-sqlserver-split-three (nth 2 sub-prefix)))
                    (name3-prefix (car fullname3))
                    (name3 (nth 1 fullname3))
-                   (name3-suffix  (if (equal "[" name3-prefix) "]" "" ))
-                   )
-              (setq sql (format "select dbname_tab.dbname + '.' + schemaname_tab.schemaname  + '.' + tablename_tab.tablename from ( SELECT '%s' + name + '%s' dbname FROM sys.databases WHERE name = '%s' ) AS dbname_tab, ( SELECT '%s' + name + '%s' schemaname FROM sys.schemas WHERE name = '%s' ) schemaname_tab ,( SELECT '%s' + name + '%s' tablename FROM sys.tables WHERE name LIKE '%s%%' ) tablename_tab"
-                                name1-prefix name1-suffix name1 name2-prefix name2-suffix name2 name3-prefix name3-suffix  (replace-regexp-in-string "_" "[_]" name3 )
-                                )))))
+                   (name3-suffix  (if (equal "[" name3-prefix) "]" ""))
+                  )
+              (setq sql (format " SELECT '%s' + name + '%s' tablename FROM sys.tables WHERE exists (select name from sys.databases where name = '%s') and schema_name(schema_id)= '%s' and name LIKE '%s%%'"
+                                name3-prefix name3-suffix name1 name2      (replace-regexp-in-string "_" "[_]" name3))))))
     (mapcar 'car (sqlserver-query sql))))
 
 ;;(sqlparser-sqlserver-split-three "[abc]") return ("[" "abc" "]")
@@ -167,12 +199,12 @@ position ."
 ;; (sqlparser-sqlserver-split-three "abc") return ("" "abc" "")
 ;; (sqlparser-sqlserver-split-three "") return ("" "" "")
 (defun sqlparser-sqlserver-split-three(str)
-  "when str=[abc] ,then return '(\"[\" \"abc\" \"]\" )
+  "when str=[abc] ,then return '(\"[\" \"abc\" \"]\")
    when str=[abc  ,then return '(\"[\" \"abc\" \"\")
    when str=abc   ,then return '(\"\" \"abc\" \"\")"
   (if  (or (null str) (string= str ""))
       (list "" "" "")
-    (let ( (prefix "") ( suffix "") (middle str))
+    (let ((prefix "") (suffix "") (middle str))
       (when (string-match "^\\[" middle)
         (setq prefix "[")
         (setq middle  (substring-no-properties middle 1)))
@@ -180,41 +212,41 @@ position ."
         (setq suffix "]")
         (setq middle (substring-no-properties str 1   (length middle))))
       (list prefix  middle suffix)
-      )))
+     )))
 
 ;; Test:
 ;; (sqlparser-sqlserver-get-matched-columns "t3" "s")
 ;; (sqlparser-sqlserver-get-matched-columns "[t3]" "[s")
-;; (sqlparser-sqlserver-get-matched-columns "[t3]" )
-;; (sqlparser-sqlserver-get-matched-columns "dbo.t3" "[s" )
-;; (sqlparser-sqlserver-get-matched-columns "dbo.t3" "s" )
-;; (sqlparser-sqlserver-get-matched-columns "dbo.t3" "" )
-;; (sqlparser-sqlserver-get-matched-columns "master.dbo.dt" "t" )
-;; (sqlparser-sqlserver-get-matched-columns "master.[dbo].dt" "[t" )
-(defun sqlparser-sqlserver-get-matched-columns( tablename &optional column-prefix)
+;; (sqlparser-sqlserver-get-matched-columns "[t3]")
+;; (sqlparser-sqlserver-get-matched-columns "dbo.t3" "[s")
+;; (sqlparser-sqlserver-get-matched-columns "dbo.t3" "s")
+;; (sqlparser-sqlserver-get-matched-columns "dbo.t3" "")
+;; (sqlparser-sqlserver-get-matched-columns "master.dbo.dt" "t")
+;; (sqlparser-sqlserver-get-matched-columns "master.[dbo].dt" "[t")
+(defun sqlparser-sqlserver-get-matched-columns(tablename &optional column-prefix)
   "tablename can be [master].[dbo].test ,or test or [dbo].test"
   (let* (;;("[master]" "dbo" "test") or ("dbo" "test") or ("test")
          (tablename-string-list (split-string tablename "[ \t\\.]" t))
          sql
          (column-prefix-string (nth 1 (sqlparser-sqlserver-split-three  (or  column-prefix ""))))
          (column-prefix-prefix (car  (sqlparser-sqlserver-split-three  (or  column-prefix ""))))
-         (column-prefix-sufix    (if (equal "[" column-prefix-prefix) "]" "" ))
-         )
-    (cond ( (= (length tablename-string-list) 1);tablename
+         (column-prefix-sufix    (if (equal "[" column-prefix-prefix) "]" ""))
+        )
+    (cond ((= (length tablename-string-list) 1);tablename
             (setq sql (format "select '%s' + col.name + '%s' from sys.objects obj, sys.tables tab , sys.columns col where tab.[object_id]=obj.[object_id] and col.[object_id]=obj.[object_id] and tab.name ='%s'  and col.name like '%s%%'"
                               column-prefix-prefix column-prefix-sufix
                               (nth 1 (sqlparser-sqlserver-split-three  (car tablename-string-list)))
                               column-prefix-string))
 
-            )
-          ( (= (length tablename-string-list) 2); schema.tablename
+           )
+          ((= (length tablename-string-list) 2); schema.tablename
             (setq sql (format "select '%s' + col.name + '%s' from sys.objects obj, sys.tables tab , sys.columns col where tab.[object_id]=obj.[object_id] and col.[object_id]=obj.[object_id] and SCHEMA_NAME(tab.schema_id)='%s' and tab.name ='%s'  and col.name like '%s%%'"
                               column-prefix-prefix column-prefix-sufix
                               (nth 1 (sqlparser-sqlserver-split-three  (car tablename-string-list)))
                               (nth 1 (sqlparser-sqlserver-split-three  (nth 1  tablename-string-list)))
                               column-prefix-string))
-            )
-          ( (= (length tablename-string-list) 3); dbname.schema.tablename
+           )
+          ((= (length tablename-string-list) 3); dbname.schema.tablename
             (setq sql (format "select '%s' + col.name + '%s' from %s.sys.objects obj, %s.sys.tables tab , %s.sys.columns col where tab.[object_id]=obj.[object_id] and col.[object_id]=obj.[object_id] and SCHEMA_NAME(tab.schema_id)='%s' and tab.name ='%s'  and col.name like '%s%%'"
                               column-prefix-prefix column-prefix-sufix
                               (nth 1 (sqlparser-sqlserver-split-three  (car tablename-string-list)));db
@@ -231,18 +263,18 @@ position ."
          (prefix (sqlparser-get-prefix)) ;alias.columnname or columnname
          (sub-prefix (split-string prefix "\\." nil)) ;(alias columnname)
          result)
-    (cond ( (= (length sub-prefix) 1);;columnname
+    (cond ((= (length sub-prefix) 1);;columnname
             (let ((table-names (sqlparser-fetch-tablename-from-select-sql
                                 (sqlparser-sql-sentence-at-point)))
-                  )
+                 )
               (dolist (tablename table-names)
                 (setq result (append result    (sqlparser-sqlserver-get-matched-columns tablename (car sub-prefix))))
-                )))
+               )))
           ((= (length sub-prefix) 2); alias.columnname
            (let ((tablename-string  (sqlparser-guess-table-name (car sub-prefix))) ;[master].dbo.test
-                 )
+                )
              (setq result (sqlparser-sqlserver-get-matched-columns tablename-string (nth 1 sub-prefix)))))
-          )
+         )
     result))
 
 (defun sqlparser-sqlserver-all-tablename-candidates()
@@ -265,7 +297,7 @@ then the `u' is `alias' and `user' is the true table name."
         (regexp (concat  "\\(\\([a-zA-Z0-9_\\$\\.]\\|\\[\\|]\\)+\\)[ \t\n\r]+\\(as[ \t]+\\)?" alias "[, \t\n\r]\\|$"))
         table-name)
     (setq sql (concat sql " "))
-    (setq sql  (replace-regexp-in-string "\n" " " sql ))
+    (setq sql  (replace-regexp-in-string "\n" " " sql))
     (if (and  sql (string-match regexp sql))
         (progn
           (setq table-name (match-string 1 sql))
@@ -273,7 +305,7 @@ then the `u' is `alias' and `user' is the true table name."
       alias)))
 
 
-(defun sqlparser-fetch-tablename-from-sql ( &optional sql1)
+(defun sqlparser-fetch-tablename-from-sql (&optional sql1)
   "return a list of tablenames from a sql-sentence."
   (let ((sql (or sql1 (sqlparser-sql-sentence-at-point)))
         tablenames)
@@ -281,9 +313,9 @@ then the `u' is `alias' and `user' is the true table name."
     (unless tablenames
       (setq tablenames (append tablenames (list (sqlparser-fetch-tablename-from-insert-update-alter-sql sql)))))
     tablenames
-    ))
+   ))
 
-(defun sqlparser-fetch-tablename-from-insert-update-alter-sql( &optional sql1)
+(defun sqlparser-fetch-tablename-from-insert-update-alter-sql(&optional sql1)
   "fetch tablename ,or schema.tablename from a insert sentence or
 update sentence or alter sentence."
   (let ((sql (or sql1 (sqlparser-sql-sentence-at-point)))
@@ -291,14 +323,14 @@ update sentence or alter sentence."
     (with-temp-buffer
       (insert sql)
       (goto-char (point-min))
-      (when (search-forward-regexp "\\(\\binto\\|update\\|alter\\)[ \t\n\r]+\\(\\([a-zA-Z0-9_\\$\\.]\\|\\[\\|]\\)+\\)[ \t\n\r]*" (point-max ) t)
+      (when (search-forward-regexp "\\(\\binto\\|update\\|alter\\)[ \t\n\r]+\\(\\([a-zA-Z0-9_\\$\\.]\\|\\[\\|]\\)+\\)[ \t\n\r]*" (point-max) t)
         (setq tablename (match-string 2))))))
 
 
-(defun sqlparser-fetch-tablename-from-select-sql ( &optional sql1)
+(defun sqlparser-fetch-tablename-from-select-sql (&optional sql1)
   "return a list of tablenames from a sql-sentence."
   (let* ((sql (or sql1 (sqlparser-sql-sentence-at-point)))
-         (sql-stack (list sql)) ele pt result-stack tablename-stack )
+         (sql-stack (list sql)) ele pt result-stack tablename-stack)
     (while (> (length sql-stack) 0)
       (setq ele (pop sql-stack))
       (with-temp-buffer
@@ -312,7 +344,7 @@ update sentence or alter sentence."
           (delete-region  pt (point))
           (insert "table"))
         (push (buffer-substring (point-min) (point-max))  result-stack)
-        ))
+       ))
     (while (> (length result-stack) 0)
       (setq ele (pop result-stack))
       (with-temp-buffer
@@ -327,11 +359,11 @@ update sentence or alter sentence."
           (while (search-forward-regexp "," (point-max) t)
             (push (buffer-substring 1 (1- (point))) tablename-stack)
             (delete-region  1 (point))
-            )
+           )
           (push (buffer-substring (point-min) (point-max)) tablename-stack)
-          )
-        )
-      )
+         )
+       )
+     )
     (while (> (length tablename-stack) 0)
       (setq ele (pop tablename-stack))
       (with-temp-buffer
@@ -352,15 +384,15 @@ update sentence or alter sentence."
         (if (= 1  (count-matches   "\\([a-zA-Z0-9_\\$\\.]\\|\\[\\|]\\)+" 1 (point-max)))
             (push (buffer-substring 1 (point-max)) result-stack)
           (goto-char 0)
-          (when (search-forward-regexp "\\([a-zA-Z0-9_\\$\\.]\\|\\[\\|]\\)+" (point-max) t )
+          (when (search-forward-regexp "\\([a-zA-Z0-9_\\$\\.]\\|\\[\\|]\\)+" (point-max) t)
             (push (match-string 0) result-stack)
-            )
-          )
-        )
-      )
+           )
+         )
+       )
+     )
     (delete "table" result-stack)
     result-stack
-    ))
+   ))
 
 (defun sqlparser-parse-4-sqlserver()
   "judge now need complete tablename or column name or don't complete .
@@ -368,7 +400,7 @@ it will return 'table' ,or 'column' ,or nil.
 "
   (let* ((cur-pos (point))
          (sql-pos-info (bounds-of-sql-at-point-4-sqlserver))
-         (sql-start-pos (car sql-pos-info ))
+         (sql-start-pos (car sql-pos-info))
          (sql-end-pos (cdr sql-pos-info))
          map keyword returnVal)
     (when (search-backward-regexp "\\balter\\b" sql-start-pos t 1)
@@ -398,40 +430,40 @@ it will return 'table' ,or 'column' ,or nil.
     (when (search-backward-regexp "\\binto\\b" sql-start-pos t 1)
       (push   (list (- cur-pos (point)) "into") map))
     (goto-char cur-pos)
-    (setq map   (sort map (lambda (a b ) (when (< (car a ) (car b)) t))))
+    (setq map   (sort map (lambda (a b) (when (< (car a) (car b)) t))))
     (setq keyword  (car (cdar map)))
     (cond
-     ( (null keyword)
+     ((null keyword)
        (setq returnVal nil)
-       )
+      )
      ((string= "into" keyword)
       (progn
         ;; '(' between "into" and current position
         (if (search-backward-regexp (regexp-quote "(") (- cur-pos  (caar map)) t 1)
             (setq returnVal "column")
           (setq returnVal "table")
-          )
-        )
-      )
+         )
+       )
+     )
      ((string-match "use" keyword)
       (setq returnVal "database")
-      )
+     )
      ((string-match "from\\|alter\\|update" keyword)
       (setq returnVal "table")
-      )
+     )
      ((string-match "select\\|set\\|where\\|" keyword)
       (setq returnVal "column")
-      )
+     )
      ((string-match "values" keyword)
       (setq returnVal nil)
-      )
+     )
      (t
       (setq returnVal nil)
-      )
      )
+    )
     (goto-char cur-pos)
     returnVal
-    ))
+   ))
 
 (defun sqlparser-sql-sentence-at-point()
   "get current sql sentence. "
@@ -439,7 +471,7 @@ it will return 'table' ,or 'column' ,or nil.
          (beg (car bounds))
          (end (cdr bounds)))
     (buffer-substring-no-properties  beg end)
-    ))
+   ))
 
 (defun bounds-of-sql-at-point-4-sqlserver()
   "get start and end point of current sql."
@@ -447,9 +479,9 @@ it will return 'table' ,or 'column' ,or nil.
     (when (and
            (looking-at "[ \t]*\\(\n\\|\\'\\)")
            (looking-back "[ \t]*;[ \t]*" (beginning-of-line))
-           )
+          )
       (search-backward-regexp "[ \t]*;[ \t]*" (beginning-of-line) t)
-      )
+     )
     (save-excursion
       (skip-chars-forward " \t\n\r")
       (re-search-backward ";[ \t\n\r]*\\|\\`\\|\n[\r\t ]*\n[^ \t]" nil t)
@@ -463,8 +495,8 @@ it will return 'table' ,or 'column' ,or nil.
       (setq end   (point)))
     (goto-char pt)
     (cons begin end)
-    )
-  )
+   )
+ )
 
 (defun sqlparser-get-prefix()
   "for example `tablename.col' `table.' `str'"
@@ -473,22 +505,15 @@ it will return 'table' ,or 'column' ,or nil.
       (setq prefix (buffer-substring (match-end 0) init-pos)))
     (goto-char init-pos)
     (or prefix "")
-    ))
+   ))
 
 (defun sqlparser-word-before-point()
   "get word before current point or empty string."
   (save-excursion
     (let ((current-pos (point)))
-      (if (search-backward-regexp "\s-\\|[ \t]+\\|\\.\\|," (point-at-bol) t )
-          (buffer-substring-no-properties (match-end 0) current-pos )
+      (if (search-backward-regexp "\s-\\|[ \t]+\\|\\.\\|," (point-at-bol) t)
+          (buffer-substring-no-properties (match-end 0) current-pos)
         ""))))
-
-(defun abcd ()
-  "thisandthat."
-  (interactive)
-;;  (  anything-sqlserver-complete)
-  (print (   sqlparser-word-before-point ))
-  )
 
 (provide 'sqlparser-sqlserver-complete)
 ;;; sqlparser-sqlserver-complete.el ends here

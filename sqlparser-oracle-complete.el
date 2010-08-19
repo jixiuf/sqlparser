@@ -66,12 +66,12 @@
 ;;        "initial some variable .some is defined in oracle.el.
 ;;         some is defined here."
 ;;        (interactive)
-;;        (setq osq-username "scott")
-;;        (setq osq-password "tiger")
-;;        (setq osq-server   "localhost")
-;;        (setq osq-dbname   "orcl")
-;;        (setq osq-port   "1521")
-;;        (setq osq-as-sysdba nil)
+;;        (setq oq-username "scott")
+;;        (setq oq-password "tiger")
+;;        (setq oq-server   "localhost")
+;;        (setq oq-dbname   "orcl")
+;;        (setq oq-port   "1521")
+;;        (setq oq-as-sysdba nil)
 
 ;;        )
 ;;      (sqlparser-setup-for-oracle)
@@ -102,8 +102,6 @@
 ;;
 ;; Below are complete command list:
 ;;
-;;  `sqlparser-oracle-setup-interactive'
-;;    populate some usful variables ,like user ,passwd,dbname.
 ;;  `sqlparser-oracle-complete'
 ;;    complete tablename or column name depending on current point
 ;;
@@ -121,18 +119,6 @@
   "SQL-PARSE"
   :group 'tools
   )
-
-(defun sqlparser-oracle-setup-interactive()
-  "populate some usful variables ,like user ,passwd,dbname."
-  (interactive)
-  (setq osq-username (read-string  (format "(build conn for completing)username:(default:%s)" osq-username) "" nil osq-username))
-  (setq osq-password  (read-passwd (format  "(build conn for completing)passwd:(default:%s)" osq-password)  nil osq-password))
-  (setq osq-server   (read-string (format  "(build conn for completing)server:(default:%s)" osq-server)  nil osq-server))
-  (setq osq-dbname   (read-string (format  "(build conn for completing)dbname:(default:%s)" osq-dbname)  nil osq-dbname))
-  (setq osq-port     (read-string (format  "(build conn for completing)port:(default:%s)" osq-port)  nil osq-port))
-  (if  (y-or-n-p  "login as sysdba?")
-      (setq osq-as-sysdba t)
-    (setq osq-as-sysdba nil)))
 
 (when (featurep 'anything)
   (defvar anything-c-source-oracle-candidates nil)
@@ -170,7 +156,7 @@ position ."
 (defun  sqlparser-oracle-context-candidates()
   "it will decide to complete tablename or columnname depend on
   current position."
-  (let ((context (sqlparser-parse)) candidats)
+  (let ((context (sqlparser-parse-4-oracle)) candidats)
     (cond
      ((string= "schema" context)
       (setq candidats (sqlparser-oracle-schemaname-candidates))
@@ -184,11 +170,6 @@ position ."
      ((null context)))
     candidats))
 
-
-
-
-
-
 ;; elect view_name from all_views where owner = 'U1'
 ;; union all
 ;; select table_name from all_tables where owner = 'U1'
@@ -200,7 +181,7 @@ position ."
   (mapcar 'car
           (oracle-query
            (format " select view_name from all_views where upper(owner)=upper('%s') union all select table_name from all_tables where upper(owner)=upper('%s') union all  select table_schema||'.'||table_name from all_tab_privs where lower(grantee) = lower('%s') and privilege = 'SELECT' union all select table_name from dict"
-                   osq-username osq-username osq-username))))
+                   oq-username oq-username oq-username))))
 
 (defun sqlparser-oracle-schemaname-candidates ()
   "all schema-name in oracle database"
@@ -208,13 +189,13 @@ position ."
   (mapcar 'car
           (oracle-query
            (format "select table_schema from all_tab_privs where lower(grantee) = lower('%s') and privilege = 'SELECT'"
-            osq-username))))
+            oq-username))))
 
 (defun  sqlparser-oracle-column-candidates ()
   "column name candidates of table in current sql "
   (let* ((sql "select column_name from user_tab_columns where 1=0")
          (table-names (sqlparser-fetch-tablename-from-select-sql
-                       (sqlparser-sql-sentence-at-point)))
+                       (sqlparser-sql-sentence-at-point-4-oracle)))
          (prefix (sqlparser-get-prefix))
          (sub-prefix (split-string prefix "\\." nil))
          tablename tablenamelist schemaname )
@@ -255,7 +236,7 @@ position ."
 
 (defun sqlparser-fetch-tablename-from-sql ( &optional sql1)
   "return a list of tablenames from a sql-sentence."
-  (let ((sql (or sql1 (sqlparser-sql-sentence-at-point)))
+  (let ((sql (or sql1 (sqlparser-sql-sentence-at-point-4-oracle)))
         tablenames)
     (setq tablenames (sqlparser-fetch-tablename-from-select-sql sql))
     (unless tablenames
@@ -266,7 +247,7 @@ position ."
 (defun sqlparser-fetch-tablename-from-insert-update-alter-sql( &optional sql1)
   "fetch tablename ,or schema.tablename from a insert sentence or
 update sentence or alter sentence."
-  (let ((sql (or sql1 (sqlparser-sql-sentence-at-point)))
+  (let ((sql (or sql1 (sqlparser-sql-sentence-at-point-4-oracle)))
         tablename)
     (with-temp-buffer
       (insert sql)
@@ -278,7 +259,7 @@ update sentence or alter sentence."
 
 (defun sqlparser-fetch-tablename-from-select-sql ( &optional sql1)
   "return a list of tablenames from a sql-sentence."
-  (let* ((sql (or sql1 (sqlparser-sql-sentence-at-point)))
+  (let* ((sql (or sql1 (sqlparser-sql-sentence-at-point-4-oracle)))
          (sql-stack (list sql)) ele pt result-stack tablename-stack )
     (while (> (length sql-stack) 0)
       (setq ele (pop sql-stack))
@@ -318,9 +299,11 @@ update sentence or alter sentence."
       (with-temp-buffer
         (insert ele)
         (goto-char (point-min))
-        (replace-regexp "\n" " ")
+        (while (re-search-forward "\n" nil t)
+          (replace-match " " nil nil))
         (goto-char (point-min))
-        (replace-regexp "[ \t]+as[ \t]+" " ")
+        (while (re-search-forward "[ \t]+as[ \t]+"  nil t)
+          (replace-match " " nil nil))
         (goto-char (point-min))
         (delete-horizontal-space)
         (goto-char (point-max))
@@ -347,7 +330,7 @@ update sentence or alter sentence."
   "find out the true table name depends on the alias.
 suppose the sql is `select * from user u where u.age=11'
 then the `u' is `alias' and `user' is the true table name."
-  (let ((sql  (or sql1 (sqlparser-sql-sentence-at-point)))
+  (let ((sql  (or sql1 (sqlparser-sql-sentence-at-point-4-oracle)))
         (regexp (concat  "\\([a-zA-Z0-9_\\.\\$]+\\)[ \t]+\\(as[ \t]+\\)?" alias "[, \t\n\r]\\|$"))
         table-name)
     (setq sql (concat sql " "))
@@ -371,16 +354,15 @@ then the `u' is `alias' and `user' is the true table name."
 ;;   )
 ;; (add-hook 'sql-mode-hook 'sql-mode-hook-fun)
 
-(defun sqlparser-sql-sentence-at-point()
+(defun sqlparser-sql-sentence-at-point-4-oracle()
   "get current sql sentence. "
-  (let* ((bounds (bounds-of-sql-at-point))
+  (let* ((bounds (bounds-of-sql-at-point-4-oracle))
          (beg (car bounds))
          (end (cdr bounds)))
     (buffer-substring-no-properties  beg end)
     ))
 
-
-(defun bounds-of-sql-at-point()
+(defun bounds-of-sql-at-point-4-oracle()
   "get start and end point of current sql."
   (let ((pt (point))begin end empty-line-p empty-line-p next-line-included tail-p)
     (when (and
@@ -391,21 +373,20 @@ then the `u' is `alias' and `user' is the true table name."
       )
     (save-excursion
       (skip-chars-forward " \t\n\r")
-      ;;(end-of-line)
       (re-search-backward ";[ \t\n\r]*\\|\\`\\|\n[\r\t ]*\n[^ \t]" nil t)
-      (skip-syntax-forward "-")
-      (setq begin (match-end 0)))
+      (setq begin (point)))
     (save-excursion
       (skip-chars-forward " \t\n\r")
       (re-search-forward "\n[\r\t ]*\n[^ \t]\\|\\'\\|[ \t\n\r]*;" nil t)
       (unless (zerop (length (match-string 0)))
         (backward-char 1))
       (skip-syntax-backward "-")
-      (setq end   (match-beginning 0)))
+      (setq end   (point)))
     (goto-char pt)
     (cons begin end)
     )
   )
+
 ;; 1 after keyword 'use'   :complete schema name
 ;; 2 after keyword 'alter', 'from' 'update' 'desc'  'show' : complete tablename
 ;; 3 after keyword 'select' 'set' 'where'    :complete  columnname.
@@ -414,12 +395,12 @@ then the `u' is `alias' and `user' is the true table name."
 ;; 4.1 after keyword 'into' but there is a "(" between 'into' and current
 ;; position  :complete columnname
 ;; 5 after keyword 'values'  :complete nothing.
-(defun sqlparser-parse()
+(defun sqlparser-parse-4-oracle()
   "judge now need complete tablename or column name or don't complete .
 it will return 'table' ,or 'column' ,or nil.
 "
   (let* ((cur-pos (point))
-         (sql-pos-info (bounds-of-sql-at-point))
+         (sql-pos-info (bounds-of-sql-at-point-4-oracle))
          (sql-start-pos (car sql-pos-info ))
          (sql-end-pos (cdr sql-pos-info))
          map keyword returnVal)
@@ -471,7 +452,7 @@ it will return 'table' ,or 'column' ,or nil.
       (setq returnVal "column")
       )
      ((string-match "values" keyword)
-      (setq returnVal nil.)
+      (setq returnVal nil)
       )
      (t
       (setq returnVal nil)
