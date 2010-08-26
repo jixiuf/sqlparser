@@ -505,7 +505,7 @@ it will return 'table' ,or 'column' ,or nil.
 (defun sqlparser-get-prefix-4-sqlserver()
   "for example `tablename.col' `table.' `str'"
   (let ((init-pos (point)) prefix)
-    (when (search-backward-regexp "[ \t,(;]+" (point-min) t)
+    (when (search-backward-regexp "[ \t\n,(;]+" (point-min) t)
       (setq prefix (buffer-substring (match-end 0) init-pos)))
     (goto-char init-pos)
     (or prefix "")
