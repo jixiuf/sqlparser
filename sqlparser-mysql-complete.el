@@ -109,9 +109,6 @@
 ;;  `sqlparse-mysql-default-db-name'
 ;;    default conn to this db .
 ;;    default = sql-database
-;;  `sqlparse-read-initial-info-interactively-p'
-;;    read usefull info. interactively or not , like username
-;;    default = t
 
 ;;; Code:
 ;;;尚未完成，可能永远完不成。不幸已经完成。
@@ -129,11 +126,6 @@
   :group 'sqlparse
   :type 'string)
 
-(defcustom sqlparse-read-initial-info-interactively-p t
-  "read usefull info. interactively or not , like username
-,password db-name."
-  :group 'sqlparse
-  :type 'string)
 
 (defun sqlparse-mysql-setup-interactive()
   "populate some usful variables ,like user ,passwd,db. "
