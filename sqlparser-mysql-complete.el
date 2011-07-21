@@ -10,6 +10,8 @@
 ;; Created: 2011年07月21日 星期四 20时03分40秒
 ;; Version: 0.1.0
 ;; URL:http://www.emacswiki.org/emacs/down/sqlparser-mysql-complete.el
+;; https://github.com/jixiuf/sqlparser-mysql-complete
+;; screencast :http://screencast-repos.googlecode.com/files/emacs-sqlparse-mysql-complete.mkv.bz2
 ;; Compatibility: Test on Windows Xp ,and Linux
 ;;
 ;; Features that might be required by this library:
