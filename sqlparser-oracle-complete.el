@@ -17,8 +17,8 @@
 ;; `anything'
 ;;
 ;; Features  that be required by this library
-;; `oracle-shell-query.el'
-;; http://www.emacswiki.org/emacs/download/oracle-shell-query.el
+;; `oracle-query.el'
+;; http://www.emacswiki.org/emacs/download/oracle-query.el
 ;;
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -50,7 +50,7 @@
 ;;; Installation:
 ;;
 ;; 1 it required oracle.el you should download and add it to you load-path.
-;; http://www.emacswiki.org/emacs/download/oracle-shell-query.el
+;; http://www.emacswiki.org/emacs/download/oracle--query.el
 
 ;; 2 add sqlparser-oracle-complete.el to you load-path
 ;; The load-path is usually ~/elisp/.
@@ -112,7 +112,7 @@
 
 ;;; Code:
 (require 'sql)
-(require 'oracle-shell-query)
+(require 'oracle-query)
 (require 'anything nil t)
 
 (defgroup sqlparser nil
