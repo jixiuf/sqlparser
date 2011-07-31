@@ -125,7 +125,7 @@
 
 (defun osq-conn-str()
   " default:sqlplus -s scott/tiger@localhost:1521/orcl"
-  (format "sqlplus -s %s/%s@%s:%d/%s"
+  (format "sqlplus -s %s/%s@%s:%s/%s"
           osq-username osq-password osq-server osq-port osq-dbname))
 
 (defun osq-generate-sql-script(sql)
