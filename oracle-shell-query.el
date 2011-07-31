@@ -112,7 +112,8 @@
       (goto-char  (point-min))
           (while (not (= (point-at-eol) (point-max)))
             (setq row (split-string (buffer-substring-no-properties (point-at-bol) (point-at-eol)) "" t))
-            (add-to-list 'result row t)
+            (setq result (append result (list row)))
+;;            (add-to-list 'result row t)
             (forward-line) (beginning-of-line))
           )result ))
 
