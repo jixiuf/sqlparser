@@ -84,14 +84,20 @@
   :group 'SQL
   :safe 'numberp)
 
+(defvar osq-linesize 2000
+  "Default linesize for sqlplus")
 
 (defun oracle-shell-query (sql)
   "query `sql',and return as list"
   (let ((raw-result  (osq-shell-querry-raw sql)) table)
     (when raw-result
       (when (string-match "\\bERROR\\b" raw-result) (error raw-result))
-      (setq table (osq-parse-result-as-list raw-result))
-      )))
+      (if (string-match "rows will be truncated" raw-result)
+          (progn
+            (setq osq-linesize (+ osq-linesize 500))
+            (setq table (oracle-shell-query sql)))
+        (setq table (osq-parse-result-as-list raw-result))))
+    table))
 
 
 ;;TEST: (osq-parse-result-as-list (osq-shell-querry-raw "select * from emp"))
@@ -119,15 +125,14 @@
 (defun osq-conn-str()
   " default:sqlplus -s scott/tiger@localhost:1521/orcl"
   (format "sqlplus -s %s/%s@%s:%d/%s"
-          osq-username osq-password osq-server osq-port osq-dbname)
-  )
+          osq-username osq-password osq-server osq-port osq-dbname))
 
 (defun osq-generate-sql-script(sql)
 (when (string-match "\\(.*\\);[ \t]*" sql)
   (setq sql (match-string 1 sql)))
   (with-temp-buffer
     (insert "set heading off;\n")
-    (insert "set lines 1000;\n")
+    (insert (format  "set linesize %d;\n" osq-linesize))
     (insert "set colsep '';\n");;column separater
     (insert "set null 'NULL';\n");;
     (insert "set wrap off;\n")
