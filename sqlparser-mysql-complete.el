@@ -11,7 +11,7 @@
 ;; Version: 0.1.0
 ;; URL:http://www.emacswiki.org/emacs/down/sqlparser-mysql-complete.el
 ;; https://github.com/jixiuf/sqlparser-mysql-complete
-;; screencast :http://screencast-repos.googlecode.com/files/emacs-sqlparse-mysql-complete.mkv.bz2
+;; screencast :http://screencast-repos.googlecode.com/files/emacs-sqlparser-mysql-complete.mkv.bz2
 ;; Compatibility: Test on Windows Xp ,and Linux
 ;;
 ;; Features that might be required by this library:
@@ -63,22 +63,22 @@
 ;; (eval-after-load 'sql
 ;;   '(progn
 ;;      (require 'sqlparser-mysql-complete)
-;;      (defun sqlparse-setup-for-mysql()
+;;      (defun sqlparser-setup-for-mysql()
 ;;        "initial some variable .some is defined in mysql.el.
 ;;         some is defined here."
 ;;        (interactive)
 ;;        (setq mysql-user "root")
 ;;        (setq mysql-password "root")
-;;        (setq sqlparse-mysql-default-db-name "test")
+;;        (setq sqlparser-mysql-default-db-name "test")
 ;;        )
-;;      (sqlparse-setup-for-mysql)
+;;      (sqlparser-setup-for-mysql)
 ;;      (define-key sql-mode-map (quote [M-return]) 'anything-mysql-complete)
 ;;      (define-key sql-interactive-mode-map  (quote [M-return]) 'anything-mysql-complete)
 ;;      )
 ;;   )
 
 ;; if you don't want to use this function
-;; you can call (sqlparse-setup-for-mysql-interactive)
+;; you can call (sqlparser-setup-for-mysql-interactive)
 ;;
 ;; 3 define key bindings for complete .you have two choice .
 ;;  1). if you using anything.el  you can binding it like this .
@@ -88,8 +88,8 @@
 
 ;;  2). use Emacs default completing system.
 ;;
-;;      (define-key sql-mode-map (quote [M-return]) 'sqlparse-mysql-complete)
-;;      (define-key sql-interactive-mode-map  (quote [M-return]) 'sqlparse-mysql-complete)
+;;      (define-key sql-mode-map (quote [M-return]) 'sqlparser-mysql-complete)
+;;      (define-key sql-interactive-mode-map  (quote [M-return]) 'sqlparser-mysql-complete)
 ;;
 
 
@@ -97,16 +97,16 @@
 ;;
 ;; Below are complete command list:
 ;;
-;;  `sqlparse-mysql-setup-interactive'
+;;  `sqlparser-mysql-setup-interactive'
 ;;    populate some usful variables ,like user ,passwd,db.
-;;  `sqlparse-mysql-complete'
+;;  `sqlparser-mysql-complete'
 ;;    complete tablename or column name depending on current point
 ;;
 ;;; Customizable Options:
 ;;
 ;; Below are customizable option list:
 ;;
-;;  `sqlparse-mysql-default-db-name'
+;;  `sqlparser-mysql-default-db-name'
 ;;    default conn to this db .
 ;;    default = sql-database
 
@@ -116,27 +116,27 @@
 (require 'mysql)
 (require 'anything nil t)
 
-(defgroup sqlparse nil
+(defgroup sqlparser nil
   "SQL-PARSE"
   :group 'tools
   )
 
-(defcustom sqlparse-mysql-default-db-name sql-database
+(defcustom sqlparser-mysql-default-db-name sql-database
   "default conn to this db ."
-  :group 'sqlparse
+  :group 'sqlparser
   :type 'string)
 
 
-(defun sqlparse-mysql-setup-interactive()
+(defun sqlparser-mysql-setup-interactive()
   "populate some usful variables ,like user ,passwd,db. "
   (interactive)
   (setq mysql-user (read-string "(build conn for completing)mysql-user:(default:root)" "" nil mysql-user))
   (setq mysql-password  (read-passwd "(build conn for completing)mysql-passwd:(default:root)"  nil mysql-password))
-  (setq sqlparse-mysql-default-db-name
+  (setq sqlparser-mysql-default-db-name
         (read-string (format "(build conn for completing)mysql-db-name:(default:%s)"
-                             sqlparse-mysql-default-db-name) "" nil
-                             sqlparse-mysql-default-db-name))
-  ;;    (setq sqlparse-mysql-conn (mysql-connect  mysql-user mysql-password sqlparse-mysql-default-db-name ))
+                             sqlparser-mysql-default-db-name) "" nil
+                             sqlparser-mysql-default-db-name))
+  ;;    (setq sqlparser-mysql-conn (mysql-connect  mysql-user mysql-password sqlparser-mysql-default-db-name ))
   )
 
 
@@ -145,9 +145,9 @@
   (defvar anything-c-source-mysql-candidates nil)
   (defvar anything-c-source-mysql
     '((name . "SQL Object:")
-      (init (lambda() (setq anything-c-source-mysql-candidates ( sqlparse-mysql-context-candidates))))
+      (init (lambda() (setq anything-c-source-mysql-candidates ( sqlparser-mysql-context-candidates))))
       (candidates . anything-c-source-mysql-candidates)
-      (action . (("Complete" . (lambda(candidate) (backward-delete-char (length (sqlparse-word-before-point))) (insert candidate)))))))
+      (action . (("Complete" . (lambda(candidate) (backward-delete-char (length (sqlparser-word-before-point))) (insert candidate)))))))
 
   (defun anything-mysql-complete()
     "call `anything' to complete tablename and column name for mysql."
@@ -157,38 +157,38 @@
            (lambda () (message "complete failed."))))
       (anything '(anything-c-source-mysql)
                 ;; Initialize input with current symbol
-                (sqlparse-word-before-point)  nil nil))))
+                (sqlparser-word-before-point)  nil nil))))
 
 
-(defun sqlparse-mysql-complete()
+(defun sqlparser-mysql-complete()
   "complete tablename or column name depending on current point
 position ."
   (interactive)
-  (let ((prefix  (sqlparse-word-before-point) )
+  (let ((prefix  (sqlparser-word-before-point) )
         (init-pos (point))
         last-mark)
-    (insert (completing-read "complete:" (  sqlparse-mysql-context-candidates) nil t prefix ))
+    (insert (completing-read "complete:" (  sqlparser-mysql-context-candidates) nil t prefix ))
     (setq last-mark (point-marker))
     (goto-char init-pos)
     (backward-delete-char (length prefix))
     (goto-char (marker-position last-mark))
     ))
 
-(defun  sqlparse-mysql-context-candidates()
+(defun  sqlparser-mysql-context-candidates()
   "it will decide to complete tablename or columnname depend on
   current position."
-  (let ((context (sqlparse-parse))
+  (let ((context (sqlparser-parse))
         candidats)
     ;;  (print context)
     (cond
      ((string= "schema" context)
-      (setq candidats (sqlparse-mysql-schemaname-candidates))
+      (setq candidats (sqlparser-mysql-schemaname-candidates))
       )
      ((string= "table" context)
-      (setq candidats (sqlparse-mysql-tablename-or-schemaname-candidates))
+      (setq candidats (sqlparser-mysql-tablename-or-schemaname-candidates))
       )
      ((string= "column" context)
-      (setq candidats (  sqlparse-mysql-column-candidates))
+      (setq candidats (  sqlparser-mysql-column-candidates))
       )
      ((null context)
       )
@@ -199,17 +199,17 @@ position ."
 
 ;; (setq ac-ignore-case t)
 ;; (ac-define-source mysql-all
-;;   '((candidates . ( sqlparse-mysql-context-candidates ))
+;;   '((candidates . ( sqlparser-mysql-context-candidates ))
 ;;     (cache)))
 ;; (define-key sql-mode-map "\C-o" 'ac-complete-mysql-all)
 
-(defun sqlparse-mysql-tablename-or-schemaname-candidates ()
+(defun sqlparser-mysql-tablename-or-schemaname-candidates ()
   "is used to complete tablenames ,but sometimes you may
 type in `schema.tablename'. so schemaname is considered as
 candidats"
   ;;-s means use TAB as separate char . -N means don't print column name.
   (let* (( mysql-options '("-s" "-N"))
-         (prefix (sqlparse-get-prefix))
+         (prefix (sqlparser-get-prefix))
          (sub-prefix (split-string prefix "\\." nil))
          (sql )
          )
@@ -220,7 +220,7 @@ candidats"
       (setq sql (format
                  "select concat( schema_name, '.') as tablename from information_schema.schemata where schema_name like '%s%%' union select table_name as tablename from information_schema.tables where table_schema='%s' and table_name like '%s%%'"
                  prefix
-                 sqlparse-mysql-default-db-name
+                 sqlparser-mysql-default-db-name
                  prefix
                  ))
       )
@@ -229,24 +229,24 @@ candidats"
   )
 
 
-(defun sqlparse-mysql-schemaname-candidates ()
+(defun sqlparser-mysql-schemaname-candidates ()
   "all schema-name in mysql database"
   ;;-s means use TAB as separate char . -N means don't print column name.
   (let (( mysql-options '("-s" "-N")))
     (mapcar 'car (mysql-shell-query "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA" ))))
 
-(defun  sqlparse-mysql-column-candidates ()
+(defun  sqlparser-mysql-column-candidates ()
   "column name candidates of table in current sql "
   (let* ((sql "select column_name from information_schema.columns where 1=0")
-         (table-names (sqlparse-fetch-tablename-from-select-sql
-                       (sqlparse-sql-sentence-at-point)))
-         (prefix (sqlparse-get-prefix))
+         (table-names (sqlparser-fetch-tablename-from-select-sql
+                       (sqlparser-sql-sentence-at-point)))
+         (prefix (sqlparser-get-prefix))
          (sub-prefix (split-string prefix "\\." nil))
          tablename tablenamelist schemaname )
     (print table-names)
     (if (> (length sub-prefix) 1);;alias.columnsname
         (progn
-          (setq tablename (sqlparse-guess-table-name (car sub-prefix)))
+          (setq tablename (sqlparser-guess-table-name (car sub-prefix)))
           (setq tablenamelist (split-string tablename "[ \t\\.]" t))
           (if (= 1 (length tablenamelist)) ;;just tablename ,not dbname.tablename
               (progn
@@ -276,24 +276,24 @@ candidats"
       )))
 
 ;; TEST :
-;; (sqlparse-fetch-tablename-from-sql "select * from (select id from mysql.emp a , mysql.abc ad) ,abcd  as acd  where name=''")
-;; (sqlparse-fetch-tablename-from-sql "update user set age=11 ")
-;; (sqlparse-fetch-tablename-from-sql "alter  user add (tim datetime)")
+;; (sqlparser-fetch-tablename-from-sql "select * from (select id from mysql.emp a , mysql.abc ad) ,abcd  as acd  where name=''")
+;; (sqlparser-fetch-tablename-from-sql "update user set age=11 ")
+;; (sqlparser-fetch-tablename-from-sql "alter  user add (tim datetime)")
 
-(defun sqlparse-fetch-tablename-from-sql ( &optional sql1)
+(defun sqlparser-fetch-tablename-from-sql ( &optional sql1)
   "return a list of tablenames from a sql-sentence."
-  (let ((sql (or sql1 (sqlparse-sql-sentence-at-point)))
+  (let ((sql (or sql1 (sqlparser-sql-sentence-at-point)))
         tablenames)
-    (setq tablenames (sqlparse-fetch-tablename-from-select-sql sql))
+    (setq tablenames (sqlparser-fetch-tablename-from-select-sql sql))
     (unless tablenames
-      (setq tablenames (append tablenames (list (sqlparse-fetch-tablename-from-insert-update-alter-sql sql)))))
+      (setq tablenames (append tablenames (list (sqlparser-fetch-tablename-from-insert-update-alter-sql sql)))))
     tablenames
     ))
 
-(defun sqlparse-fetch-tablename-from-insert-update-alter-sql( &optional sql1)
+(defun sqlparser-fetch-tablename-from-insert-update-alter-sql( &optional sql1)
   "fetch tablename ,or schema.tablename from a insert sentence or
 update sentence or alter sentence."
-  (let ((sql (or sql1 (sqlparse-sql-sentence-at-point)))
+  (let ((sql (or sql1 (sqlparser-sql-sentence-at-point)))
         tablename)
     (with-temp-buffer
       (insert sql)
@@ -303,9 +303,9 @@ update sentence or alter sentence."
         )
       )))
 
-(defun sqlparse-fetch-tablename-from-select-sql ( &optional sql1)
+(defun sqlparser-fetch-tablename-from-select-sql ( &optional sql1)
   "return a list of tablenames from a sql-sentence."
-  (let* ((sql (or sql1 (sqlparse-sql-sentence-at-point)))
+  (let* ((sql (or sql1 (sqlparser-sql-sentence-at-point)))
          (sql-stack (list sql)) ele pt result-stack tablename-stack )
     (while (> (length sql-stack) 0)
       (setq ele (pop sql-stack))
@@ -367,14 +367,14 @@ update sentence or alter sentence."
     ))
 
 ;; TEST :
-;; (sqlparse-fetch-tablename-from-select-sql "select * from (select id from mysql.emp a , mysql.abc ad) ,abcd  as acd  where name=''")
+;; (sqlparser-fetch-tablename-from-select-sql "select * from (select id from mysql.emp a , mysql.abc ad) ,abcd  as acd  where name=''")
 
 
-(defun sqlparse-guess-table-name (alias &optional sql1)
+(defun sqlparser-guess-table-name (alias &optional sql1)
   "find out the true table name depends on the alias.
 suppose the sql is `select * from user u where u.age=11'
 then the `u' is `alias' and `user' is the true table name."
-  (let ((sql  (or sql1 (sqlparse-sql-sentence-at-point)))
+  (let ((sql  (or sql1 (sqlparser-sql-sentence-at-point)))
         (regexp (concat  "\\([a-zA-Z0-9_\\.]+\\)[ \t]+\\(as[ \t]+\\)?" alias "[, \t\n\r]"))
         table-name)
     (if (and  sql (string-match regexp sql))
@@ -384,7 +384,7 @@ then the `u' is `alias' and `user' is the true table name."
       alias)
     ))
 ;; TEST :
-;; (sqlparse-guess-table-name "a"   "select * from (select id from mysql.emp a , mysql.abc ad) ,abcd  as acd  where name=''")
+;; (sqlparser-guess-table-name "a"   "select * from (select id from mysql.emp a , mysql.abc ad) ,abcd  as acd  where name=''")
 
 
 ;; (defun sql-mode-hook-fun()
@@ -397,7 +397,7 @@ then the `u' is `alias' and `user' is the true table name."
 ;;   )
 ;; (add-hook 'sql-mode-hook 'sql-mode-hook-fun)
 
-(defun sqlparse-sql-sentence-at-point()
+(defun sqlparser-sql-sentence-at-point()
   "get current sql sentence. "
   (let* ((bounds (bounds-of-sql-at-point))
          (beg (car bounds))
@@ -440,7 +440,7 @@ then the `u' is `alias' and `user' is the true table name."
 ;; 4.1 after keyword 'into' but there is a "(" between 'into' and current
 ;; position  :complete columnname
 ;; 5 after keyword 'values'  :complete nothing.
-(defun sqlparse-parse()
+(defun sqlparser-parse()
   "judge now need complete tablename or column name or don't complete .
 it will return 'table' ,or 'column' ,or nil.
 "
@@ -515,7 +515,7 @@ it will return 'table' ,or 'column' ,or nil.
     ))
 
 
-(defun sqlparse-get-prefix()
+(defun sqlparser-get-prefix()
   "for example `tablename.col' `table.' `str'"
   (let ((init-pos (point)) prefix)
     (when (search-backward-regexp "[ \t,(;]+" (point-min) t)
@@ -524,7 +524,7 @@ it will return 'table' ,or 'column' ,or nil.
     (or prefix "")
     ))
 
-(defun sqlparse-word-before-point()
+(defun sqlparser-word-before-point()
   "get word before current point or empty string."
   (save-excursion
     (let ((current-pos (point)))
