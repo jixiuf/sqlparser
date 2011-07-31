@@ -50,9 +50,10 @@
 ;;; Installation:
 ;;
 ;; 1 it required oracle.el you should download and add it to you load-path.
-;; http://www.emacswiki.org/emacs/download/oracle--query.el
+;; http://www.emacswiki.org/emacs/download/oracle-shell-query.el
+;; 2 run  lsnrctl start
 
-;; 2 add sqlparser-oracle-complete.el to you load-path
+;; 3 add sqlparser-oracle-complete.el to you load-path
 ;; The load-path is usually ~/elisp/.
 ;; It's set in your ~/.emacs like this:
 ;; (add-to-list 'load-path (expand-file-name "~/elisp"))
@@ -84,7 +85,7 @@
 ;; if you don't want to use this function
 ;; you can call (sqlparser-setup-for-oracle-interactive)
 ;;
-;; 3 define key bindings for complete .you have two choice .
+;; 4 define key bindings for complete .you have two choice .
 ;;  1). if you using anything.el  you can binding it like this .
 
 ;;      (define-key sql-mode-map (quote [tab]) 'anything-oracle-complete)
