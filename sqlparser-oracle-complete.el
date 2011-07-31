@@ -1,5 +1,4 @@
-;;; sqlparser-oracle-complete.el --- completing tablename,column name for oracle.
-;; -*- coding:utf-8 -*-
+;;; sqlparser-oracle-complete.el --- completing tablename,column name for oracle. -*- coding:utf-8 -*-
 
 ;; Copyright (C) 2011 孤峰独秀
 
@@ -7,7 +6,7 @@
 ;; Keywords: sql parse oracle
 ;; Filename: sqlparser-oracle-complete.el
 ;; Description:  completing tablename column for oracle when editing
-;; Created: 2011年07月21日 星期四 20时03分40秒
+;; Created: 2011年07月31日 星期日 20时37分31秒
 ;; Version: 0.1.0
 ;; URL:http://www.emacswiki.org/emacs/down/sqlparser-oracle-complete.el
 ;;
@@ -38,7 +37,7 @@
 ;;; Commentary:
 ;; it can parsing current sql sentence ,it is smart enough to choose to
 ;; completing table name or column name depending on your position.
-;; 1 after keyword 'use'   :complete schema name
+;; 1 after keyword 'use'   :complete schema name (on mysql)
 ;; 2 after keyword 'select' 'set' 'where'    :complete  columnname.
 ;; 3 after keyword 'alter', 'from' 'update' 'desc'  'show' : complete tablename
 ;; 4 after keyword 'into' and and there isn't a
@@ -193,7 +192,7 @@ position ."
   ;;-s means use TAB as separate char . -N means don't print column name.
   (mapcar 'car
           (oracle-shell-query
-           (format " select view_name from all_views where upper(owner)=upper('%s') union all select table_name from all_tables where upper(owner)=upper('%s') union all  select table_schema||'.'||table_name from all_tab_privs where lower(grantee) = lower('%s') and privilege = 'SELECT'"
+           (format " select view_name from all_views where upper(owner)=upper('%s') union all select table_name from all_tables where upper(owner)=upper('%s') union all  select table_schema||'.'||table_name from all_tab_privs where lower(grantee) = lower('%s') and privilege = 'SELECT' union all select table_name from dict"
                    osq-username osq-username osq-username))))
 
 (defun sqlparser-oracle-schemaname-candidates ()
@@ -220,8 +219,8 @@ position ."
               (progn
                 (setq tablename (car tablenamelist))
                 (setq schemaname nil)
-                (setq sql (format "select column_name from user_tab_columns where upper(table_name)=upper('%s') and upper(column_name) like upper('%s%%')"
-                                  tablename (nth 1 sub-prefix))))
+                (setq sql (format " select column_name from all_tab_columns  where upper(table_name)=upper('%s') and upper(column_name) like upper('%s%%') "
+                                  tablename (nth 1 sub-prefix) ) ))
             (setq schemaname (car tablenamelist))
             (setq tablename (cadr tablenamelist))
             (setq sql (format "select column_name from all_tab_columns where upper(owner)=upper('%s') and upper(table_name) =upper('%s') and upper(column_name) like upper('%s%%')"
@@ -234,7 +233,8 @@ position ."
             (progn
               (setq tablename (car tablenamelist))
               (setq schemaname nil)
-              (setq sql (format "%s union select column_name from user_tab_columns where upper(table_name)=upper('%s') and upper(column_name) like upper('%s%%') " sql tablename prefix )))
+              (setq sql (format "%s union select column_name from all_tab_columns where upper(table_name)=upper('%s') and upper(column_name) like upper('%s%%') " sql tablename prefix ))
+              )
           (setq tablename (cadr tablenamelist))
           (setq schemaname (car tablenamelist))
           (setq sql (format "%s union select column_name from all_tab_columns where upper(table_name)=upper('%s') and upper(owner)=upper('%s') and upper(column_name) like upper('%s%%') "
