@@ -17,8 +17,8 @@
 ;; `anything'
 ;;
 ;; Features  that be required by this library
-;; `oracle-query.el'
-;; http://www.emacswiki.org/emacs/download/oracle-query.el
+;; `oracle-shell-query.el'
+;; http://www.emacswiki.org/emacs/download/oracle-shell-query.el
 ;;
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -112,7 +112,7 @@
 
 ;;; Code:
 (require 'sql)
-(require 'oracle-query)
+(require 'oracle-shell-query)
 (require 'anything nil t)
 
 (defgroup sqlparser nil
@@ -125,9 +125,12 @@
   (interactive)
   (setq osq-username (read-string  (format "(build conn for completing)username:(default:%s)" osq-username) "" nil osq-username))
   (setq osq-password  (read-passwd (format  "(build conn for completing)passwd:(default:%s)" osq-password)  nil osq-password))
-  (setq osq-server   (read-passwd (format  "(build conn for completing)server:(default:%s)" osq-server)  nil osq-server))
-  (setq osq-dbname   (read-passwd (format  "(build conn for completing)dbname:(default:%s)" osq-dbname)  nil osq-dbname))
-  (setq osq-port   (read-passwd (format  "(build conn for completing)port:(default:%s)" osq-port)  nil osq-port)))
+  (setq osq-server   (read-string (format  "(build conn for completing)server:(default:%s)" osq-server)  nil osq-server))
+  (setq osq-dbname   (read-string (format  "(build conn for completing)dbname:(default:%s)" osq-dbname)  nil osq-dbname))
+  (setq osq-port     (read-string (format  "(build conn for completing)port:(default:%s)" osq-port)  nil osq-port))
+  (if  (y-or-n-p  "login as sysdba?")
+      (setq osq-as-sysdba t)
+    (setq osq-as-sysdba nil)))
 
 (when (featurep 'anything)
   (defvar anything-c-source-oracle-candidates nil)
@@ -266,7 +269,7 @@ update sentence or alter sentence."
     (with-temp-buffer
       (insert sql)
       (goto-char (point-min))
-      (when (search-forward-regexp "\\(\\binto\\|update\\|alter\\)[ \t]+\\([a-zA-Z0-9\\._]+\\)\\b" (point-max ) t)
+      (when (search-forward-regexp "\\(\\binto\\|update\\|alter\\)[ \t]+\\([a-zA-Z0-9\\$\\._]+\\)\\b" (point-max ) t)
         (setq tablename (match-string 2))
         )
       )))
@@ -321,10 +324,10 @@ update sentence or alter sentence."
         (goto-char (point-max))
         (delete-horizontal-space)
 
-        (if (= 1  (count-matches  "[a-zA-Z0-9_\\.]+" 1 (point-max)))
+        (if (= 1  (count-matches  "[a-zA-Z0-9_\\$\\.]+" 1 (point-max)))
             (push (buffer-substring 1 (point-max)) result-stack)
           (goto-char 0)
-          (when (search-forward-regexp "[a-zA-Z0-9_\\.]+" (point-max) t )
+          (when (search-forward-regexp "[a-zA-Z0-9_\\$\\.]+" (point-max) t )
             (push (match-string 0) result-stack)
             )
           )
@@ -343,7 +346,7 @@ update sentence or alter sentence."
 suppose the sql is `select * from user u where u.age=11'
 then the `u' is `alias' and `user' is the true table name."
   (let ((sql  (or sql1 (sqlparser-sql-sentence-at-point)))
-        (regexp (concat  "\\([a-zA-Z0-9_\\.]+\\)[ \t]+\\(as[ \t]+\\)?" alias "[, \t\n\r]\\|$"))
+        (regexp (concat  "\\([a-zA-Z0-9_\\.\\$]+\\)[ \t]+\\(as[ \t]+\\)?" alias "[, \t\n\r]\\|$"))
         table-name)
     (setq sql (concat sql " "))
     (if (and  sql (string-match regexp sql))
