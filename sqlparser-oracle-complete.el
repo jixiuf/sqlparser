@@ -9,6 +9,8 @@
 ;; Created: 2011年07月31日 星期日 20时37分31秒
 ;; Version: 0.1.0
 ;; URL:http://www.emacswiki.org/emacs/down/sqlparser-oracle-complete.el
+;;     https://github.com/jixiuf/sqlparser
+;; screencast: http://screencast-repos.googlecode.com/files/emacs-sqlparse-mysql-complete.mkv.bz2
 ;;
 ;; screencast :
 ;; Compatibility: Test on Linux
