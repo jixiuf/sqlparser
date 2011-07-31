@@ -75,9 +75,11 @@
 ;;      (sqlparser-setup-for-oracle)
 ;;      (define-key sql-mode-map (quote [tab]) 'anything-oracle-complete)
 ;;      (define-key sql-interactive-mode-map  (quote [tab]) 'anything-oracle-complete)
-;;      (define-key sqlplus-mode-map  (quote [tab]) 'anything-oracle-complete)
 ;;      )
 ;;   )
+;; (eval-after-load 'sqlplus
+;;   '(progn (define-key sqlplus-mode-map  (quote [tab]) 'anything-oracle-complete)))
+;;
 ;; if you don't want to use this function
 ;; you can call (sqlparser-setup-for-oracle-interactive)
 ;;
