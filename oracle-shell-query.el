@@ -58,6 +58,8 @@
 ;;    default = 1521
 
 ;;; Code:
+
+
 (require 'sql)
 (defcustom osq-username "scott"
   "oracle user name."
