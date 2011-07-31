@@ -11,8 +11,6 @@
 ;; URL:http://www.emacswiki.org/emacs/down/sqlparser-oracle-complete.el
 ;;     https://github.com/jixiuf/sqlparser
 ;; screencast: http://screencast-repos.googlecode.com/files/emacs-sqlparse-mysql-complete.mkv.bz2
-;;
-;; screencast :
 ;; Compatibility: Test on Linux
 ;;
 ;; Features that might be required by this library:
