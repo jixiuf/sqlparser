@@ -152,5 +152,3 @@
   )
 (provide 'oracle-shell-query)
 ;;; oracle-shell-query.el ends here
-
-
