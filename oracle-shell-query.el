@@ -87,7 +87,7 @@
 (defvar osq-linesize 2000
   "Default linesize for sqlplus")
 
-(defun oracle-shell-query (sql)
+(defun oracle-shell-query(sql)
   "query `sql',and return as list"
   (let ((raw-result  (osq-shell-querry-raw sql)) table)
     (when raw-result
@@ -99,16 +99,17 @@
         (setq table (osq-parse-result-as-list raw-result))))
     table))
 
-
 ;;TEST: (osq-parse-result-as-list (osq-shell-querry-raw "select * from emp"))
 (defun osq-parse-result-as-list (raw-result)
   (let  (result row)
     (with-temp-buffer
       (insert raw-result)
       (goto-char (point-min))
-      (replace-regexp "[ \t\n]*[ \t\n]*" "")
+      (while (re-search-forward "[ \t\n]*[ \t\n]*" nil t)
+        (replace-match "" nil nil))
       (goto-char (point-min))
-      (replace-regexp "^[ \t]*" "")
+      (while (re-search-forward "^[ \t]*" nil t)
+        (replace-match "" nil nil))
       (goto-char  (point-min))
           (while (not (= (point-at-eol) (point-max)))
             (setq row (split-string (buffer-substring-no-properties (point-at-bol) (point-at-eol)) "" t))
