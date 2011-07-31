@@ -1,4 +1,4 @@
-;;; oracle--query.el --- execute a select sql using sqlplus . -*- coding:utf-8 -*-
+;;; oracle-query.el --- execute a select sql using sqlplus . -*- coding:utf-8 -*-
 
 ;; Copyright (C) 2011 孤峰独秀
 
