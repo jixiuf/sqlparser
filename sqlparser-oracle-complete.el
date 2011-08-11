@@ -17,8 +17,8 @@
 ;; `anything'
 ;;
 ;; Features  that be required by this library
-;; `oracle-shell-query.el'
-;; http://www.emacswiki.org/emacs/download/oracle-shell-query.el
+;; `oracle-query.el'
+;; http://www.emacswiki.org/emacs/download/oracle-query.el
 ;;
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -50,7 +50,7 @@
 ;;; Installation:
 ;;
 ;; 1 it required oracle.el you should download and add it to you load-path.
-;; http://www.emacswiki.org/emacs/download/oracle-shell-query.el
+;; http://www.emacswiki.org/emacs/download/oracle-query.el
 ;; 2 run  lsnrctl start
 
 ;; 3 add sqlparser-oracle-complete.el to you load-path
@@ -114,7 +114,7 @@
 
 ;;; Code:
 (require 'sql)
-(require 'oracle-shell-query)
+(require 'oracle-query)
 (require 'anything nil t)
 
 (defgroup sqlparser nil
@@ -198,7 +198,7 @@ position ."
   "all tablename viewname i can select."
   ;;-s means use TAB as separate char . -N means don't print column name.
   (mapcar 'car
-          (oracle-shell-query
+          (oracle-query
            (format " select view_name from all_views where upper(owner)=upper('%s') union all select table_name from all_tables where upper(owner)=upper('%s') union all  select table_schema||'.'||table_name from all_tab_privs where lower(grantee) = lower('%s') and privilege = 'SELECT' union all select table_name from dict"
                    osq-username osq-username osq-username))))
 
@@ -206,7 +206,7 @@ position ."
   "all schema-name in oracle database"
   ;;-s means use TAB as separate char . -N means don't print column name.
   (mapcar 'car
-          (oracle-shell-query
+          (oracle-query
            (format "select table_schema from all_tab_privs where lower(grantee) = lower('%s') and privilege = 'SELECT'"
             osq-username))))
 
@@ -246,7 +246,7 @@ position ."
           (setq schemaname (car tablenamelist))
           (setq sql (format "%s union select column_name from all_tab_columns where upper(table_name)=upper('%s') and upper(owner)=upper('%s') and upper(column_name) like upper('%s%%') "
                             sql tablename schemaname prefix)))))
-    (mapcar 'car (oracle-shell-query sql))))
+    (mapcar 'car (oracle-query sql))))
 
 ;; TEST :
 ;; (sqlparser-fetch-tablename-from-sql "select * from (select id from oracle.emp a , oracle.abc ad) ,abcd  as acd  where name=''")
