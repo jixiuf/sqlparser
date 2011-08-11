@@ -50,7 +50,6 @@
 ;; (setq oq-port "1521")
 ;; (setq oq-as-sysdba nil)
 
-;; (oracle-query-init)
 ;; (oracle-query "select 1 from dual")
 ;; (oracle-query "select * from user_tables")
 
@@ -177,6 +176,8 @@
 (defun oracle-query (sql)
   "geta result from the function `oracle-query-result-function'
 after you call `oracle-query'"
+  (when (or (not oracle-query-process)  (not (equal (process-status oracle-query-process ) 'run)))
+    (oracle-query-init))
   (when (string-match "\\(.*\\);[ \t]*" sql)
     (setq sql (match-string 1 sql)))
   (process-send-string oracle-query-process  (format "%s ;\n" sql))
@@ -185,7 +186,10 @@ after you call `oracle-query'"
     nil))
 
 (defun oq-filter-fun (process output)
-  (unless (string= "SQL> " output)
+  (unless (or  (string-match "SQL> " output)
+               (string-match "Copyright (c) .* Oracle.  All rights reserved." output)
+               (string-match "Oracle Database 11g Enterprise Edition Release 11.2.0.1.0 - Production" output)
+               )
     (setq  oracle-query-result  ( oq-parse-result-as-list  output))))
 
 (provide 'oracle-query)
