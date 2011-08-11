@@ -38,7 +38,6 @@
 ;;  `oq-as-sysdba'
 ;; 3. call (oracle-query-init) to start a background sqlplus process
 
-;; 4. define a function ,and custom `oracle-query-result-function'
 ;;    value as the function name .this function must accept one parameter
 ;;    actually the parameter is the result after you call (oracle-query sql)
 ;; 5. call function `oracle-query'
@@ -52,13 +51,6 @@
 ;; (setq oq-as-sysdba nil)
 
 ;; (oracle-query-init)
-;; (defun handle-result (result)
-;;   "just print the result"
-;;   (message "handle the result after `oracle-query'")
-;;   (print result))
-
-;; (setq oracle-query-result-function 'handle-result)
-
 ;; (oracle-query "select 1 from dual")
 ;; (oracle-query "select * from user_tables")
 
@@ -68,6 +60,8 @@
 ;;
 ;; Below are complete command list:
 ;;
+;;  `oracle-query-rebuild-connection'
+;;    rebuild sqlplus connection.
 ;;
 ;;; Customizable Options:
 ;;
@@ -91,9 +85,6 @@
 ;;  `oq-as-sysdba'
 ;;    login as sysdba.
 ;;    default = nil
-;;  `oracle-query-result-function'
-;;    when you call `oracle-query' and the result is returned ,it will
-;;    default = (quote oq-default-result-funciont)
 
 ;;; Code:
 
@@ -128,18 +119,12 @@
   :type 'boolean
   :group 'SQL
   :safe 'booleanp)
-(defcustom oracle-query-result-function 'oq-default-result-funciont
-  "when you call `oracle-query' and the result is returned ,it will
-call this function"
-  :type 'symbol
-  :group 'SQL
-  :safe 'symbolp)
 
-
-(defvar oq-linesize 2000
-  "Default linesize for sqlplus")
-
+(defvar oq-timeout-wait-for-result 300
+  "waiting 300s for sql result returned.")
+(defvar oq-linesize 20000 "Default linesize for sqlplus")
 (defvar oracle-query-process nil)
+(defvar oracle-query-result nil)
 
 
 (defun oq-parse-result-as-list (raw-result)
@@ -154,7 +139,8 @@ call this function"
         (replace-match "" nil nil))
       (goto-char  (point-min))
       (while (not (= (point-at-eol) (point-max)))
-        (setq row (split-string (buffer-substring-no-properties (point-at-bol) (point-at-eol)) "" t))
+        (setq row (split-string (buffer-substring-no-properties
+                                 (point-at-bol) (point-at-eol)) "" t))
         (setq result (append result (list row)))
         ;;            (add-to-list 'result row t)
         (forward-line) (beginning-of-line))
@@ -169,9 +155,10 @@ call this function"
             oq-username oq-password oq-server oq-port oq-dbname)
     ))
 (defun oracle-query-init()
-  (setq oracle-query-process (start-process-shell-command "sqlplus" " *oracle-query-sqlplus*" (oq-conn-str)))
+  (setq oracle-query-process
+        (start-process-shell-command "sqlplus" " *oracle-query-sqlplus*" (oq-conn-str)))
   (process-send-string oracle-query-process "set heading off;\n")
-  (process-send-string oracle-query-process (format  "set linesize %d;\n" 11111))
+  (process-send-string oracle-query-process (format  "set linesize %d;\n" oq-linesize))
   (process-send-string oracle-query-process "set colsep '';\n");;column separater
   (process-send-string oracle-query-process "set null 'NULL';\n");;
   (process-send-string oracle-query-process "set wrap off;\n")
@@ -180,24 +167,27 @@ call this function"
   (process-send-string oracle-query-process "set serveroutput on;\n")
   (set-process-filter oracle-query-process 'oq-filter-fun)
   )
+
 (defun oracle-query-rebuild-connection()
+  "rebuild sqlplus connection."
   (interactive)
   (kill-process oracle-query-process)
   (oracle-query-init))
 
 (defun oracle-query (sql)
-  "get result from the function `oracle-query-result-function' after you call `oracle-query'"
+  "geta result from the function `oracle-query-result-function'
+after you call `oracle-query'"
   (when (string-match "\\(.*\\);[ \t]*" sql)
     (setq sql (match-string 1 sql)))
-  (process-send-string oracle-query-process  (format "%s ;\n" sql)))
-
-(defun oq-default-result-funciont(result)
-  "the default function when result is ok."
-  (print result))
+  (process-send-string oracle-query-process  (format "%s ;\n" sql))
+  (if (accept-process-output oracle-query-process  oq-timeout-wait-for-result 0 nil)
+      oracle-query-result
+    nil))
 
 (defun oq-filter-fun (process output)
   (unless (string= "SQL> " output)
-    (funcall oracle-query-result-function ( oq-parse-result-as-list  output)) ))
+    (setq  oracle-query-result  ( oq-parse-result-as-list  output))))
+
 (provide 'oracle-query)
 ;;; oracle-query.el ends here
 
