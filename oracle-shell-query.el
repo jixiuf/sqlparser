@@ -4,6 +4,8 @@
 
 ;; Author: 孤峰独秀  jixiuf@gmail.com
 ;; Keywords: oracle sqlplus script shell
+;; URL:http://www.emacswiki.org/emacs/down/oracle-query.el
+;;     https://github.com/jixiuf/sqlparser
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
