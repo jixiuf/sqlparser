@@ -68,33 +68,33 @@
 (require 'sql)
 (defcustom osq-username "scott"
   "oracle user name."
-  :group 'sqlparse
+  :group 'sqlparser
   :type 'string)
 (defcustom osq-password "tiger"
   "oracle user password."
-  :group 'sqlparse
+  :group 'sqlparser
   :type 'string)
 (defcustom osq-server "localhost"
   "Default server or host."
   :type 'string
-  :group 'SQL
+  :group 'sqlparser
   :safe 'stringp)
 (defcustom osq-dbname "orcl"
   "database name ."
   :type 'string
-  :group 'SQL
+  :group 'sqlparser
   :safe 'stringp)
 
 (defcustom osq-port 1521
   "Default port."
   :type 'number
-  :group 'SQL
+  :group 'sqlparser
   :safe 'numberp)
 
 (defcustom osq-as-sysdba nil
   "login as sysdba."
   :type 'boolean
-  :group 'SQL
+  :group 'sqlparser
   :safe 'booleanp)
 
 (defvar osq-linesize 2000

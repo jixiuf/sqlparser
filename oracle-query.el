@@ -90,33 +90,33 @@
 (require 'sql)
 (defcustom oq-username "scott"
   "oracle user name."
-  :group 'sqlparse
+  :group 'sqlparser
   :type 'string)
 (defcustom oq-password "tiger"
   "oracle user password."
-  :group 'sqlparse
+  :group 'sqlparser
   :type 'string)
 (defcustom oq-server "localhost"
   "Default server or host."
   :type 'string
-  :group 'SQL
+  :group 'sqlparser
   :safe 'stringp)
 (defcustom oq-dbname "orcl"
   "database name ."
   :type 'string
-  :group 'SQL
+  :group 'sqlparser
   :safe 'stringp)
 
 (defcustom oq-port 1521
   "Default port."
   :type 'number
-  :group 'SQL
+  :group 'sqlparser
   :safe 'numberp)
 
 (defcustom oq-as-sysdba nil
   "login as sysdba."
   :type 'boolean
-  :group 'SQL
+  :group 'sqlparser
   :safe 'booleanp)
 
 (defvar oq-timeout-wait-for-result 300
