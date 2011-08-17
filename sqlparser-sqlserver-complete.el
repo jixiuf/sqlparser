@@ -185,7 +185,7 @@
                                 (sqlparser-sql-sentence-at-point)))
                   )
               (dolist (tablename table-names)
-                (setq result (append result (list  (sqlparser-sqlserver-get-matched-columns tablename (car sub-prefix)))))
+                (setq result (append result    (sqlparser-sqlserver-get-matched-columns tablename (car sub-prefix))))
                 )))
           ((= (length sub-prefix) 2); alias.columnname
            (let ((tablename-string  (sqlparser-guess-table-name (car sub-prefix))) ;[master].dbo.test
