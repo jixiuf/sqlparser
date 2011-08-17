@@ -4,6 +4,12 @@
 
 ;; Author: 孤峰独秀  jixiuf@gmail.com
 ;; Keywords: sqlserver emacs sql sqlcmd.exe osql.exe
+;; Filename: sqlserver-query.el
+;; Description:  execute sql select using sqlcmd.exe or osql.exe on SQL SERVER
+;; Created: 2011年08月17日 星期三 22时11分54秒
+;; Version: 0.1.0
+;; URL:http://www.emacswiki.org/emacs/down/sqlserver-query.el
+;;     https://github.com/jixiuf/sqlparser
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
