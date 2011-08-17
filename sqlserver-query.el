@@ -1,9 +1,9 @@
-;;; sqlserver-query.el --- execute sql select using sqlserver on SQL SERVER. -*- coding:utf-8 -*-
+;;; sqlserver-query.el --- execute sql select using sqlcmd.exe or osql.exe on SQL SERVER. -*- coding:utf-8 -*-
 
 ;; Copyright (C) 2011 孤峰独秀
 
 ;; Author: 孤峰独秀  jixiuf@gmail.com
-;; Keywords: sqlserver emacs sql
+;; Keywords: sqlserver emacs sql sqlcmd.exe osql.exe
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -24,30 +24,23 @@
 ;;  (sqlserver-query "select empno,ename from emp where empno<=7499")
 ;;  got : (("7369" "SMITH") ("7499" "ALLEN"))
 ;;
-
+;; 1 make sure sqlcmd.exe or osql.exe are in your path .and sqlserver is started
 
 ;; 2. you should custom these variable
 ;;  `sqlserver-username'
 ;;  `sqlserver-password'
-;;  `sqlserver-server'
+;;  `sqlserver-server-instance'
 ;;  `sqlserver-dbname'
-;;  `sqlserver-cmd'
-;;  call (sqlserver-query-init) to start a background sqlserver process
-;; or call (sqlserver-query-init-interactive)
-
-;; 4. call function `sqlserver-query'
-;;
+;;  `sqlserver-cmd' ;sqlcmd or osql
 ;; for example
 ;; (setq sqlserver-username "sa")
 ;; (setq sqlserver-password "sa")
-;; (setq sqlserver-server "localhost")
-;; (setq sqlserver-dbname "SQLEXPRESS")
+;; (setq sqlserver-server-instance "localhost\\SQLEXPRESS")
+;; (setq sqlserver-dbname "master")
 ;; (setq sqlserver-cmd' 'sqlcmd)
-;;  `
 
-;; (sqlserver-query "select 1 from dual")
-;; (sqlserver-query "select * from user_tables")
-
+;; 3. call function `sqlserver-query'
+;; (sqlserver-query "select * from sysobjects where type='u'")
 
 
 ;;; Commands:
@@ -69,45 +62,50 @@
 ;;  `sqlserver-password'
 ;;    sqlserver user password.
 ;;    default = "sa"
-;;  `sqlserver-server'
+;;  `sqlserver-server-instance'
 ;;    Default server or host.
-;;    default = "localhost"
+;;    default = "localhost\\SQLEXPRESS"
 ;;  `sqlserver-dbname'
 ;;    database name .
-;;    default = "SQLEXPRESS"
+;;    default = "master"
 ;;  `sqlserver-cmd'
-;;    sqlserver cmd.now it support sqlcmd and osql
+;;    sqlserver-cmd  now  support sqlcmd.exe and osql.exe
 ;;    default = (quote sqlcmd)
 
 ;;; Code:
 
 (require 'sql)
 
+(defgroup sqlserver-query nil
+  "SQL SERVER QUERY"
+  :group 'SQL)
 (defcustom sqlserver-username "sa"
   "sqlserver user name."
-  :group 'sqlparser
+  :group 'sqlserver-query
   :type 'string)
+
 (defcustom sqlserver-password "sa"
   "sqlserver user password."
-  :group 'sqlparser
+  :group 'sqlserver-query
   :type 'string)
-(defcustom sqlserver-server "localhost"
+
+(defcustom sqlserver-server-instance "localhost\\SQLEXPRESS"
   "Default server or host."
   :type 'string
-  :group 'sqlparser
+  :group 'sqlserver-query
   :safe 'stringp)
-(defcustom sqlserver-dbname "SQLEXPRESS"
+
+(defcustom sqlserver-dbname "master"
   "database name ."
   :type 'string
-  :group 'sqlparser
+  :group 'sqlserver-query
   :safe 'stringp)
 
 (defcustom sqlserver-cmd 'sqlcmd
-  "sqlserver cmd.now it support sqlcmd and osql
-sqlserver add new cmd sqlcmd.exe.and osql is not recommended."
+  "sqlserver-cmd  now  support sqlcmd.exe and osql.exe
+sqlserver 2005 add new cmd sqlcmd.exe. and osql.exe is not recommended."
   :type '(choice (const sqlcmd) (const osql))
-  :group 'sqlparser)
-
+  :group 'sqlserver-query)
 
 (defvar sqlserver-timeout-wait-for-result 300
   "waiting 300s for sql result returned.")
@@ -116,42 +114,68 @@ sqlserver add new cmd sqlcmd.exe.and osql is not recommended."
 (defvar sqlserver-query-result nil)
 (defvar sqlserver-query-buffer  " *sqlserver-query*")
 
-(defun sqlserver-parse-result-as-list (raw-result)
-  (let  (result row line-count)
+(defun sqlserver-parse-result-as-list-4-osql (raw-result)
+  (let  (result row line-count line)
     (with-temp-buffer
       (insert raw-result)
       (goto-char  (point-min))
+      (when (re-search-forward "(.*\\(行受影响\\|rows affected\\))" nil t)
+        (replace-match "" nil nil))
+      (goto-char  (point-min))
       (while (re-search-forward "[ \t\n]*[ \t\n]*" nil t)
         (replace-match "" nil nil))
+      (goto-char  (point-min))
+      (while (re-search-forward "\\([ \t]+$\\|^[ \t]+\\)" nil t)
+        (replace-match "" nil nil))
+      (setq line-count (count-lines (point-min) (point-max)))
+      (goto-char  (point-min))
+      (while (< (line-number-at-pos)  line-count )
+	(setq line  (buffer-substring-no-properties
+		     (point-at-bol) (point-at-eol)))
+	(unless (string-match "^[ \t]*$" line)
+	  (setq row (split-string line "" t))
+	  (when row (setq result (append result (list row)))))
+	(forward-line))
+      )result ))
+
+(defun sqlserver-parse-result-as-list-4-sqlcmd (raw-result)
+  (let  (result row line-count)
+    (with-temp-buffer
+      (insert raw-result)
       (setq line-count (count-lines (point-min) (point-max)))
       (goto-char  (point-min))
       (while (< (line-number-at-pos) (- line-count 1))
         (setq row (split-string (buffer-substring-no-properties
                                  (point-at-bol) (point-at-eol)) "" t))
         (setq result (append result (list row)))
-        ;;            (add-to-list 'result row t)
         (forward-line))
       )result ))
 
+(defun sqlserver-parse-result-as-list (raw-result)
+  (if (equal sqlserver-cmd 'sqlcmd)
+      (sqlserver-parse-result-as-list-4-sqlcmd raw-result)
+    (sqlserver-parse-result-as-list-4-osql raw-result)))
+
 (defun sqlserver-conn-str()
-  "default:sqlcmd -S localhost -U sa -P sa -d SQLEXPRESS -h-1 -w 65535   -s \"\^E\" -W"
+  "default:sqlcmd -S localhost\\SQLEXPRESS -U sa -P sa -d master -h-1 -w 65535   -s \"\^E\" -W"
   (if (equal sqlserver-cmd 'sqlcmd)
       (format "%s -S %s -U %s -P %s -d %s -h-1  -w 65535  -s \"\^E\" -W"
-              (symbol-name sqlserver-cmd) sqlserver-server sqlserver-username sqlserver-password sqlserver-dbname)
-    (format "%s -S %s -U %s -P %s -d %s -h-1  -n -w 65535  "
-;;            "%s -S %s -U %s -P %s -d %s -h-1  -n -w 65535  -s \"\^E\" "
-            (symbol-name sqlserver-cmd) sqlserver-server sqlserver-username sqlserver-password sqlserver-dbname)
-      )
-  )
+              (symbol-name sqlserver-cmd) sqlserver-server-instance
+	      sqlserver-username sqlserver-password sqlserver-dbname)
+    (format "%s -S %s -U %s -P %s -d %s -h-1  -n -w 65535 -s \"\" "
+	    ;;            "%s -S %s -U %s -P %s -d %s -h-1  -n -w 65535  -s \"\^E\""
+            (symbol-name sqlserver-cmd) sqlserver-server-instance
+	    sqlserver-username sqlserver-password sqlserver-dbname)))
 
 (defun sqlserver-query-init-interactive()
   "set server dbname username password interactive"
   (interactive)
-  (setq sqlserver-server
-        (read-string (format  "sqlserver-server(default:%s):" sqlserver-server)
-                     "" nil sqlserver-server))
+  (setq sqlserver-server-instance
+        (read-string (format  "sqlserver-server-instance(default:%s):"
+			      sqlserver-server-instance)
+                     "" nil sqlserver-server-instance))
   (setq sqlserver-dbname
-        (read-string (format  "sqlserver-server(default:%s):" sqlserver-dbname)
+        (read-string (format  "sqlserver-db(default:%s):" sqlserver-dbname)
                      "" nil sqlserver-dbname))
   (setq sqlserver-username
         (read-string (format  "sqlserver-username(default:%s):" sqlserver-username)
@@ -160,8 +184,10 @@ sqlserver add new cmd sqlcmd.exe.and osql is not recommended."
   (sqlserver-query-init))
 
 (defun sqlserver-query-init()
+  "open connection with sqlcmd.exe or osql.exe."
   (setq sqlserver-query-process
-        (start-process-shell-command (symbol-name sqlserver-cmd)  sqlserver-query-buffer (sqlserver-conn-str)))
+        (start-process-shell-command (symbol-name sqlserver-cmd)
+				     sqlserver-query-buffer (sqlserver-conn-str)))
   (set-process-query-on-exit-flag sqlserver-query-process nil)
   (set-process-filter sqlserver-query-process 'sqlserver-filter-fun))
 
@@ -179,9 +205,6 @@ sqlserver add new cmd sqlcmd.exe.and osql is not recommended."
                             (sqlserver-query-init)))))
 
 
-;;(sqlserver-query-init-interactive)
-;;(sqlserver-query "select name from sysobjects")
-;;(sqlserver-query-rebuild-connection)
 
 (defun sqlserver-query (sql)
   "geta result from the function `sqlserver-query-result-function'
@@ -197,11 +220,9 @@ after you call `sqlserver-query'"
     nil))
 
 (defun sqlserver-filter-fun (process output)
-;  (setq  sqlserver-query-result  ( sqlserver-parse-result-as-list  output))
-;  (  print output)
-)
+  (setq  sqlserver-query-result  ( sqlserver-parse-result-as-list  output))
+
+  )
 
 (provide 'sqlserver-query)
 ;;; sqlserver-query.el ends here
-
-
