@@ -39,15 +39,6 @@
 
 (require 'sqlserver-query)
 
-;;( sqlparser-string-replace "abc_" "_" "[_]")
-(defun sqlparser-string-replace(str from-string replace-string)
-  "replace all `from-string' in `str' with `replace-string'"
-  (with-temp-buffer
-    (insert str)
-    (goto-char (point-min))
-    (while (search-forward from-string nil t)
-      (replace-match replace-string nil t))
-    (buffer-string)))
 
 ;; Test
 ;; ( sqlparser-sqlserver-tablename-schemaname-databasename-candidates "")
@@ -194,7 +185,7 @@
                                 (sqlparser-sql-sentence-at-point)))
                   )
               (dolist (tablename table-names)
-                (setq result (append result (list  (sqlparser-sqlserver-get-matched-columns tablename-string (car sub-prefix)))))
+                (setq result (append result (list  (sqlparser-sqlserver-get-matched-columns tablename (car sub-prefix)))))
                 )))
           ((= (length sub-prefix) 2); alias.columnname
            (let ((tablename-string  (sqlparser-guess-table-name (car sub-prefix))) ;[master].dbo.test
