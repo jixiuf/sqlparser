@@ -201,21 +201,26 @@ sqlserver 2005 add new cmd sqlcmd.exe. and osql.exe is not recommended."
 (defun sqlserver-query-rebuild-connection()
   "rebuild connection."
   (interactive)
-  (when (and   sqlserver-query-process
-               (equal (process-status sqlserver-query-process ) 'run))
-    (process-send-string sqlserver-query-process  "go\n")
-    (process-send-string sqlserver-query-process  "exit\n"))
-  (set-process-sentinel sqlserver-query-process
-                        (lambda (proc change)
-                          (when (string-match "\\(finished\\|exited\\)" change)
-                            (sqlserver-query-init)))))
+  (if (and   sqlserver-query-process
+             (equal (process-status sqlserver-query-process ) 'run))
+      (progn
+        (process-send-string sqlserver-query-process  "go\n")
+        (process-send-string sqlserver-query-process  "exit\n")
+        (set-process-sentinel sqlserver-query-process
+                              (lambda (proc change)
+                                (when (string-match "\\(finished\\|exited\\)" change)
+                                  (sqlserver-query-init)))))
+    (sqlserver-query-init)))
 
 
 
 (defun sqlserver-query (sql)
   "geta result from the function `sqlserver-query-result-function'
 after you call `sqlserver-query'"
-  (unless (buffer-live-p (get-buffer  sqlserver-query-buffer))
+  (if (and (buffer-live-p (get-buffer  sqlserver-query-buffer))
+           sqlserver-query-process
+           (equal (process-status sqlserver-query-process ) 'run))
+      (sqlserver-query-rebuild-connection)
     (sqlserver-query-init))
   (when (string-match "\\(.*\\);[ \t]*" sql)
     (setq sql (match-string 1 sql)))
