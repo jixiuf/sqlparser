@@ -1,4 +1,4 @@
-;;; sqlserver-query.el --- execute sql select using sqlcmd.exe or osql.exe on SQL SERVER. -*- coding:utf-8 -*-
+;;; sqlserver-query.el --- execute sql select using sqlcmd.exe or osql.exe on SQL SERVER2005 and later. -*- coding:utf-8 -*-
 
 ;; Copyright (C) 2011 孤峰独秀
 
@@ -42,8 +42,9 @@
 ;; (setq sqlserver-username "sa")
 ;; (setq sqlserver-password "sa")
 ;; (setq sqlserver-server-instance "localhost\\SQLEXPRESS")
+;; or sometimes  (setq sqlserver-server-instance "localhost")
 ;; (setq sqlserver-dbname "master")
-;; (setq sqlserver-cmd' 'sqlcmd)
+;; (setq sqlserver-cmd' 'sqlcmd) or (setq sqlserver-cmd' 'osql)
 
 ;; 3. call function `sqlserver-query'
 ;; (sqlserver-query "select * from sysobjects where type='u'")
