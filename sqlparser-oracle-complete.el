@@ -66,12 +66,12 @@
 ;;        "initial some variable .some is defined in oracle.el.
 ;;         some is defined here."
 ;;        (interactive)
-;;        (setq osq-username "scott")
-;;        (setq osq-password "tiger")
-;;        (setq osq-server   "localhost")
-;;        (setq osq-dbname   "orcl")
-;;        (setq osq-port   "1521")
-;;        (setq osq-as-sysdba nil)
+;;        (setq oq-username "scott")
+;;        (setq oq-password "tiger")
+;;        (setq oq-server   "localhost")
+;;        (setq oq-dbname   "orcl")
+;;        (setq oq-port   "1521")
+;;        (setq oq-as-sysdba nil)
 
 ;;        )
 ;;      (sqlparser-setup-for-oracle)
@@ -181,7 +181,7 @@ position ."
   (mapcar 'car
           (oracle-query
            (format " select view_name from all_views where upper(owner)=upper('%s') union all select table_name from all_tables where upper(owner)=upper('%s') union all  select table_schema||'.'||table_name from all_tab_privs where lower(grantee) = lower('%s') and privilege = 'SELECT' union all select table_name from dict"
-                   osq-username osq-username osq-username))))
+                   oq-username oq-username oq-username))))
 
 (defun sqlparser-oracle-schemaname-candidates ()
   "all schema-name in oracle database"
@@ -189,7 +189,7 @@ position ."
   (mapcar 'car
           (oracle-query
            (format "select table_schema from all_tab_privs where lower(grantee) = lower('%s') and privilege = 'SELECT'"
-            osq-username))))
+            oq-username))))
 
 (defun  sqlparser-oracle-column-candidates ()
   "column name candidates of table in current sql "
@@ -299,9 +299,11 @@ update sentence or alter sentence."
       (with-temp-buffer
         (insert ele)
         (goto-char (point-min))
-        (replace-regexp "\n" " ")
+        (while (re-search-forward "\n" nil t)
+          (replace-match " " nil nil))
         (goto-char (point-min))
-        (replace-regexp "[ \t]+as[ \t]+" " ")
+        (while (re-search-forward "[ \t]+as[ \t]+"  nil t)
+          (replace-match " " nil nil))
         (goto-char (point-min))
         (delete-horizontal-space)
         (goto-char (point-max))
@@ -398,7 +400,7 @@ then the `u' is `alias' and `user' is the true table name."
 it will return 'table' ,or 'column' ,or nil.
 "
   (let* ((cur-pos (point))
-         (sql-pos-info (bounds-of-sql-at-point))
+         (sql-pos-info (bounds-of-sql-at-point-4-oracle))
          (sql-start-pos (car sql-pos-info ))
          (sql-end-pos (cdr sql-pos-info))
          map keyword returnVal)
@@ -450,7 +452,7 @@ it will return 'table' ,or 'column' ,or nil.
       (setq returnVal "column")
       )
      ((string-match "values" keyword)
-      (setq returnVal nil.)
+      (setq returnVal nil)
       )
      (t
       (setq returnVal nil)
