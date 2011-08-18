@@ -345,9 +345,11 @@ update sentence or alter sentence."
       (with-temp-buffer
         (insert ele)
         (goto-char (point-min))
-        (replace-regexp "\n" " ")
+        (while (re-search-forward "\n" nil t)
+          (replace-match " " nil nil))
         (goto-char (point-min))
-        (replace-regexp "[ \t]+as[ \t]+" " ")
+        (while (re-search-forward "[ \t]+as[ \t]+"  nil t)
+          (replace-match " " nil nil))
         (goto-char (point-min))
         (delete-horizontal-space)
         (goto-char (point-max))
@@ -444,7 +446,7 @@ then the `u' is `alias' and `user' is the true table name."
 it will return 'table' ,or 'column' ,or nil.
 "
   (let* ((cur-pos (point))
-         (sql-pos-info (bounds-of-sql-at-point))
+         (sql-pos-info (bounds-of-sql-at-point-4-mysql))
          (sql-start-pos (car sql-pos-info ))
          (sql-end-pos (cdr sql-pos-info))
          map keyword returnVal)
@@ -503,7 +505,7 @@ it will return 'table' ,or 'column' ,or nil.
       (setq returnVal "column")
       )
      ((string-match "values" keyword)
-      (setq returnVal nil.)
+      (setq returnVal nil)
       )
      (t
       (setq returnVal nil)
