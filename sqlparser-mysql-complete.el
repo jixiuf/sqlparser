@@ -239,7 +239,7 @@ candidats"
   "column name candidates of table in current sql "
   (let* ((sql "select column_name from information_schema.columns where 1=0")
          (table-names (sqlparser-fetch-tablename-from-select-sql
-                       (sqlparser-sql-sentence-at-point)))
+                       (sqlparser-sql-sentence-at-point-4-mysql)))
          (prefix (sqlparser-get-prefix))
          (sub-prefix (split-string prefix "\\." nil))
          tablename tablenamelist schemaname )
@@ -282,7 +282,7 @@ candidats"
 
 (defun sqlparser-fetch-tablename-from-sql ( &optional sql1)
   "return a list of tablenames from a sql-sentence."
-  (let ((sql (or sql1 (sqlparser-sql-sentence-at-point)))
+  (let ((sql (or sql1 (sqlparser-sql-sentence-at-point-4-mysql)))
         tablenames)
     (setq tablenames (sqlparser-fetch-tablename-from-select-sql sql))
     (unless tablenames
@@ -293,7 +293,7 @@ candidats"
 (defun sqlparser-fetch-tablename-from-insert-update-alter-sql( &optional sql1)
   "fetch tablename ,or schema.tablename from a insert sentence or
 update sentence or alter sentence."
-  (let ((sql (or sql1 (sqlparser-sql-sentence-at-point)))
+  (let ((sql (or sql1 (sqlparser-sql-sentence-at-point-4-mysql)))
         tablename)
     (with-temp-buffer
       (insert sql)
@@ -305,7 +305,7 @@ update sentence or alter sentence."
 
 (defun sqlparser-fetch-tablename-from-select-sql ( &optional sql1)
   "return a list of tablenames from a sql-sentence."
-  (let* ((sql (or sql1 (sqlparser-sql-sentence-at-point)))
+  (let* ((sql (or sql1 (sqlparser-sql-sentence-at-point-4-mysql)))
          (sql-stack (list sql)) ele pt result-stack tablename-stack )
     (while (> (length sql-stack) 0)
       (setq ele (pop sql-stack))
@@ -374,7 +374,7 @@ update sentence or alter sentence."
   "find out the true table name depends on the alias.
 suppose the sql is `select * from user u where u.age=11'
 then the `u' is `alias' and `user' is the true table name."
-  (let ((sql  (or sql1 (sqlparser-sql-sentence-at-point)))
+  (let ((sql  (or sql1 (sqlparser-sql-sentence-at-point-4-mysql)))
         (regexp (concat  "\\([a-zA-Z0-9_\\.]+\\)[ \t]+\\(as[ \t]+\\)?" alias "[, \t\n\r]"))
         table-name)
     (if (and  sql (string-match regexp sql))
@@ -397,16 +397,17 @@ then the `u' is `alias' and `user' is the true table name."
 ;;   )
 ;; (add-hook 'sql-mode-hook 'sql-mode-hook-fun)
 
-(defun sqlparser-sql-sentence-at-point()
+(defun sqlparser-sql-sentence-at-point-4-mysql()
   "get current sql sentence. "
-  (let* ((bounds (bounds-of-sql-at-point))
+  (let* ((bounds (bounds-of-sql-at-point-4-mysql))
          (beg (car bounds))
          (end (cdr bounds)))
     (buffer-substring-no-properties  beg end)
     ))
 
 
-(defun bounds-of-sql-at-point()
+
+(defun bounds-of-sql-at-point-4-mysql()
   "get start and end point of current sql."
   (let ((pt (point))begin end empty-line-p empty-line-p next-line-included tail-p)
     (when (and
@@ -417,17 +418,15 @@ then the `u' is `alias' and `user' is the true table name."
       )
     (save-excursion
       (skip-chars-forward " \t\n\r")
-      ;;(end-of-line)
       (re-search-backward ";[ \t\n\r]*\\|\\`\\|\n[\r\t ]*\n[^ \t]" nil t)
-      (skip-syntax-forward "-")
-      (setq begin (match-end 0)))
+      (setq begin (point)))
     (save-excursion
       (skip-chars-forward " \t\n\r")
       (re-search-forward "\n[\r\t ]*\n[^ \t]\\|\\'\\|[ \t\n\r]*;" nil t)
       (unless (zerop (length (match-string 0)))
         (backward-char 1))
       (skip-syntax-backward "-")
-      (setq end   (match-beginning 0)))
+      (setq end   (point)))
     (goto-char pt)
     (cons begin end)
     )
