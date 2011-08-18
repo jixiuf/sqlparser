@@ -130,14 +130,14 @@
 (defun oracle-query-setup-interactive()
   "populate some usful variables ,like user ,passwd,dbname."
   (interactive)
-  (setq osq-username (read-string  (format "(build conn for completing)username:(default:%s)" osq-username) "" nil osq-username))
-  (setq osq-password  (read-passwd (format  "(build conn for completing)passwd:(default:%s)" osq-password)  nil osq-password))
-  (setq osq-server   (read-string (format  "(build conn for completing)server:(default:%s)" osq-server)  nil osq-server))
-  (setq osq-dbname   (read-string (format  "(build conn for completing)dbname:(default:%s)" osq-dbname)  nil osq-dbname))
-  (setq osq-port     (read-string (format  "(build conn for completing)port:(default:%s)" osq-port)  nil osq-port))
+  (setq oq-username (read-string  (format "(build conn for completing)username:(default:%s)" oq-username) "" nil oq-username))
+  (setq oq-password  (read-passwd (format  "(build conn for completing)passwd:(default:%s)" oq-password)  nil oq-password))
+  (setq oq-server   (read-string (format  "(build conn for completing)server:(default:%s)" oq-server)  nil oq-server))
+  (setq oq-dbname   (read-string (format  "(build conn for completing)dbname:(default:%s)" oq-dbname)  nil oq-dbname))
+  (setq oq-port     (read-string (format  "(build conn for completing)port:(default:%s)" oq-port)  nil oq-port))
   (if  (y-or-n-p  "login as sysdba?")
-      (setq osq-as-sysdba t)
-    (setq osq-as-sysdba nil)))
+      (setq oq-as-sysdba t)
+    (setq oq-as-sysdba nil)))
 
 (defun oq-parse-result-as-list (raw-result)
   (let  (result row)
@@ -160,7 +160,7 @@
 
 (defun oq-conn-str()
   " default:sqlplus scott/tiger@localhost:1521/orcl"
-  (if osq-as-sysdba
+  (if oq-as-sysdba
       (format "sqlplus  %s/%s@%s:%s/%s as sysdba"
               oq-username oq-password oq-server oq-port oq-dbname)
     (format "sqlplus  %s/%s@%s:%s/%s"
