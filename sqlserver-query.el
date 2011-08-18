@@ -217,11 +217,10 @@ sqlserver 2005 add new cmd sqlcmd.exe. and osql.exe is not recommended."
 (defun sqlserver-query (sql)
   "geta result from the function `sqlserver-query-result-function'
 after you call `sqlserver-query'"
-  (if (and (buffer-live-p (get-buffer  sqlserver-query-buffer))
+  (unless (and (buffer-live-p (get-buffer  sqlserver-query-buffer))
            sqlserver-query-process
            (equal (process-status sqlserver-query-process ) 'run))
-      (sqlserver-query-rebuild-connection)
-    (sqlserver-query-init))
+      (sqlserver-query-rebuild-connection))
   (when (string-match "\\(.*\\);[ \t]*" sql)
     (setq sql (match-string 1 sql)))
   (process-send-string sqlserver-query-process  (format "%s ;\n" sql))
