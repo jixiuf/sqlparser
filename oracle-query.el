@@ -59,6 +59,8 @@
 ;;
 ;; Below are complete command list:
 ;;
+;;  `oracle-query-setup-interactive'
+;;    populate some usful variables ,like user ,passwd,dbname.
 ;;  `oracle-query-rebuild-connection'
 ;;    rebuild sqlplus connection.
 ;;
@@ -125,6 +127,17 @@
 (defvar oracle-query-process nil)
 (defvar oracle-query-result nil)
 
+(defun oracle-query-setup-interactive()
+  "populate some usful variables ,like user ,passwd,dbname."
+  (interactive)
+  (setq osq-username (read-string  (format "(build conn for completing)username:(default:%s)" osq-username) "" nil osq-username))
+  (setq osq-password  (read-passwd (format  "(build conn for completing)passwd:(default:%s)" osq-password)  nil osq-password))
+  (setq osq-server   (read-string (format  "(build conn for completing)server:(default:%s)" osq-server)  nil osq-server))
+  (setq osq-dbname   (read-string (format  "(build conn for completing)dbname:(default:%s)" osq-dbname)  nil osq-dbname))
+  (setq osq-port     (read-string (format  "(build conn for completing)port:(default:%s)" osq-port)  nil osq-port))
+  (if  (y-or-n-p  "login as sysdba?")
+      (setq osq-as-sysdba t)
+    (setq osq-as-sysdba nil)))
 
 (defun oq-parse-result-as-list (raw-result)
   (let  (result row)
