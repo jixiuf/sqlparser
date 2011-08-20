@@ -244,7 +244,6 @@ candidats"
          (prefix (sqlparser-get-prefix-4-mysql))
          (sub-prefix (split-string prefix "\\." nil))
          tablename tablenamelist schemaname )
-    (print table-names)
     (if (> (length sub-prefix) 1);;alias.columnsname
         (progn
           (setq tablename (sqlparser-guess-table-name-4-mysql (car sub-prefix)))
