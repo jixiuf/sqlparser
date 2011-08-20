@@ -239,7 +239,7 @@ candidats"
 (defun  sqlparser-mysql-column-candidates ()
   "column name candidates of table in current sql "
   (let* ((sql "select column_name from information_schema.columns where 1=0")
-         (table-names (sqlparser-fetch-tablename-from-select-sql
+         (table-names (sqlparser-fetch-tablename-from-sql-4-mysql
                        (sqlparser-sql-sentence-at-point-4-mysql)))
          (prefix (sqlparser-get-prefix-4-mysql))
          (sub-prefix (split-string prefix "\\." nil))
@@ -247,7 +247,7 @@ candidats"
     (print table-names)
     (if (> (length sub-prefix) 1);;alias.columnsname
         (progn
-          (setq tablename (sqlparser-guess-table-name (car sub-prefix)))
+          (setq tablename (sqlparser-guess-table-name-4-mysql (car sub-prefix)))
           (setq tablenamelist (split-string tablename "[ \t\\.]" t))
           (if (= 1 (length tablenamelist)) ;;just tablename ,not dbname.tablename
               (progn
@@ -281,17 +281,17 @@ candidats"
 ;; (sqlparser-fetch-tablename-from-sql "update user set age=11 ")
 ;; (sqlparser-fetch-tablename-from-sql "alter  user add (tim datetime)")
 
-(defun sqlparser-fetch-tablename-from-sql ( &optional sql1)
+(defun sqlparser-fetch-tablename-from-sql-4-mysql ( &optional sql1)
   "return a list of tablenames from a sql-sentence."
   (let ((sql (or sql1 (sqlparser-sql-sentence-at-point-4-mysql)))
         tablenames)
-    (setq tablenames (sqlparser-fetch-tablename-from-select-sql sql))
+    (setq tablenames (sqlparser-fetch-tablename-from-select-sql-4-mysql sql))
     (unless tablenames
-      (setq tablenames (append tablenames (list (sqlparser-fetch-tablename-from-insert-update-alter-sql sql)))))
+      (setq tablenames (append tablenames (list (sqlparser-fetch-tablename-from-insert-update-alter-sql-4-mysql sql)))))
     tablenames
     ))
 
-(defun sqlparser-fetch-tablename-from-insert-update-alter-sql( &optional sql1)
+(defun sqlparser-fetch-tablename-from-insert-update-alter-sql-4-mysql( &optional sql1)
   "fetch tablename ,or schema.tablename from a insert sentence or
 update sentence or alter sentence."
   (let ((sql (or sql1 (sqlparser-sql-sentence-at-point-4-mysql)))
@@ -304,7 +304,7 @@ update sentence or alter sentence."
         )
       )))
 
-(defun sqlparser-fetch-tablename-from-select-sql ( &optional sql1)
+(defun sqlparser-fetch-tablename-from-select-sql-4-mysql ( &optional sql1)
   "return a list of tablenames from a sql-sentence."
   (let* ((sql (or sql1 (sqlparser-sql-sentence-at-point-4-mysql)))
          (sql-stack (list sql)) ele pt result-stack tablename-stack )
@@ -370,8 +370,8 @@ update sentence or alter sentence."
     ))
 
 ;; TEST :
-;; (sqlparser-fetch-tablename-from-select-sql "select * from (select id from mysql.emp a , mysql.abc ad) ,abcd  as acd  where name=''")
-(defun sqlparser-guess-table-name (alias &optional sql1)
+;; (sqlparser-fetch-tablename-from-select-sql-4-mysql "select * from (select id from mysql.emp a , mysql.abc ad) ,abcd  as acd  where name=''")
+(defun sqlparser-guess-table-name-4-mysql (alias &optional sql1)
   "find out the true table name depends on the alias.
 suppose the sql is `select * from user u where u.age=11'
 then the `u' is `alias' and `user' is the true table name."
@@ -388,7 +388,7 @@ then the `u' is `alias' and `user' is the true table name."
   )
 
 ;; TEST :
-;; (sqlparser-guess-table-name "a"   "select * from (select id from mysql.emp a , mysql.abc ad) ,abcd  as acd  where name=''")
+;; (sqlparser-guess-table-name-4-mysql "a"   "select * from (select id from mysql.emp a , mysql.abc ad) ,abcd  as acd  where name=''")
 
 
 ;; (defun sql-mode-hook-fun()
