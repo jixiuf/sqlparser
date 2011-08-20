@@ -143,11 +143,12 @@
 
 (when (featurep 'anything)
   (defvar anything-c-source-mysql-candidates nil)
+  (defvar anything-init-postion-4-mysql nil)
   (defvar anything-c-source-mysql
     '((name . "SQL Object:")
-      (init (lambda() (setq anything-c-source-mysql-candidates ( sqlparser-mysql-context-candidates))))
+      (init (lambda() (setq anything-init-postion-4-mysql (point))(setq anything-c-source-mysql-candidates ( sqlparser-mysql-context-candidates))))
       (candidates . anything-c-source-mysql-candidates)
-      (action . (("Complete" . (lambda(candidate) (backward-delete-char (length (sqlparser-word-before-point))) (insert candidate)))))))
+      (action . (("Complete" . (lambda(candidate) (goto-char anything-init-postion-4-mysql)(backward-delete-char (length (sqlparser-word-before-point-4-mysql))) (insert candidate)))))))
 
   (defun anything-mysql-complete()
     "call `anything' to complete tablename and column name for mysql."
@@ -157,14 +158,14 @@
            (lambda () (message "complete failed."))))
       (anything '(anything-c-source-mysql)
                 ;; Initialize input with current symbol
-                (sqlparser-word-before-point)  nil nil))))
+                (sqlparser-word-before-point-4-mysql)  nil nil))))
 
 
 (defun sqlparser-mysql-complete()
   "complete tablename or column name depending on current point
 position ."
   (interactive)
-  (let ((prefix  (sqlparser-word-before-point) )
+  (let ((prefix  (sqlparser-word-before-point-4-mysql) )
         (init-pos (point))
         last-mark)
     (insert (completing-read "complete:" (  sqlparser-mysql-context-candidates) nil t prefix ))
@@ -177,7 +178,7 @@ position ."
 (defun  sqlparser-mysql-context-candidates()
   "it will decide to complete tablename or columnname depend on
   current position."
-  (let ((context (sqlparser-parse))
+  (let ((context (sqlparser-parse-4-mysql))
         candidats)
     ;;  (print context)
     (cond
@@ -209,7 +210,7 @@ type in `schema.tablename'. so schemaname is considered as
 candidats"
   ;;-s means use TAB as separate char . -N means don't print column name.
   (let* (( mysql-options '("-s" "-N"))
-         (prefix (sqlparser-get-prefix))
+         (prefix (sqlparser-get-prefix-4-mysql))
          (sub-prefix (split-string prefix "\\." nil))
          (sql )
          )
@@ -240,7 +241,7 @@ candidats"
   (let* ((sql "select column_name from information_schema.columns where 1=0")
          (table-names (sqlparser-fetch-tablename-from-select-sql
                        (sqlparser-sql-sentence-at-point-4-mysql)))
-         (prefix (sqlparser-get-prefix))
+         (prefix (sqlparser-get-prefix-4-mysql))
          (sub-prefix (split-string prefix "\\." nil))
          tablename tablenamelist schemaname )
     (print table-names)
@@ -370,21 +371,22 @@ update sentence or alter sentence."
 
 ;; TEST :
 ;; (sqlparser-fetch-tablename-from-select-sql "select * from (select id from mysql.emp a , mysql.abc ad) ,abcd  as acd  where name=''")
-
-
 (defun sqlparser-guess-table-name (alias &optional sql1)
   "find out the true table name depends on the alias.
 suppose the sql is `select * from user u where u.age=11'
 then the `u' is `alias' and `user' is the true table name."
   (let ((sql  (or sql1 (sqlparser-sql-sentence-at-point-4-mysql)))
-        (regexp (concat  "\\([a-zA-Z0-9_\\.]+\\)[ \t]+\\(as[ \t]+\\)?" alias "[, \t\n\r]"))
+        (regexp (concat  "\\(\\([a-zA-Z0-9_\\$\\.]\\|\\[\\|]\\)+\\)[ \t\n\r]+\\(as[ \t]+\\)?" alias "[, \t\n\r]\\|$"))
         table-name)
+    (setq sql (concat sql " "))
+    (setq sql  (replace-regexp-in-string "\n" " " sql))
     (if (and  sql (string-match regexp sql))
         (progn
           (setq table-name (match-string 1 sql))
           (if (string-equal "from" table-name) alias table-name))
-      alias)
-    ))
+      alias))
+  )
+
 ;; TEST :
 ;; (sqlparser-guess-table-name "a"   "select * from (select id from mysql.emp a , mysql.abc ad) ,abcd  as acd  where name=''")
 
@@ -441,7 +443,7 @@ then the `u' is `alias' and `user' is the true table name."
 ;; 4.1 after keyword 'into' but there is a "(" between 'into' and current
 ;; position  :complete columnname
 ;; 5 after keyword 'values'  :complete nothing.
-(defun sqlparser-parse()
+(defun sqlparser-parse-4-mysql()
   "judge now need complete tablename or column name or don't complete .
 it will return 'table' ,or 'column' ,or nil.
 "
@@ -516,7 +518,7 @@ it will return 'table' ,or 'column' ,or nil.
     ))
 
 
-(defun sqlparser-get-prefix()
+(defun sqlparser-get-prefix-4-mysql()
   "for example `tablename.col' `table.' `str'"
   (let ((init-pos (point)) prefix)
     (when (search-backward-regexp "[ \t,(;]+" (point-min) t)
@@ -525,7 +527,7 @@ it will return 'table' ,or 'column' ,or nil.
     (or prefix "")
     ))
 
-(defun sqlparser-word-before-point()
+(defun sqlparser-word-before-point-4-mysql()
   "get word before current point or empty string."
   (save-excursion
     (let ((current-pos (point)))
