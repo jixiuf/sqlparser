@@ -122,11 +122,12 @@
 
 (when (featurep 'anything)
   (defvar anything-c-source-oracle-candidates nil)
+  (defvar anything-init-postion-4-oracle)
   (defvar anything-c-source-oracle
     '((name . "SQL Object:")
-      (init (lambda() (setq anything-c-source-oracle-candidates ( sqlparser-oracle-context-candidates))))
+      (init (lambda() (setq anything-init-postion-4-oracle (point))(setq anything-c-source-oracle-candidates ( sqlparser-oracle-context-candidates))))
       (candidates . anything-c-source-oracle-candidates)
-      (action . (("Complete" . (lambda(candidate) (backward-delete-char (length (sqlparser-word-before-point))) (insert candidate)))))))
+      (action . (("Complete" . (lambda(candidate) (goto-char anything-init-postion-4-oracle)(backward-delete-char (length (sqlparser-word-before-point-4-oracle))) (insert candidate)))))))
 
   (defun anything-oracle-complete()
     "call `anything' to complete tablename and column name for oracle."
@@ -136,17 +137,17 @@
            (lambda () (message "complete failed."))))
       (anything '(anything-c-source-oracle)
                 ;; Initialize input with current symbol
-                (sqlparser-word-before-point)  nil nil))))
+                (sqlparser-word-before-point-4-oracle)  nil nil))))
 
 
 (defun sqlparser-oracle-complete()
   "complete tablename or column name depending on current point
 position ."
   (interactive)
-  (let ((prefix  (sqlparser-word-before-point) )
+  (let ((prefix  (sqlparser-word-before-point-4-oracle) )
         (init-pos (point))
         last-mark)
-    (insert (completing-read "complete:" (  sqlparser-oracle-context-candidates) nil t prefix ))
+    (insert (completing-read "complete:" (sqlparser-oracle-context-candidates) nil t prefix ))
     (setq last-mark (point-marker))
     (goto-char init-pos)
     (backward-delete-char (length prefix))
@@ -194,14 +195,14 @@ position ."
 (defun  sqlparser-oracle-column-candidates ()
   "column name candidates of table in current sql "
   (let* ((sql "select column_name from user_tab_columns where 1=0")
-         (table-names (sqlparser-fetch-tablename-from-select-sql
+         (table-names (sqlparser-fetch-tablename-from-sql-4-oracle
                        (sqlparser-sql-sentence-at-point-4-oracle)))
-         (prefix (sqlparser-get-prefix))
+         (prefix (sqlparser-get-prefix-4-oracle))
          (sub-prefix (split-string prefix "\\." nil))
          tablename tablenamelist schemaname )
     (if (> (length sub-prefix) 1);;alias.columnsname
         (progn
-          (setq tablename (sqlparser-guess-table-name (car sub-prefix)))
+          (setq tablename (sqlparser-guess-table-name-4-oracle (car sub-prefix)))
           (setq tablenamelist (split-string tablename "[ \t\\.]" t))
           (if (= 1 (length tablenamelist)) ;;just tablename ,not dbname.tablename
               (progn
@@ -230,21 +231,21 @@ position ."
     (mapcar 'car (oracle-query sql))))
 
 ;; TEST :
-;; (sqlparser-fetch-tablename-from-sql "select * from (select id from oracle.emp a , oracle.abc ad) ,abcd  as acd  where name=''")
-;; (sqlparser-fetch-tablename-from-sql "update user set age=11 ")
-;; (sqlparser-fetch-tablename-from-sql "alter  user add (tim datetime)")
+;; (sqlparser-fetch-tablename-from-sql-4-oracle "select * from (select id from oracle.emp a , oracle.abc ad) ,abcd  as acd  where name=''")
+;; (sqlparser-fetch-tablename-from-sql-4-oracle "update user set age=11 ")
+;; (sqlparser-fetch-tablename-from-sql-4-oracle "alter  user add (tim datetime)")
 
-(defun sqlparser-fetch-tablename-from-sql ( &optional sql1)
+(defun sqlparser-fetch-tablename-from-sql-4-oracle ( &optional sql1)
   "return a list of tablenames from a sql-sentence."
   (let ((sql (or sql1 (sqlparser-sql-sentence-at-point-4-oracle)))
         tablenames)
-    (setq tablenames (sqlparser-fetch-tablename-from-select-sql sql))
+    (setq tablenames (sqlparser-fetch-tablename-from-select-sql-4-oracle sql))
     (unless tablenames
-      (setq tablenames (append tablenames (list (sqlparser-fetch-tablename-from-insert-update-alter-sql sql)))))
+      (setq tablenames (append tablenames (list (sqlparser-fetch-tablename-from-insert-update-alter-sql-4-oracle sql)))))
     tablenames
     ))
 
-(defun sqlparser-fetch-tablename-from-insert-update-alter-sql( &optional sql1)
+(defun sqlparser-fetch-tablename-from-insert-update-alter-sql-4-oracle( &optional sql1)
   "fetch tablename ,or schema.tablename from a insert sentence or
 update sentence or alter sentence."
   (let ((sql (or sql1 (sqlparser-sql-sentence-at-point-4-oracle)))
@@ -257,7 +258,7 @@ update sentence or alter sentence."
         )
       )))
 
-(defun sqlparser-fetch-tablename-from-select-sql ( &optional sql1)
+(defun sqlparser-fetch-tablename-from-select-sql-4-oracle ( &optional sql1)
   "return a list of tablenames from a sql-sentence."
   (let* ((sql (or sql1 (sqlparser-sql-sentence-at-point-4-oracle)))
          (sql-stack (list sql)) ele pt result-stack tablename-stack )
@@ -323,10 +324,10 @@ update sentence or alter sentence."
     ))
 
 ;; TEST :
-;; (sqlparser-fetch-tablename-from-select-sql "select * from (select id from oracle.emp a , oracle.abc ad) ,abcd  as acd  where name=''")
+;; (sqlparser-fetch-tablename-from-select-sql-4-oracle "select * from (select id from oracle.emp a , oracle.abc ad) ,abcd  as acd  where name=''")
 
 
-(defun sqlparser-guess-table-name (alias &optional sql1)
+(defun sqlparser-guess-table-name-4-oracle (alias &optional sql1)
   "find out the true table name depends on the alias.
 suppose the sql is `select * from user u where u.age=11'
 then the `u' is `alias' and `user' is the true table name."
@@ -463,7 +464,7 @@ it will return 'table' ,or 'column' ,or nil.
     ))
 
 
-(defun sqlparser-get-prefix()
+(defun sqlparser-get-prefix-4-oracle()
   "for example `tablename.col' `table.' `str'"
   (let ((init-pos (point)) prefix)
     (when (search-backward-regexp "[ \t,(;]+" (point-min) t)
@@ -472,7 +473,7 @@ it will return 'table' ,or 'column' ,or nil.
     (or prefix "")
     ))
 
-(defun sqlparser-word-before-point()
+(defun sqlparser-word-before-point-4-oracle()
   "get word before current point or empty string."
   (save-excursion
     (let ((current-pos (point)))
