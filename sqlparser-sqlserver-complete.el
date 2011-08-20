@@ -78,7 +78,7 @@
   "complete tablename or column name depending on current point
 position ."
   (interactive)
-  (let ((prefix  (sqlparser-word-before-point))
+  (let ((prefix  (sqlparser-word-before-point-4-sqlserver))
         (init-pos (point))
         last-mark)
     (insert (completing-read "complete:" ( sqlparser-sqlserver-context-candidates) nil t prefix))
@@ -90,11 +90,12 @@ position ."
 
 (when (featurep 'anything)
   (defvar anything-c-source-sqlserver-candidates nil)
+  (defvar anything-init-postion-4-sqlserver)
   (defvar anything-c-source-sqlserver
     '((name . "SQL Object:")
-      (init (lambda() (setq anything-c-source-sqlserver-candidates (sqlparser-sqlserver-context-candidates))))
+      (init (lambda() (setq anything-init-postion-4-sqlserver (point))(setq anything-c-source-sqlserver-candidates (sqlparser-sqlserver-context-candidates))))
       (candidates . anything-c-source-sqlserver-candidates)
-      (action . (("Complete" . (lambda(candidate) (backward-delete-char (length (sqlparser-word-before-point))) (insert candidate)))))))
+      (action . (("Complete" . (lambda(candidate) (goto-char anything-init-postion-4-sqlserver) (backward-delete-char (length (sqlparser-word-before-point-4-sqlserver))) (insert candidate)))))))
 
   (defun anything-sqlserver-complete()
     "call `anything' to complete tablename and column name for sqlserver."
@@ -104,7 +105,7 @@ position ."
            (lambda () (message "complete failed."))))
       (anything '(anything-c-source-sqlserver)
                 ;; Initialize input with current symbol
-                (sqlparser-word-before-point)  nil nil))))
+                (sqlparser-word-before-point-4-sqlserver)  nil nil))))
 
 (defun  sqlparser-sqlserver-context-candidates()
   "it will decide to complete tablename or columnname depend on
@@ -139,7 +140,7 @@ position ."
 
 (defun sqlparser-sqlserver-tablename-schemaname-databasename-candidates (&optional prefix)
   "complete table name or schemanmae or databasename ."
-  (let* ((prefix (or prefix  (sqlparser-get-prefix))); maybe master.dbo.tablename ,dbo.tablename tablename [dbo].[tablename]
+  (let* ((prefix (or prefix  (sqlparser-get-prefix-4-sqlserver))); maybe master.dbo.tablename ,dbo.tablename tablename [dbo].[tablename]
          (sub-prefix (split-string prefix "\\." nil))
          sql result)
     (cond ((= (length sub-prefix) 1)
@@ -260,18 +261,18 @@ position ."
 (defun  sqlparser-sqlserver-column-candidates ()
   "column name candidates of table in current sql "
   (let* ((sql "select column_name from user_tab_columns where 1=0")
-         (prefix (sqlparser-get-prefix)) ;alias.columnname or columnname
+         (prefix (sqlparser-get-prefix-4-sqlserver)) ;alias.columnname or columnname
          (sub-prefix (split-string prefix "\\." nil)) ;(alias columnname)
          result)
     (cond ((= (length sub-prefix) 1);;columnname
-            (let ((table-names (sqlparser-fetch-tablename-from-select-sql
-                                (sqlparser-sql-sentence-at-point)))
+            (let ((table-names (sqlparser-fetch-tablename-from-sql-4-sqlserver
+                                (sqlparser-sql-sentence-at-point-4-sqlserver)))
                  )
               (dolist (tablename table-names)
                 (setq result (append result    (sqlparser-sqlserver-get-matched-columns tablename (car sub-prefix))))
                )))
           ((= (length sub-prefix) 2); alias.columnname
-           (let ((tablename-string  (sqlparser-guess-table-name (car sub-prefix))) ;[master].dbo.test
+           (let ((tablename-string  (sqlparser-guess-table-name-4-sqlserver (car sub-prefix))) ;[master].dbo.test
                 )
              (setq result (sqlparser-sqlserver-get-matched-columns tablename-string (nth 1 sub-prefix)))))
          )
@@ -289,11 +290,11 @@ position ."
   "for example :return (dbo sys db_owner)."
   (mapcar 'car (sqlserver-query "  select name from sys.schemas")))
 
-(defun sqlparser-guess-table-name (alias &optional sql1)
+(defun sqlparser-guess-table-name-4-sqlserver (alias &optional sql1)
   "find out the true table name depends on the alias.
 suppose the sql is `select * from user u where u.age=11'
 then the `u' is `alias' and `user' is the true table name."
-  (let ((sql  (or sql1 (sqlparser-sql-sentence-at-point)))
+  (let ((sql  (or sql1 (sqlparser-sql-sentence-at-point-4-sqlserver)))
         (regexp (concat  "\\(\\([a-zA-Z0-9_\\$\\.]\\|\\[\\|]\\)+\\)[ \t\n\r]+\\(as[ \t]+\\)?" alias "[, \t\n\r]\\|$"))
         table-name)
     (setq sql (concat sql " "))
@@ -305,20 +306,20 @@ then the `u' is `alias' and `user' is the true table name."
       alias)))
 
 
-(defun sqlparser-fetch-tablename-from-sql (&optional sql1)
+(defun sqlparser-fetch-tablename-from-sql-4-sqlserver (&optional sql1)
   "return a list of tablenames from a sql-sentence."
-  (let ((sql (or sql1 (sqlparser-sql-sentence-at-point)))
+  (let ((sql (or sql1 (sqlparser-sql-sentence-at-point-4-sqlserver)))
         tablenames)
-    (setq tablenames (sqlparser-fetch-tablename-from-select-sql sql))
+    (setq tablenames (sqlparser-fetch-tablename-from-select-sql-4-sqlserver sql))
     (unless tablenames
-      (setq tablenames (append tablenames (list (sqlparser-fetch-tablename-from-insert-update-alter-sql sql)))))
+      (setq tablenames (append tablenames (list (sqlparser-fetch-tablename-from-insert-update-alter-sql-4-sqlserver sql)))))
     tablenames
    ))
 
-(defun sqlparser-fetch-tablename-from-insert-update-alter-sql(&optional sql1)
+(defun sqlparser-fetch-tablename-from-insert-update-alter-sql-4-sqlserver(&optional sql1)
   "fetch tablename ,or schema.tablename from a insert sentence or
 update sentence or alter sentence."
-  (let ((sql (or sql1 (sqlparser-sql-sentence-at-point)))
+  (let ((sql (or sql1 (sqlparser-sql-sentence-at-point-4-sqlserver)))
         tablename)
     (with-temp-buffer
       (insert sql)
@@ -327,9 +328,9 @@ update sentence or alter sentence."
         (setq tablename (match-string 2))))))
 
 
-(defun sqlparser-fetch-tablename-from-select-sql (&optional sql1)
+(defun sqlparser-fetch-tablename-from-select-sql-4-sqlserver (&optional sql1)
   "return a list of tablenames from a sql-sentence."
-  (let* ((sql (or sql1 (sqlparser-sql-sentence-at-point)))
+  (let* ((sql (or sql1 (sqlparser-sql-sentence-at-point-4-sqlserver)))
          (sql-stack (list sql)) ele pt result-stack tablename-stack)
     (while (> (length sql-stack) 0)
       (setq ele (pop sql-stack))
@@ -465,7 +466,7 @@ it will return 'table' ,or 'column' ,or nil.
     returnVal
    ))
 
-(defun sqlparser-sql-sentence-at-point()
+(defun sqlparser-sql-sentence-at-point-4-sqlserver()
   "get current sql sentence. "
   (let* ((bounds (bounds-of-sql-at-point-4-sqlserver))
          (beg (car bounds))
@@ -498,7 +499,7 @@ it will return 'table' ,or 'column' ,or nil.
    )
  )
 
-(defun sqlparser-get-prefix()
+(defun sqlparser-get-prefix-4-sqlserver()
   "for example `tablename.col' `table.' `str'"
   (let ((init-pos (point)) prefix)
     (when (search-backward-regexp "[ \t,(;]+" (point-min) t)
@@ -507,7 +508,7 @@ it will return 'table' ,or 'column' ,or nil.
     (or prefix "")
    ))
 
-(defun sqlparser-word-before-point()
+(defun sqlparser-word-before-point-4-sqlserver()
   "get word before current point or empty string."
   (save-excursion
     (let ((current-pos (point)))
