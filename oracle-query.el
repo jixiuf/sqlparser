@@ -127,6 +127,7 @@
 (defvar oracle-query-process nil)
 (defvar oracle-query-result nil)
 
+;;;###autoload
 (defun oracle-query-setup-interactive()
   "populate some usful variables ,like user ,passwd,dbname."
   (interactive)
@@ -179,7 +180,7 @@
   (process-send-string oracle-query-process "set serveroutput on;\n")
   (set-process-filter oracle-query-process 'oq-filter-fun)
   )
-
+;;;###autoload
 (defun oracle-query-rebuild-connection()
   "rebuild sqlplus connection."
   (interactive)
