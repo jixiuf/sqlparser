@@ -260,8 +260,7 @@ position ."
 
 (defun  sqlparser-sqlserver-column-candidates ()
   "column name candidates of table in current sql "
-  (let* ((sql "select column_name from user_tab_columns where 1=0")
-         (prefix (sqlparser-get-prefix-4-sqlserver)) ;alias.columnname or columnname
+  (let* ((prefix (sqlparser-get-prefix-4-sqlserver)) ;alias.columnname or columnname
          (sub-prefix (split-string prefix "\\." nil)) ;(alias columnname)
          result)
     (cond ((= (length sub-prefix) 1);;columnname
@@ -315,7 +314,6 @@ then the `u' is `alias' and `user' is the true table name."
       (setq tablenames (append tablenames (list (sqlparser-fetch-tablename-from-insert-update-alter-sql-4-sqlserver sql)))))
     tablenames
    ))
-
 (defun sqlparser-fetch-tablename-from-insert-update-alter-sql-4-sqlserver(&optional sql1)
   "fetch tablename ,or schema.tablename from a insert sentence or
 update sentence or alter sentence."
@@ -324,9 +322,8 @@ update sentence or alter sentence."
     (with-temp-buffer
       (insert sql)
       (goto-char (point-min))
-      (when (search-forward-regexp "\\(\\binto\\|update\\|alter\\)[ \t\n\r]+\\(\\([a-zA-Z0-9_\\$\\.]\\|\\[\\|]\\)+\\)[ \t\n\r]*" (point-max) t)
+      (when (search-forward-regexp "\\(\\binto\\|update\\|table\\)[ \t\n\r]+\\(\\([a-zA-Z0-9_\\$\\.]\\|\\[\\|]\\)+\\)[ \t\n\r]*" (point-max) t)
         (setq tablename (match-string 2))))))
-
 
 (defun sqlparser-fetch-tablename-from-select-sql-4-sqlserver (&optional sql1)
   "return a list of tablenames from a sql-sentence."
@@ -407,6 +404,12 @@ it will return 'table' ,or 'column' ,or nil.
     (when (search-backward-regexp "\\balter\\b" sql-start-pos t 1)
       (push   (list (- cur-pos (point)) "alter") map))
     (goto-char cur-pos)
+    (when (search-backward-regexp "\\btable\\b" sql-start-pos t 1)
+      (push   (list (- cur-pos (point)) "table") map))
+    (goto-char cur-pos)
+    (when (search-backward-regexp "\\bcolumn\\b" sql-start-pos t 1)
+      (push   (list (- cur-pos (point)) "column") map))
+    (goto-char cur-pos)
     (when (search-backward-regexp "\\buse\\b" sql-start-pos t 1)
       (push   (list (- cur-pos (point)) "use") map))
     (goto-char cur-pos)
@@ -449,10 +452,10 @@ it will return 'table' ,or 'column' ,or nil.
      ((string-match "use" keyword)
       (setq returnVal "database")
      )
-     ((string-match "from\\|alter\\|update" keyword)
+     ((string-match "table\\|from\\|alter\\|update" keyword)
       (setq returnVal "table")
      )
-     ((string-match "select\\|set\\|where\\|" keyword)
+     ((string-match "column\\|select\\|set\\|where\\|" keyword)
       (setq returnVal "column")
      )
      ((string-match "values" keyword)
