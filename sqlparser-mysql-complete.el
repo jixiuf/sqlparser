@@ -127,7 +127,7 @@
   :group 'sqlparser
   :type 'string)
 
-
+;;;###autoload
 (defun sqlparser-mysql-setup-interactive()
   "populate some usful variables ,like user ,passwd,db. "
   (interactive)
@@ -150,7 +150,7 @@
       (init (lambda() (setq anything-init-postion-4-mysql (point))(setq anything-c-source-mysql-candidates ( sqlparser-mysql-context-candidates))))
       (candidates . anything-c-source-mysql-candidates)
       (action . (("Complete" . (lambda(candidate) (goto-char anything-init-postion-4-mysql)(backward-delete-char (length (sqlparser-word-before-point-4-mysql))) (insert candidate)))))))
-
+;;;###autoload
   (defun anything-mysql-complete()
     "call `anything' to complete tablename and column name for mysql."
     (interactive)
@@ -161,7 +161,7 @@
                 ;; Initialize input with current symbol
                 (sqlparser-word-before-point-4-mysql)  nil nil))))
 
-
+;;;###autoload
 (defun sqlparser-mysql-complete()
   "complete tablename or column name depending on current point
 position ."
@@ -299,7 +299,7 @@ update sentence or alter sentence."
     (with-temp-buffer
       (insert sql)
       (goto-char (point-min))
-      (when (search-forward-regexp "\\(\\binto\\|update\\|alter\\)[ \t]+\\([a-zA-Z0-9\\._]+\\)\\b" (point-max ) t)
+      (when (search-forward-regexp "\\(\\binto\\|update\\|table\\)[ \t]+\\([a-zA-Z0-9\\._]+\\)\\b" (point-max ) t)
         (setq tablename (match-string 2))
         )
       )))
@@ -452,10 +452,15 @@ it will return 'table' ,or 'column' ,or nil.
          (sql-start-pos (car sql-pos-info ))
          (sql-end-pos (cdr sql-pos-info))
          map keyword returnVal)
+    (goto-char cur-pos)
     (when (search-backward-regexp "\\buse\\b" sql-start-pos t 1)
       (push   (list (- cur-pos (point)) "use") map))
-    (when (search-backward-regexp "\\balter\\b" sql-start-pos t 1)
-      (push   (list (- cur-pos (point)) "alter") map))
+    (goto-char cur-pos)
+    (when (search-backward-regexp "\\btable\\b" sql-start-pos t 1)
+      (push   (list (- cur-pos (point)) "table") map))
+    (goto-char cur-pos)
+    (when (search-backward-regexp "\\bcolumn\\b" sql-start-pos t 1)
+      (push   (list (- cur-pos (point)) "column") map))
     (goto-char cur-pos)
     (when (search-backward-regexp "\\bfrom\\b" sql-start-pos t 1)
       (push   (list (- cur-pos (point)) "from") map))
@@ -500,10 +505,10 @@ it will return 'table' ,or 'column' ,or nil.
      ((string-match "use" keyword)
       (setq returnVal "schema")
       )
-     ((string-match "from\\|alter\\|update\\|desc\\|describe\\|show" keyword)
+     ((string-match "table\\|from\\|alter\\|update\\|desc\\|describe\\|show" keyword)
       (setq returnVal "table")
       )
-     ((string-match "select\\|set\\|where\\|" keyword)
+     ((string-match "column\\|select\\|set\\|where\\|" keyword)
       (setq returnVal "column")
       )
      ((string-match "values" keyword)
