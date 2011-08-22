@@ -1,4 +1,4 @@
-;;; sqlserver-query.el --- execute sql select using sqlcmd.exe or osql.exe on SQL SERVER2005 and later. -*- coding:utf-8 -*-
+;;; sqlserver-query.el --- execute sql select using sqlcmd.exe or osql.exe on SQL SERVER. -*- coding:utf-8 -*-
 
 ;; Copyright (C) 2011 孤峰独秀
 
@@ -39,15 +39,17 @@
 ;;  `sqlserver-dbname'
 ;;  `sqlserver-cmd' ;sqlcmd or osql
 ;; for example
-;; (setq sqlserver-username "sa")
-;; (setq sqlserver-password "sa")
-;; (setq sqlserver-server-instance "localhost\\SQLEXPRESS")
-;; or sometimes  (setq sqlserver-server-instance "localhost")
-;; (setq sqlserver-dbname "master")
-;; (setq sqlserver-cmd' 'sqlcmd) or (setq sqlserver-cmd' 'osql)
+;;    (setq sqlserver-username "sa")
+;;    (setq sqlserver-password "sa")
+;;    (setq sqlserver-server-instance "localhost\\SQLEXPRESS")
+;; or sometimes
+;;   (setq sqlserver-server-instance "localhost")
+;; is enough
+;;   (setq sqlserver-dbname "master")
+;;   (setq sqlserver-cmd' 'sqlcmd) or (setq sqlserver-cmd' 'osql)
 
 ;; 3. call function `sqlserver-query'
-;; (sqlserver-query "select * from sysobjects where type='u'")
+;;   (sqlserver-query "select * from sysobjects where type='u'")
 
 
 ;;; Commands:
@@ -174,6 +176,7 @@ sqlserver 2005 add new cmd sqlcmd.exe. and osql.exe is not recommended."
             (symbol-name sqlserver-cmd) sqlserver-server-instance
 	    sqlserver-username sqlserver-password sqlserver-dbname)))
 
+;;;###autoload
 (defun sqlserver-query-init-interactive()
   "set server dbname username password interactive"
   (interactive)
@@ -198,7 +201,7 @@ sqlserver 2005 add new cmd sqlcmd.exe. and osql.exe is not recommended."
   (set-process-query-on-exit-flag sqlserver-query-process nil)
   (set-process-filter sqlserver-query-process 'sqlserver-filter-fun))
 
-
+;;;###autoload
 (defun sqlserver-query-rebuild-connection()
   "rebuild connection."
   (interactive)
@@ -231,9 +234,7 @@ after you call `sqlserver-query'"
     nil))
 
 (defun sqlserver-filter-fun (process output)
-  (setq  sqlserver-query-result  ( sqlserver-parse-result-as-list  output))
-
-  )
+  (setq  sqlserver-query-result  ( sqlserver-parse-result-as-list  output)))
 
 (provide 'sqlserver-query)
 ;;; sqlserver-query.el ends here
