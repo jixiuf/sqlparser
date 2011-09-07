@@ -8,8 +8,8 @@
 ;; Filename: sqlparser-mysql-complete.el
 ;; Description:  completing tablename column for mysql when editing
 ;; Created: 2011年07月21日 星期四 20时03分40秒
-;; Updated: 2011年08月21日 星期日 01时00分47秒
-;; Version: 0.1.1
+;; Updated: 2011-09-08 00:07
+;; Version: 0.1.2
 ;; URL:http://www.emacswiki.org/emacs/download/sqlparser-mysql-complete.el
 ;; https://github.com/jixiuf/sqlparser
 ;; screencast :http://screencast-repos.googlecode.com/files/emacs-sqlparse-mysql-complete.mkv.bz2
