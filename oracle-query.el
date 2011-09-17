@@ -200,10 +200,11 @@ after you call `oracle-query'"
     nil))
 
 (defun oq-filter-fun (process output)
-  (unless (or  (string-match "SQL> " output)
+  (if  (or  (string-match "SQL> " output)
                (string-match "Copyright (c) .* Oracle.  All rights reserved." output)
                (string-match "Oracle Database 11g Enterprise Edition Release 11.2.0.1.0 - Production" output)
                )
+      (setq  oracle-query-result nil)
     (setq  oracle-query-result  ( oq-parse-result-as-list  output))))
 
 (provide 'oracle-query)
