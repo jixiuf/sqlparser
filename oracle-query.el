@@ -127,9 +127,8 @@ created process"
     (set-process-query-on-exit-flag  oracle-query-process nil)
     (set-process-sentinel oracle-query-process
                           (lambda (proc change)
-                            (when (string-match "\\(finished\\|exited\\|\\`exited abnormally with code\\)" change)
-                              (switch-to-buffer (process-buffer proc))
-                              ;(kill-buffer  (process-buffer proc))
+                            (when (string-match "\\(finished\\|exited\\|exited abnormally with code\\)" change)
+                              (kill-buffer  (process-buffer proc))
                               )))
     ;; (set-process-filter oracle-query-process 'oq-filter-fun)
     (list oracle-query-process
