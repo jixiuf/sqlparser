@@ -150,7 +150,7 @@ position ."
   "it will decide to complete tablename or columnname depend on
   current position."
   (unless (and sqlparser-sqlplus-connection
-               (equal (process-status (nth 1  sqlparser-sqlplus-connection)) 'run))
+               (equal (process-status (nth 0  sqlparser-sqlplus-connection)) 'run))
     (setq sqlparser-sqlplus-connection (call-interactively 'oracle-query-create-connection)))
   (let ((context (sqlparser-parse-4-oracle)) candidats)
     (cond
