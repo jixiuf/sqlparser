@@ -1,7 +1,7 @@
 ;;; oracle-table2entity-4csharp.el --- oracle table2entity for csharp   -*- coding:utf-8 -*-
 
 ;; Description:oracle table2entity for csharp
-;; Time-stamp: <Joseph 2011-09-18 23:47:15 星期日>
+;; Time-stamp: <Joseph 2011-09-19 00:05:17 星期一>
 ;; Created: 2011-09-18 21:44
 ;; Author: 孤峰独秀  jixiuf@gmail.com
 ;; Maintainer:  孤峰独秀  jixiuf@gmail.com
@@ -60,7 +60,6 @@
     ("DECIMAL" . "decimal")
     ("INTEGER" . "decimal")
     ("REAL" . "decimal")
-    ("D" . "decimal")
     )
   "key must be upcase.
 key 是db类型，value 是csharp 中对应类型.要求key大写"
