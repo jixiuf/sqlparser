@@ -1,7 +1,7 @@
 ;;; oracle-table2entity-4csharp.el --- oracle table2entity for csharp   -*- coding:utf-8 -*-
 
 ;; Description:oracle table2entity for csharp
-;; Time-stamp: <Joseph 2011-09-18 23:47:01 星期日>
+;; Time-stamp: <Joseph 2011-09-18 23:47:15 星期日>
 ;; Created: 2011-09-18 21:44
 ;; Author: 孤峰独秀  jixiuf@gmail.com
 ;; Maintainer:  孤峰独秀  jixiuf@gmail.com
@@ -184,4 +184,4 @@ key 是db类型，value 是csharp 中对应类型.要求key大写"
     )
   )
 (provide 'oracle-table2entity-4csharp)
-;;; joseph-oracle-db2class-4csharp.el ends here
+;;; oracle-table2entity-4csharp ends here
