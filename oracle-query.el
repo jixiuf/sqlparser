@@ -192,7 +192,6 @@
     (oracle-query-init))
   (when (string-match "\\(.*\\);[ \t]*" sql)
     (setq sql (match-string 1 sql)))
-  (print sql)
   (with-current-buffer (process-buffer oracle-query-process)
     (delete-region (point-min) (point-max))
     (let ((start (point-min)) end)
