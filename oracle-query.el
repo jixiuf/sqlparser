@@ -128,6 +128,7 @@ created process"
     (set-process-sentinel oracle-query-process
                           (lambda (proc change)
                             (when (string-match "\\(finished\\|exited\\|exited abnormally with code\\)" change)
+                              (message  (concat  (process-name proc) "closed"))
                               (kill-buffer  (process-buffer proc))
                               )))
     ;; (set-process-filter oracle-query-process 'oq-filter-fun)
