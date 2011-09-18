@@ -121,6 +121,9 @@
   :group 'tools
   )
 
+(defvar sqlparser-sqlplus-connection nil)
+(make-variable-buffer-local 'sqlparser-sqlplus-connection)
+
 (when (featurep 'anything)
   (defvar anything-c-source-oracle-candidates nil)
   (defvar anything-init-postion-4-oracle)
@@ -129,7 +132,7 @@
       (init (lambda() (setq anything-init-postion-4-oracle (point))(setq anything-c-source-oracle-candidates ( sqlparser-oracle-context-candidates))))
       (candidates . anything-c-source-oracle-candidates)
       (action . (("Complete" . (lambda(candidate) (goto-char anything-init-postion-4-oracle)(backward-delete-char (length (sqlparser-word-before-point-4-oracle))) (insert candidate)))))))
-
+;;;###autoload
   (defun anything-oracle-complete()
     "call `anything' to complete tablename and column name for oracle."
     (interactive)
@@ -141,6 +144,7 @@
                 (sqlparser-word-before-point-4-oracle)  nil nil))))
 
 
+;;;###autoload
 (defun sqlparser-oracle-complete()
   "complete tablename or column name depending on current point
 position ."
@@ -158,6 +162,8 @@ position ."
 (defun  sqlparser-oracle-context-candidates()
   "it will decide to complete tablename or columnname depend on
   current position."
+  (unless sqlparser-sqlplus-connection
+    (setq sqlparser-sqlplus-connection (call-interactively 'oracle-query-create-connection)))
   (let ((context (sqlparser-parse-4-oracle)) candidats)
     (cond
      ((string= "schema" context)
@@ -183,15 +189,19 @@ position ."
   (mapcar 'car
           (oracle-query
            (format " select view_name from all_views where upper(owner)=upper('%s') union all select table_name from all_tables where upper(owner)=upper('%s') union all  select table_schema||'.'||table_name from all_tab_privs where lower(grantee) = lower('%s') and privilege = 'SELECT' union all select table_name from dict"
-                   oq-username oq-username oq-username))))
+                   (nth 2 sqlparser-sqlplus-connection)(nth 2 sqlparser-sqlplus-connection)(nth 2 sqlparser-sqlplus-connection))
+           sqlparser-sqlplus-connection
+           )))
 
 (defun sqlparser-oracle-schemaname-candidates ()
   "all schema-name in oracle database"
   ;;-s means use TAB as separate char . -N means don't print column name.
   (mapcar 'car
           (oracle-query
-           (format "select table_schema from all_tab_privs where lower(grantee) = lower('%s') and privilege = 'SELECT'"
-            oq-username))))
+            (format "select table_schema from all_tab_privs where lower(grantee) = lower('%s') and privilege = 'SELECT'"
+                   (nth 2 sqlparser-sqlplus-connection))
+           sqlparser-sqlplus-connection
+           )))
 
 (defun  sqlparser-oracle-column-candidates ()
   "column name candidates of table in current sql "
@@ -229,7 +239,7 @@ position ."
           (setq schemaname (car tablenamelist))
           (setq sql (format "%s union select column_name from all_tab_columns where upper(table_name)=upper('%s') and upper(owner)=upper('%s') and upper(column_name) like upper('%s%%') "
                             sql tablename schemaname prefix)))))
-    (mapcar 'car (oracle-query sql))))
+    (mapcar 'car (oracle-query sql sqlparser-sqlplus-connection))))
 
 ;; TEST :
 ;; (sqlparser-fetch-tablename-from-sql-4-oracle "select * from (select id from oracle.emp a , oracle.abc ad) ,abcd  as acd  where name=''")
