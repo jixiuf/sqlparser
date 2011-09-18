@@ -63,19 +63,6 @@
 ;; (eval-after-load 'sql
 ;;   '(progn
 ;;      (require 'sqlparser-oracle-complete)
-;;      (defun sqlparser-setup-for-oracle()
-;;        "initial some variable .some is defined in oracle.el.
-;;         some is defined here."
-;;        (interactive)
-;;        (setq oq-username "scott")
-;;        (setq oq-password "tiger")
-;;        (setq oq-server   "localhost")
-;;        (setq oq-dbname   "orcl")
-;;        (setq oq-port   "1521")
-;;        (setq oq-as-sysdba nil)
-
-;;        )
-;;      (sqlparser-setup-for-oracle)
 ;;      (define-key sql-mode-map (quote [tab]) 'anything-oracle-complete)
 ;;      (define-key sql-interactive-mode-map  (quote [tab]) 'anything-oracle-complete)
 ;;      )
