@@ -8,7 +8,7 @@
 ;; Description:execute sql select using sqlplus.
 ;; Created: 2011-7-31
 ;; Updated: 2011-09-18 18:28
-;; Version: 0.1.3
+;; Version: 0.1.4
 ;; URL:http://www.emacswiki.org/emacs/download/oracle-query.el
 ;; https://github.com/jixiuf/sqlparser
 ;; Compatibility: Test on Linux
