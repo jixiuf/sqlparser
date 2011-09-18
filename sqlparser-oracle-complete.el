@@ -11,7 +11,7 @@
 ;; Version: 0.1.4
 ;; URL:http://www.emacswiki.org/emacs/download/sqlparser-oracle-complete.el
 ;;     https://github.com/jixiuf/sqlparser
-;; screencast: http://screencast-repos.googlecode.com/files/emacs-sqlparse-mysql-complete.mkv.bz2
+;; screencast:http://screencast-repos.googlecode.com/files/sqlparser0oracle0complete.mkv
 ;; Compatibility: Test on Linux
 ;;
 ;; Features that might be required by this library:
@@ -162,7 +162,8 @@ position ."
 (defun  sqlparser-oracle-context-candidates()
   "it will decide to complete tablename or columnname depend on
   current position."
-  (unless sqlparser-sqlplus-connection
+  (unless (and sqlparser-sqlplus-connection
+               (equal (process-status (nth 1  sqlparser-sqlplus-connection)) 'run))
     (setq sqlparser-sqlplus-connection (call-interactively 'oracle-query-create-connection)))
   (let ((context (sqlparser-parse-4-oracle)) candidats)
     (cond
