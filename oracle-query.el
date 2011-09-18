@@ -135,8 +135,7 @@ created process"
             (goto-char (point-min))))
         (setq end (1- (match-beginning 0)))
         (when (re-search-backward "\\bSQL> " nil t 1) (setq start (match-end 0)))
-        (oq-parse-result-as-list (buffer-substring start end))))  )
-  )
+        (oq-parse-result-as-list (buffer-substring start end))))))
 
 (provide 'oracle-query)
 ;;; oracle-query.el ends here
