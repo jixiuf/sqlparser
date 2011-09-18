@@ -59,6 +59,12 @@
 
 (defvar oq-linesize 20000 "Default linesize for sqlplus")
 
+;; (oracle-query-fetch-username-from-connect-string "scott/tiger")
+(defun oracle-query-fetch-username-from-connect-string(connect-string)
+  (when (string-match "\\(.*\\)/.*" connect-string)
+    (match-string 1 connect-string)))
+
+
 (defun oq-parse-result-as-list (raw-result)
   (let (result row)
     (with-temp-buffer
@@ -106,22 +112,25 @@ created process"
     (process-send-string oracle-query-process "set pagesize 0;\n")
     (process-send-string oracle-query-process "set feedback on;\n")
     (process-send-string oracle-query-process "set serveroutput on;\n")
+    (set-process-query-on-exit-flag  oracle-query-process nil)
     ;; (set-process-filter oracle-query-process 'oq-filter-fun)
-    oracle-query-process))
+    (list oracle-query-process
+          (process-buffer oracle-query-process)
+          (oracle-query-fetch-username-from-connect-string connect-string))
+    ))
 
-
-;; (oracle-query "select empno from emp")
+;;(oracle-query "select empno from emp")
 ;; (oracle-query "select empno from emp" (oracle-query-create-connection "scott/tiger"))
 ;;;###autoload
-(defun oracle-query (sql &optional oracle-query-process)
+(defun oracle-query (sql &optional oracle-query-connection)
   "execute sql using `sqlplus' ,and return the result of it."
-  (let ((process oracle-query-process))
-    (when (or (not process)
-              (not (equal (process-status process ) 'run)))
-      (when (or (not oracle-query-default-connection)
-                (not (equal (process-status oracle-query-default-connection ) 'run)))
+  (let( (connection oracle-query-connection) process)
+    (unless connection
+      (unless oracle-query-default-connection
         (setq oracle-query-default-connection (call-interactively   'oracle-query-create-connection)))
-      (setq process oracle-query-default-connection))
+      (setq connection oracle-query-default-connection)
+      )
+    (setq process (car connection))
     (when (string-match "\\(.*\\);[ \t]*" sql)
       (setq sql (match-string 1 sql)))
     (with-current-buffer (process-buffer process)
