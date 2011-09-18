@@ -169,13 +169,13 @@
 (defun oracle-query-init()
   (setq oracle-query-process
         (start-process-shell-command "sqlplus" " *oracle-query-sqlplus*" (oq-conn-str)))
-  (process-send-string oracle-query-process "set heading off;\n")
+  (process-send-string oracle-query-process "set heading on;\n")
   (process-send-string oracle-query-process (format "set linesize %d;\n" oq-linesize))
   (process-send-string oracle-query-process "set colsep '';\n");;column separater
   (process-send-string oracle-query-process "set null 'NULL';\n");;
   (process-send-string oracle-query-process "set wrap off;\n")
   (process-send-string oracle-query-process "set pagesize 0;\n")
-                                        ; (process-send-string oracle-query-process "set feedback off;\n")
+  (process-send-string oracle-query-process "set feedback on;\n")
   (process-send-string oracle-query-process "set serveroutput on;\n")
   ;; (set-process-filter oracle-query-process 'oq-filter-fun)
   )
@@ -192,14 +192,14 @@
     (oracle-query-init))
   (when (string-match "\\(.*\\);[ \t]*" sql)
     (setq sql (match-string 1 sql)))
-  ;;send \n and then erase buffer
+  (print sql)
   (with-current-buffer (process-buffer oracle-query-process)
     (delete-region (point-min) (point-max))
     (let ((start (point-min)) end)
       (goto-char (point-max))
       (process-send-string oracle-query-process (format "%s ;\n" sql))
       (goto-char (point-min))
-      (while (not (re-search-forward "^[0-9]+ rows selected\\." nil t 1))
+      (while (not (re-search-forward "^[0-9]+ rows? selected\\|no rows selected" nil t 1))
         (when (accept-process-output oracle-query-process oq-timeout-wait-for-result 0 nil)
           (goto-char (point-min))))
       (setq end (1- (match-beginning 0)))
