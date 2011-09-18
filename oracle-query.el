@@ -101,7 +101,7 @@
 ;;   (format "sqlplus %s/%s@%s:%s/%s %s"
 ;;           oq-username oq-password oq-server oq-port oq-dbname (if oq-as-sysdba "as sysdba" "")))
 (defun oracle-query-read-connect-string ()
-  (let( (connection-string  (read-string "Connect String:" "" nil)))
+  (let( (connection-string  (read-string "SqlPlus Connect String:" "" nil)))
     (list connection-string)))
 
 ;; (oracle-query-create-connection "scott/tiger")
