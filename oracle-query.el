@@ -21,123 +21,35 @@
 ;;; Commentary:
 
 ;; execute sql using sqlplus and return as list .
+;;
 ;; (oracle-query "select empno,ename from emp where empno<=7499")
 ;; got : (("7369" "SMITH") ("7499" "ALLEN"))
+;; using default connection ,not recommend.
 ;;
-;; how to using this file
-;; 1. first you should have installed oracle ,and start the listener.
-;;  on linux ,run :
-;;      lsnrctl start
-
-;; 2. you should custom these variable
-;; `oq-username'
-;; `oq-password'
-;; `oq-server'
-;; `oq-dbname'
-;; `oq-port'
-;; `oq-as-sysdba'
-;; 3. call (oracle-query-init) to start a background sqlplus process
-
-;;  value as the function name .this function must accept one parameter
-;;  actually the parameter is the result after you call (oracle-query sql)
-;; 5. call function `oracle-query'
+;; (defvar connection (oracle-query-create-connection "scott/tiger"))
+;; (oracle-query "select empno from emp" connection)
+;; recommended
 ;;
-;; for example
-;; (setq oq-username "scott")
-;; (setq oq-password "tiger")
-;; (setq oq-server "localhost")
-;; (setq oq-dbname "orcl")
-;; (setq oq-port "1521")
-;; (setq oq-as-sysdba nil)
-
-;; (oracle-query "select 1 from dual")
-;; (oracle-query "select * from user_tables")
-
-
-
 ;;; Commands:
 ;;
 ;; Below are complete command list:
 ;;
-;;  `oracle-query-setup-interactive'
-;;    populate some usful variables ,like user ,passwd,dbname.
-;;  `oracle-query-rebuild-connection'
-;;    rebuild sqlplus connection.
+;;  `oracle-query-create-connection'
+;;    create a connection to oracle using sqlplus ,and return the
 ;;
 ;;; Customizable Options:
 ;;
 ;; Below are customizable option list:
 ;;
-;;  `oq-username'
-;;    oracle user name.
-;;    default = "scott"
-;;  `oq-password'
-;;    oracle user password.
-;;    default = "tiger"
-;;  `oq-server'
-;;    Default server or host.
-;;    default = "localhost"
-;;  `oq-dbname'
-;;    database name .
-;;    default = "orcl"
-;;  `oq-port'
-;;    Default port.
-;;    default = 1521
-;;  `oq-as-sysdba'
-;;    login as sysdba.
-;;    default = nil
 
 ;;; Code:
 
-(require 'sql)
-(defcustom oq-username "scott"
-  "oracle user name."
-  :group 'sqlparser
-  :type 'string)
-(defcustom oq-password "tiger"
-  "oracle user password."
-  :group 'sqlparser
-  :type 'string)
-(defcustom oq-server "localhost"
-  "Default server or host."
-  :type 'string
-  :group 'sqlparser
-  :safe 'stringp)
-(defcustom oq-dbname "orcl"
-  "database name ."
-  :type 'string
-  :group 'sqlparser
-  :safe 'stringp)
-
-(defcustom oq-port 1521
-  "Default port."
-  :type 'number
-  :group 'sqlparser
-  :safe 'numberp)
-
-(defcustom oq-as-sysdba nil
-  "login as sysdba."
-  :type 'boolean
-  :group 'sqlparser
-  :safe 'booleanp)
+(defvar oracle-query-default-connection nil)
 
 (defvar oq-timeout-wait-for-result 300
   "waiting 300s for sql result returned.")
-(defvar oq-linesize 20000 "Default linesize for sqlplus")
-(defvar oracle-query-process nil)
 
-;;;###autoload
-(defun oracle-query-setup-interactive()
-  "populate some usful variables ,like user ,passwd,dbname."
-  (interactive)
-  (setq oq-username (read-string (format "(build conn for completing)username:(default:%s)" oq-username) "" nil oq-username))
-  (setq oq-password (read-passwd (format "(build conn for completing)passwd:(default:%s)" oq-password) nil oq-password))
-  (setq oq-server  (read-string (format "(build conn for completing)server:(default:%s)" oq-server) nil oq-server))
-  (setq oq-dbname  (read-string (format "(build conn for completing)dbname:(default:%s)" oq-dbname) nil oq-dbname))
-  (setq oq-port   (read-string (format "(build conn for completing)port:(default:%s)" oq-port) nil oq-port))
-  (if (y-or-n-p "login as sysdba?")
-      (setq oq-as-sysdba t)
-    (setq oq-as-sysdba nil)))
+(defvar oq-linesize 20000 "Default linesize for sqlplus")
 
 (defun oq-parse-result-as-list (raw-result)
   (let (result row)
@@ -158,52 +70,65 @@
         (forward-line) (beginning-of-line))
       )result ))
 
-(defun oq-conn-str()
-  " default:sqlplus scott/tiger@localhost:1521/orcl"
-  (if oq-as-sysdba
-      (format "sqlplus %s/%s@%s:%s/%s as sysdba"
-              oq-username oq-password oq-server oq-port oq-dbname)
-    (format "sqlplus %s/%s@%s:%s/%s"
-            oq-username oq-password oq-server oq-port oq-dbname)
-    ))
-(defun oracle-query-init()
-  (setq oracle-query-process
-        (start-process-shell-command "sqlplus" " *oracle-query-sqlplus*" (oq-conn-str)))
-  (process-send-string oracle-query-process "set heading on;\n")
-  (process-send-string oracle-query-process (format "set linesize %d;\n" oq-linesize))
-  (process-send-string oracle-query-process "set colsep '';\n");;column separater
-  (process-send-string oracle-query-process "set null 'NULL';\n");;
-  (process-send-string oracle-query-process "set wrap off;\n")
-  (process-send-string oracle-query-process "set pagesize 0;\n")
-  (process-send-string oracle-query-process "set feedback on;\n")
-  (process-send-string oracle-query-process "set serveroutput on;\n")
-  ;; (set-process-filter oracle-query-process 'oq-filter-fun)
-  )
-;;;###autoload
-(defun oracle-query-rebuild-connection()
-  "rebuild sqlplus connection."
-  (interactive)
-  (kill-process oracle-query-process)
-  (oracle-query-init))
+;; (defun oq-build-connection-string()
+;;   " default:sqlplus scott/tiger@localhost:1521/orcl"
+;;   (format "sqlplus %s/%s@%s:%s/%s %s"
+;;           oq-username oq-password oq-server oq-port oq-dbname (if oq-as-sysdba "as sysdba" "")))
+(defun oracle-query-read-connect-string ()
+  (let( (connection-string  (read-string "Connect String:" "" nil)))
+    (list connection-string)))
 
-(defun oracle-query (sql)
+;; (oracle-query-create-connection "scott/tiger")
+;; (oracle-query-create-connection "scott/tiger@localhost:1521/orcl")
+;; (oracle-query-create-connection "system/root as sysdba")
+;;;###autoload
+(defun oracle-query-create-connection(connect-string)
+  "create a connection to oracle using sqlplus ,and return the
+created process"
+  (interactive (oracle-query-read-connect-string))
+  (let ((oracle-query-process (start-process-shell-command
+                               "sqlplus"
+                               (concat " *oracle-query" (number-to-string (random)) "*")
+                               (concat "sqlplus " connect-string))))
+    (process-send-string oracle-query-process "set heading off;\n")
+    (process-send-string oracle-query-process (format "set linesize %d;\n" oq-linesize))
+    (process-send-string oracle-query-process "set colsep '';\n");;column separater
+    (process-send-string oracle-query-process "set null 'NULL';\n");;
+    (process-send-string oracle-query-process "set wrap off;\n")
+    (process-send-string oracle-query-process "set pagesize 0;\n")
+    (process-send-string oracle-query-process "set feedback on;\n")
+    (process-send-string oracle-query-process "set serveroutput on;\n")
+    ;; (set-process-filter oracle-query-process 'oq-filter-fun)
+    oracle-query-process))
+
+
+;; (oracle-query "select empno from emp")
+;; (oracle-query "select empno from emp" (oracle-query-create-connection "scott/tiger"))
+;;;###autoload
+(defun oracle-query (sql &optional oracle-query-process)
   "execute sql using `sqlplus' ,and return the result of it."
-  (when (or (not oracle-query-process) (not (equal (process-status oracle-query-process ) 'run)))
-    (oracle-query-init))
-  (when (string-match "\\(.*\\);[ \t]*" sql)
-    (setq sql (match-string 1 sql)))
-  (with-current-buffer (process-buffer oracle-query-process)
-    (delete-region (point-min) (point-max))
-    (let ((start (point-min)) end)
-      (goto-char (point-max))
-      (process-send-string oracle-query-process (format "%s ;\n" sql))
-      (goto-char (point-min))
-      (while (not (re-search-forward "^[0-9]+ rows? selected\\|no rows selected" nil t 1))
-        (when (accept-process-output oracle-query-process oq-timeout-wait-for-result 0 nil)
-          (goto-char (point-min))))
-      (setq end (1- (match-beginning 0)))
-      (when (re-search-backward "\\bSQL> " nil t 1) (setq start (match-end 0)))
-      (oq-parse-result-as-list (buffer-substring start end)))))
+  (let ((process oracle-query-process))
+    (when (or (not process)
+              (not (equal (process-status process ) 'run)))
+      (when (or (not oracle-query-default-connection)
+                (not (equal (process-status oracle-query-default-connection ) 'run)))
+        (setq oracle-query-default-connection (call-interactively   'oracle-query-create-connection)))
+      (setq process oracle-query-default-connection))
+    (when (string-match "\\(.*\\);[ \t]*" sql)
+      (setq sql (match-string 1 sql)))
+    (with-current-buffer (process-buffer process)
+      (delete-region (point-min) (point-max))
+      (let ((start (point-min)) end)
+        (goto-char (point-max))
+        (process-send-string process (format "%s ;\n" sql))
+        (goto-char (point-min))
+        (while (not (re-search-forward "^[0-9]+ rows? selected\\|no rows selected" nil t 1))
+          (when (accept-process-output process oq-timeout-wait-for-result 0 nil)
+            (goto-char (point-min))))
+        (setq end (1- (match-beginning 0)))
+        (when (re-search-backward "\\bSQL> " nil t 1) (setq start (match-end 0)))
+        (oq-parse-result-as-list (buffer-substring start end))))  )
+  )
 
 (provide 'oracle-query)
 ;;; oracle-query.el ends here
