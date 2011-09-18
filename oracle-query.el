@@ -32,11 +32,23 @@
 ;;
 ;; (oracle-query "select empno,ename from emp where empno<=7499")
 ;; got : (("7369" "SMITH") ("7499" "ALLEN"))
-;; using default connection ,not recommend.
+;; using default connection ,not recommended.
 ;;
 ;; (defvar connection (oracle-query-create-connection "scott/tiger"))
 ;; (oracle-query "select empno from emp" connection)
 ;; recommended
+;;
+;; the normal way to use oracle-query.el is :
+;; 1:
+;; (defvar sqlplus-connection nil)
+;; (unless (and sqlplus-connection
+;;               (equal (process-status (nth 0  sqlplus-connection)) 'run))
+;;    (setq sqlplus-connection (call-interactively 'oracle-query-create-connection)))
+;; 2:
+;;   (oracle-query "select empno from emp" sqlplus-connection)
+;; 3:
+;;   (oracle-query-close-connection sqlplus-connection)
+
 ;;
 ;;; Commands:
 ;;
@@ -113,11 +125,25 @@ created process"
     (process-send-string oracle-query-process "set feedback on;\n")
     (process-send-string oracle-query-process "set serveroutput on;\n")
     (set-process-query-on-exit-flag  oracle-query-process nil)
+    (set-process-sentinel oracle-query-process
+                          (lambda (proc change)
+                            (when (string-match "\\(finished\\|exited\\|\\`exited abnormally with code\\)" change)
+                              (switch-to-buffer (process-buffer proc))
+                              ;(kill-buffer  (process-buffer proc))
+                              )))
     ;; (set-process-filter oracle-query-process 'oq-filter-fun)
     (list oracle-query-process
           (process-buffer oracle-query-process)
           (oracle-query-fetch-username-from-connect-string connect-string))
     ))
+
+;;;###autoload
+(defun oracle-query-close-connection(sqlplus-connection)
+  "close connection.kill sqlplus process and buffer ."
+  (kill-process (nth 0 sqlplus-connection))
+  (kill-buffer (nth 1 sqlplus-connection))
+  (setq sqlplus-connection nil)
+  )
 
 ;;(oracle-query "select empno from emp")
 ;; (oracle-query "select empno from emp" (oracle-query-create-connection "scott/tiger"))
