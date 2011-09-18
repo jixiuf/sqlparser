@@ -3,7 +3,7 @@
 ;; Copyright (C) 2011 孤峰独秀
 
 ;; Author: 孤峰独秀  jixiuf@gmail.com
-;; Keywords: sql parse oracle
+;; Keywords: sql parse oracle complete
 ;; Filename: sqlparser-oracle-complete.el
 ;; Description:  completing tablename column for oracle when editing
 ;; Created: 2011年07月31日 星期日 20时37分31秒
