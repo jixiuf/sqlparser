@@ -169,7 +169,6 @@ position ."
 ;; select table_name from all_tab_privs where grantee = 'U1' and privilege = 'SELECT'
 (defun  sqlparser-oracle-tablename-or-schemaname-candidates ()
   "all tablename viewname i can select."
-  ;;-s means use TAB as separate char . -N means don't print column name.
   (mapcar 'car
           (oracle-query
            (format " select view_name from all_views where upper(owner)=upper('%s') union all select table_name from all_tables where upper(owner)=upper('%s') union all  select table_schema||'.'||table_name from all_tab_privs where lower(grantee) = lower('%s') and privilege = 'SELECT' union all select table_name from dict"
@@ -179,7 +178,6 @@ position ."
 
 (defun sqlparser-oracle-schemaname-candidates ()
   "all schema-name in oracle database"
-  ;;-s means use TAB as separate char . -N means don't print column name.
   (mapcar 'car
           (oracle-query
             (format "select table_schema from all_tab_privs where lower(grantee) = lower('%s') and privilege = 'SELECT'"
@@ -338,17 +336,6 @@ then the `u' is `alias' and `user' is the true table name."
     ))
 ;; TEST :
 ;; (sqlparser-guess-table-name "a"   "select * from (select id from oracle.emp a , oracle.abc ad) ,abcd  as acd  where name=''")
-
-
-;; (defun sql-mode-hook-fun()
-;;   "change the `sentence-end'"
-;;   (make-local-variable 'sentence-end)
-;;   (make-local-variable 'sentence-end-without-space)
-;;   (setq sentence-end nil)
-;;   (setq sentence-end-without-space ";")
-
-;;   )
-;; (add-hook 'sql-mode-hook 'sql-mode-hook-fun)
 
 (defun sqlparser-sql-sentence-at-point-4-oracle()
   "get current sql sentence. "
