@@ -75,6 +75,10 @@
 (require 'sqlserver-query)
 (require 'anything nil t)
 
+
+(defvar sqlparser-sqlserver-connection nil)
+(make-variable-buffer-local 'sqlparser-sqlserver-connection)
+
 (defun sqlparser-sqlserver-complete()
   "complete tablename or column name depending on current point
 position ."
@@ -111,6 +115,10 @@ position ."
 (defun  sqlparser-sqlserver-context-candidates()
   "it will decide to complete tablename or columnname depend on
   current position."
+  (unless (and sqlparser-sqlserver-connection
+               (buffer-live-p (nth 1 sqlparser-sqlserver-connection))
+               (equal (process-status (nth 0  sqlparser-sqlserver-connection)) 'run))
+    (setq sqlparser-sqlserver-connection (call-interactively 'sqlserver-query-create-connection)))
   (let ((context (sqlparser-parse-4-sqlserver)) candidats)
     (cond
      ((string= "database" context)
@@ -165,7 +173,8 @@ position ."
                    (name2-suffix  (if (equal "[" name2-prefix) "]" ""))
                    (db-exists
                     (>  (string-to-number (caar (sqlserver-query
-                                                 (format  "select count(name) from sys.databases where name='%s'" name1)))) 0)))
+                                                 (format  "select count(name) from sys.databases where name='%s'" name1)
+                                                 sqlparser-sqlserver-connection))) 0)))
               (if db-exists
                   (setq sql (format
                              "(select '%s' + name + '%s.' schemaname from [%s].[sys].[schemas] where name like '%s%%' and exists (select name from sys.databases where name='%s')) union all (select '%s' + name +'%s' tablename from sys.tables where schema_name(schema_id) ='%s' and name like '%s%%')"
@@ -194,7 +203,7 @@ position ."
                   )
               (setq sql (format " SELECT '%s' + name + '%s' tablename FROM sys.tables WHERE exists (select name from sys.databases where name = '%s') and schema_name(schema_id)= '%s' and name LIKE '%s%%'"
                                 name3-prefix name3-suffix name1 name2      (replace-regexp-in-string "_" "[_]" name3))))))
-    (mapcar 'car (sqlserver-query sql))))
+    (mapcar 'car (sqlserver-query sql sqlparser-sqlserver-connection))))
 
 ;;(sqlparser-sqlserver-split-three "[abc]") return ("[" "abc" "]")
 ;;(sqlparser-sqlserver-split-three "[abc") return ("[" "abc" "")
@@ -257,7 +266,7 @@ position ."
                               (nth 1 (sqlparser-sqlserver-split-three  (nth 1 tablename-string-list)));schema
                               (nth 1 (sqlparser-sqlserver-split-three  (nth 2  tablename-string-list)));table
                               column-prefix-string))))
-    (mapcar 'car (sqlserver-query sql))))
+    (mapcar 'car (sqlserver-query sql sqlparser-sqlserver-connection))))
 
 (defun  sqlparser-sqlserver-column-candidates ()
   "column name candidates of table in current sql "
@@ -279,16 +288,16 @@ position ."
     result))
 
 (defun sqlparser-sqlserver-all-tablename-candidates()
-  (mapcar 'car (sqlserver-query "select name from sys.tables")))
+  (mapcar 'car (sqlserver-query "select name from sys.tables" sqlparser-sqlserver-connection)))
 
 (defun sqlparser-sqlserver-all-databasename-candidates()
   "for example :return (master msdb tempdb)"
-  (mapcar 'car (sqlserver-query "select name from sys.databases")))
+  (mapcar 'car (sqlserver-query "select name from sys.databases" sqlparser-sqlserver-connection)))
 
 ;; master.dbo.tablename  databasename.schemaname.tablename
 (defun sqlparser-sqlserver-schemaname-candidates()
   "for example :return (dbo sys db_owner)."
-  (mapcar 'car (sqlserver-query "  select name from sys.schemas")))
+  (mapcar 'car (sqlserver-query "  select name from sys.schemas" sqlparser-sqlserver-connection)))
 
 (defun sqlparser-guess-table-name-4-sqlserver (alias &optional sql1)
   "find out the true table name depends on the alias.
