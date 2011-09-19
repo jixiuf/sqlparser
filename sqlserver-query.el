@@ -272,4 +272,5 @@ sqlserver 2005 add new cmd sqlcmd.exe. and osql.exe is not recommended."
 ;; (print (sqlserver-query "select * from sys.columns" ))
 ;; ;; (print (length  (sqlserver-query "select name from sys.columns " c)))
 
+(provide 'sqlserver-query)
 ;;; sqlserver-query.el ends here
