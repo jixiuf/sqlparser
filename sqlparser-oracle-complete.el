@@ -50,7 +50,7 @@
 
 ;;; Installation:
 ;;
-;; 1 it required oracle.el you should download and add it to you load-path.
+;; 1 it required oracle-query.el you should download and add it to you load-path.
 ;; http://www.emacswiki.org/emacs/download/oracle-query.el
 ;; 2 run  lsnrctl start
 
@@ -69,9 +69,6 @@
 ;;   )
 ;; (eval-after-load 'sqlplus
 ;;   '(progn (define-key sqlplus-mode-map  (quote [tab]) 'anything-oracle-complete)))
-;;
-;; if you don't want to use this function
-;; you can call (sqlparser-setup-for-oracle-interactive)
 ;;
 ;; 4 define key bindings for complete .you have two choice .
 ;;  1). if you using anything.el  you can binding it like this .
