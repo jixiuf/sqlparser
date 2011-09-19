@@ -96,7 +96,6 @@
 ;;
 
 ;;; Code:
-(require 'sql)
 (require 'oracle-query)
 (require 'anything nil t)
 
