@@ -7,7 +7,7 @@
 ;; Filename: sqlparser-oracle-complete.el
 ;; Description:  completing tablename column for oracle when editing
 ;; Created: 2011年07月31日 星期日 20时37分31秒
-;; Updated: 2011-09-18 20:08
+;; Updated: 2011-09-19 19:09
 ;; Version: 0.1.4
 ;; URL:http://www.emacswiki.org/emacs/download/sqlparser-oracle-complete.el
 ;;     https://github.com/jixiuf/sqlparser
