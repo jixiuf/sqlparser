@@ -1,7 +1,7 @@
 ;;; sqlserver-table2entity-4csharp.el --- sqlserver table2entity for csharp   -*- coding:utf-8 -*-
 
 ;; Description:sqlserver table2entity for csharp
-;; Time-stamp: <Joseph 2011-09-18 23:49:32 星期日>
+;; Time-stamp: <Joseph 2011-09-20 20:42:22 星期二>
 ;; Created: 2011-09-18 21:44
 ;; Author: 孤峰独秀  jixiuf@gmail.com
 ;; Maintainer:  孤峰独秀  jixiuf@gmail.com
@@ -77,12 +77,13 @@ key 是db类型，value 是csharp 中对应类型.要求key大写"
 
 (defun sstec-query-all-tablename-in-db()
   "从sqlserver 中查询出当前连接的数据库中所有的表名,用到了`sqlserver-query.el'"
-  (mapcar 'car (sqlserver-query "select table_name from user_tables"  sqlplus-connection-4-sqlserver)))
+  (mapcar 'car (sqlserver-query "select name from sys.tables"  sqlplus-connection-4-sqlserver)))
 ;; (sstec-query-all-tablename-in-db)
 
+;; select  sys.columns.name ,sys.types.name   from sys.columns ,sys.types where sys.columns.system_type_id =sys.types.system_type_id ;
 (defun sstec-query-table (tablename)
   (sqlserver-query
-   (format "select column_name ,data_type from user_tab_columns where table_name  ='%s'" tablename)
+   (format " select c.name ,t.name from sys.columns c ,sys.types t, sys.objects o where c.system_type_id=t.system_type_id and o.object_id = c.object_id and o.name='%s'" tablename)
    sqlplus-connection-4-sqlserver
    )
   )
