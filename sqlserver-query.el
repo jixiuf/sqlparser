@@ -219,7 +219,6 @@ sqlserver 2005 add new cmd sqlcmd.exe. and osql.exe is not recommended."
 
 
 ;;(sqlserver-query "select empno from emp")
-;; (sqlserver-query "select empno from emp" (sqlserver-query-create-connection "scott/tiger"))
 ;;;###autoload
 (defun sqlserver-query (sql &optional sqlserver-query-connection)
   "execute sql using `sqlcmd' or `osql' ,and return the result of it."
