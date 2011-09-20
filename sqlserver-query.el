@@ -1,4 +1,4 @@
-;;; sqlserver-query.el --- execute sql select using sqlcmd.exe or osql.exe on SQL SERVER. -*- coding:utf-8 -*-
+ ;;; sqlserver-query.el --- execute sql select using sqlcmd.exe or osql.exe on SQL SERVER. -*- coding:utf-8 -*-
 
 ;; Copyright (C) 2011 孤峰独秀
 
@@ -27,29 +27,45 @@
 ;;; Commentary:
 
 ;;  execute sql using sqlcmd.exe or osql.exe and return as list .
-;;  (sqlserver-query "select empno,ename from emp where empno<=7499")
-;;  got : (("7369" "SMITH") ("7499" "ALLEN"))
-;;
-;; 1 make sure sqlcmd.exe or osql.exe are in your path .and sqlserver is started
+;;  (sqlcmd.exe is recommended. ) (osql.exe is slow)
 
-;; 2. you should custom these variable
-;;  `sqlserver-username'
-;;  `sqlserver-password'
-;;  `sqlserver-server-instance'
-;;  `sqlserver-dbname'
+;; (sqlserver-query "select empno,ename from emp where empno<=7499")
+;; got : (("7369" "SMITH") ("7499" "ALLEN"))
+;; using default connection ,not recommended.
+
+;;
+;; 1. you should custom these variable
+;; `sqlserver-connection-info'
 ;;  `sqlserver-cmd' ;sqlcmd or osql
 ;; for example
-;;    (setq sqlserver-username "sa")
-;;    (setq sqlserver-password "sa")
-;;    (setq sqlserver-server-instance "localhost\\SQLEXPRESS")
+;; (setq sqlserver-connection-info
+;;       '((username . "sa")
+;;         (password . "sa")
+;;         (server-instance . "localhost\\SQLEXPRESS")
+;;         (dbname . "master"))
+;;       )
 ;; or sometimes
-;;   (setq sqlserver-server-instance "localhost")
-;; is enough
-;;   (setq sqlserver-dbname "master")
-;;   (setq sqlserver-cmd' 'sqlcmd) or (setq sqlserver-cmd' 'osql)
+;; (setq sqlserver-connection-info
+;;       '((username . "sa")
+;;         (password . "sa")
+;;         (server-instance . "localhost")
+;;         (dbname . "master")))
 
-;; 3. call function `sqlserver-query'
-;;   (sqlserver-query "select * from sysobjects where type='u'")
+;; (setq sqlserver-cmd' 'sqlcmd) or (setq sqlserver-cmd' 'osql)
+
+;; (defvar c (sqlserver-query-create-connection sqlserver-connection-info))
+;; (sqlserver-query "select empno from emp" c)
+;; recommended
+;;
+;; the normal way to use sqlserver-query.el is :
+;; 1:
+;; (defvar c nil)
+;; (unless (and c (equal (process-status (nth 0  c)) 'run))
+;;    (setq c (call-interactively 'sqlserver-query-create-connection)))
+;; 2:
+;;   (sqlserver-query "select empno from emp" c)
+;; 3:
+;;   (sqlserver-query-close-connection c)
 
 
 ;;; Commands:
@@ -87,28 +103,6 @@
   :type 'alist)
 (make-variable-buffer-local 'sqlserver-connection-info)
 
-;; (defcustom sqlserver-username "sa"
-;;   "sqlserver user name."
-;;   :group 'sqlserver-query
-;;   :type 'string)
-
-;; (defcustom sqlserver-password "sa"
-;;   "sqlserver user password."
-;;   :group 'sqlserver-query
-;;   :type 'string)
-
-;; (defcustom sqlserver-server-instance "localhost\\SQLEXPRESS"
-;;   "Default server or host."
-;;   :type 'string
-;;   :group 'sqlserver-query
-;;   :safe 'stringp)
-
-;; (defcustom sqlserver-dbname "master"
-;;   "database name ."
-;;   :type 'string
-;;   :group 'sqlserver-query
-;;   :safe 'stringp)
-
 (defcustom sqlserver-cmd 'sqlcmd
   "sqlserver-cmd  now  support sqlcmd.exe and osql.exe
 sqlserver 2005 add new cmd sqlcmd.exe. and osql.exe is not recommended."
@@ -117,10 +111,6 @@ sqlserver 2005 add new cmd sqlcmd.exe. and osql.exe is not recommended."
 
 (defvar sqlserver-timeout-wait-for-result 300
   "waiting 300s for sql result returned.")
-
-(defvar sqlserver-query-process nil)
-(defvar sqlserver-query-result nil)
-(defvar sqlserver-query-buffer  " *sqlserver-query*")
 
 (defun sqlserver-parse-result-as-list-4-osql (raw-result)
   (let  (result row line-count line)
@@ -152,7 +142,7 @@ sqlserver 2005 add new cmd sqlcmd.exe. and osql.exe is not recommended."
       (insert raw-result)
       (setq line-count (count-lines (point-min) (point-max)))
       (goto-char  (point-min))
-      (while (< (line-number-at-pos) (- line-count 1))
+      (while (<= (line-number-at-pos) line-count)
         (setq row (split-string (buffer-substring-no-properties
                                  (point-at-bol) (point-at-eol)) "" t))
         (setq result (append result (list row)))
@@ -174,7 +164,7 @@ sqlserver 2005 add new cmd sqlcmd.exe. and osql.exe is not recommended."
               (cdr (assoc 'username connection-info))
               (cdr (assoc 'password connection-info))
               (cdr (assoc 'dbname connection-info)))
-    (format "%s -S %s -U %s -P %s -d %s -h-1  -n -w 65535 -s \"\" "
+    (format "%s -S %s -U %s -P %s -d %s -h-1  -n -w 65535 -s \"\" -r 1 "
             ;;            "%s -S %s -U %s -P %s -d %s -h-1  -n -w 65535  -s \"\^E\""
             (symbol-name sqlserver-cmd)
             (cdr (assoc 'server-instance connection-info))
@@ -219,7 +209,9 @@ sqlserver 2005 add new cmd sqlcmd.exe. and osql.exe is not recommended."
           connection-info)
     ;; (set-process-filter process 'sqlserver-filter-fun)
     ))
+;;
 ;; (sqlserver-query-create-connection sqlserver-connection-info)
+
 
 ;;;###autoload
 (defun sqlserver-query-close-connection(connection)
@@ -242,57 +234,41 @@ sqlserver 2005 add new cmd sqlcmd.exe. and osql.exe is not recommended."
       (setq connection sqlserver-query-default-connection)
       )
     (setq process (car connection))
-    (when (string-match "\\(.*\\);[ \t]*" sql)
-      (setq sql (match-string 1 sql)))
+
+    (when (string-match "\\(.*\\);[ \t]*" sql) (setq sql (match-string 1 sql)))
+
     (with-current-buffer (process-buffer process)
       (delete-region (point-min) (point-max))
-      (let ((start (point-min)) end)
+      (let ((start (point-min))
+            (end-flg-regexp (if (equal sqlserver-cmd 'osql) "1234!@#end-flg&%~`4321" "([0-9]+ \\(行受影响\\|rows? affected\\))" ))
+            end)
         (goto-char (point-max))
         (process-send-string process (format "%s ;\n" sql))
         (process-send-string process  "go\n")
+        (when (equal sqlserver-cmd 'osql)
+          (process-send-string process "select '1234!@#end-flg&%~`4321' \n")
+          (process-send-string process  "go\n")
+          )
         (goto-char (point-min))
-        (while (not (re-search-forward "(.*\\(行受影响\\|rows affected\\))" nil t 1))
+        (while (not (re-search-forward end-flg-regexp nil t 1))
           (when (accept-process-output process  sqlserver-timeout-wait-for-result 0 nil)
             (goto-char (point-min))))
-        (setq end (1- (match-beginning 0)))
-        (when (re-search-backward "\\bSQL> " nil t 1) (setq start (match-end 0))) ;FIXME
+        (setq end (max start  (1- (match-beginning 0))))
         (sqlserver-parse-result-as-list  (buffer-substring-no-properties start end))
         ))))
 
-;; ;;;###autoload
-;; (defun sqlserver-query-rebuild-connection()
-;;   "rebuild connection."
-;;   (interactive)
-;;   (if (and   sqlserver-query-process
-;;              (equal (process-status sqlserver-query-process ) 'run))
-;;       (progn
-;;         (process-send-string sqlserver-query-process  "go\n")
-;;         (process-send-string sqlserver-query-process  "exit\n")
-;;         (set-process-sentinel sqlserver-query-process
-;;                               (lambda (proc change)
-;;                                 (when (string-match "\\(finished\\|exited\\)" change)
-;;                                   (sqlserver-query-create-connection)))))
-;;     (sqlserver-query-create-connection)))
+;;
+;; (setq sqlserver-connection-info
+;;       '((username . "haihua")
+;;         (password . "hh")
+;;         (server-instance . "172.20.68.10")
+;;         (dbname . "hh))
+;;       )
+;; (setq  sqlserver-cmd 'sqlcmd)
+;; (setq c (sqlserver-query-create-connection sqlserver-connection-info))
+;; ;; (print c)
+;; ;;
+;; (print (sqlserver-query "select * from sys.columns" ))
+;; ;; (print (length  (sqlserver-query "select name from sys.columns " c)))
 
-
-
-;; (defun sqlserver-query (sql)
-;;   "geta result from the function `sqlserver-query-result-function'
-;; after you call `sqlserver-query'"
-;;   (unless (and (buffer-live-p (get-buffer  sqlserver-query-buffer))
-;;            sqlserver-query-process
-;;            (equal (process-status sqlserver-query-process ) 'run))
-;;       (sqlserver-query-rebuild-connection))
-;;   (when (string-match "\\(.*\\);[ \t]*" sql)
-;;     (setq sql (match-string 1 sql)))
-;;   (process-send-string sqlserver-query-process  (format "%s ;\n" sql))
-;;   (process-send-string sqlserver-query-process  "go\n")
-;;   (if (accept-process-output sqlserver-query-process  sqlserver-timeout-wait-for-result 0 nil)
-;;       sqlserver-query-result
-;;     nil))
-
-;; (defun sqlserver-filter-fun (process output)
-;;   (setq  sqlserver-query-result  ( sqlserver-parse-result-as-list  output)))
-
-(provide 'sqlserver-query)
 ;;; sqlserver-query.el ends here
