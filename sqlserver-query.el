@@ -111,6 +111,7 @@ sqlserver 2005 add new cmd sqlcmd.exe. and osql.exe is not recommended."
 
 (defvar sqlserver-timeout-wait-for-result 300
   "waiting 300s for sql result returned.")
+(defvar sqlserver-query-default-connection nil)
 
 (defun sqlserver-parse-result-as-list-4-osql (raw-result)
   (let  (result row line-count line)
@@ -181,7 +182,7 @@ sqlserver 2005 add new cmd sqlcmd.exe. and osql.exe is not recommended."
                           "" nil   (cdr (assoc 'username connection-info))))
     (setcdr  (assoc 'password connection-info)
              (read-passwd "password:"  nil ))
-    (setcdr  (assoc 'username connection-info)
+    (setcdr  (assoc 'server-instance connection-info)
              (read-string (format  "server-instance(default:%s):"  (cdr (assoc 'server-instance connection-info)))
                           "" nil (cdr (assoc 'server-instance connection-info))))
     (setcdr  (assoc 'dbname connection-info)
@@ -189,6 +190,7 @@ sqlserver 2005 add new cmd sqlcmd.exe. and osql.exe is not recommended."
                           "" nil (cdr (assoc 'dbname connection-info))))
     connection-info))
 
+;; (sqlserver-query-create-connection sqlserver-connection-info)
 (defun sqlserver-query-create-connection(connection-info)
   "open connection with sqlcmd.exe or osql.exe."
   (interactive (list (sqlserver-query-read-connect-string)))
@@ -210,9 +212,6 @@ sqlserver 2005 add new cmd sqlcmd.exe. and osql.exe is not recommended."
     ;; (set-process-filter process 'sqlserver-filter-fun)
     ))
 ;;
-;; (sqlserver-query-create-connection sqlserver-connection-info)
-
-
 ;;;###autoload
 (defun sqlserver-query-close-connection(connection)
   "close connection.kill sqlplus process and buffer ."
@@ -220,7 +219,6 @@ sqlserver 2005 add new cmd sqlcmd.exe. and osql.exe is not recommended."
   (kill-buffer (nth 1 connection))
   (setq connection nil))
 
-(defvar sqlserver-query-default-connection nil)
 
 ;;(sqlserver-query "select empno from emp")
 ;; (sqlserver-query "select empno from emp" (sqlserver-query-create-connection "scott/tiger"))
@@ -229,7 +227,10 @@ sqlserver 2005 add new cmd sqlcmd.exe. and osql.exe is not recommended."
   "execute sql using `sqlcmd' or `osql' ,and return the result of it."
   (let( (connection sqlserver-query-connection) process)
     (unless connection
-      (unless sqlserver-query-default-connection
+      (unless (and sqlserver-query-default-connection
+                   (buffer-live-p (nth 1 sqlserver-query-default-connection))
+                   (equal (process-status (nth 0  sqlserver-query-default-connection)) 'run)
+                   )
         (setq sqlserver-query-default-connection (call-interactively 'sqlserver-query-create-connection)))
       (setq connection sqlserver-query-default-connection)
       )
