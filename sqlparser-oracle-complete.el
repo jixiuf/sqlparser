@@ -60,33 +60,18 @@
 ;; (add-to-list 'load-path (expand-file-name "~/elisp"))
 ;;
 ;; And the following to your ~/.emacs startup file.
-;; (eval-after-load 'sql
-;;   '(progn
-;;      (require 'sqlparser-oracle-complete)
-;;      (define-key sql-mode-map (quote [tab]) 'anything-oracle-complete)
-;;      (define-key sql-interactive-mode-map  (quote [tab]) 'anything-oracle-complete)
-;;      )
-;;   )
-;; (eval-after-load 'sqlplus
-;;   '(progn (define-key sqlplus-mode-map  (quote [tab]) 'anything-oracle-complete)))
-;;
-;; 4 define key bindings for complete .you have two choice .
-;;  1). if you using anything.el  you can binding it like this .
-
-;;      (define-key sql-mode-map (quote [tab]) 'anything-oracle-complete)
-;;      (define-key sql-interactive-mode-map  (quote [tab]) 'anything-oracle-complete)
-
-;;  2). use Emacs default completing system.
-;;
-;;      (define-key sql-mode-map (quote [tab]) 'sqlparser-oracle-complete)
-;;      (define-key sql-interactive-mode-map  (quote [tab]) 'sqlparser-oracle-complete)
-;;
-
+;; (require 'sqlparser-oracle-complete)
+;; (add-hook  'sql-mode-hook 'oracle-complete-minor-mode)
+;; (add-hook  'sqlplus-mode-hook 'oracle-complete-minor-mode)
+;; or you can call M-x: oracle-complete-minor-mode
+;;  and complete command is binded on `TAB' .
 
 ;;; Commands:
 ;;
 ;; Below are complete command list:
 ;;
+;;  `oracle-complete-minor-mode'
+;;    mode for editing oracle script
 ;;  `sqlparser-oracle-complete'
 ;;    complete tablename or column name depending on current point
 ;;
@@ -99,10 +84,23 @@
 (require 'oracle-query)
 (require 'anything nil t)
 
-(defgroup sqlparser nil
-  "SQL-PARSE"
-  :group 'tools
-  )
+(defvar oracle-complete-minor-mode-map
+  (let ((map (make-sparse-keymap)))
+    (if (featurep 'anything)
+        (define-key map  (quote [tab]) 'anything-oracle-complete)
+      (define-key map  (quote [tab]) 'sqlparser-oracle-complete)
+      )
+    map))
+(defvar  oracle-complete-minor-mode-hook nil)
+
+;;;###autoload
+(define-minor-mode oracle-complete-minor-mode
+  "mode for editing oracle script"
+  :lighter " OracleC"
+  :keymap oracle-complete-minor-mode-map
+  :group 'SQL
+  (if oracle-complete-minor-mode
+      (run-hooks 'oracle-complete-minor-mode-hook)))
 
 (defvar sqlparser-sqlplus-connection nil)
 (make-variable-buffer-local 'sqlparser-sqlplus-connection)
