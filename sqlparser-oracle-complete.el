@@ -81,6 +81,7 @@
 ;;
 
 ;;; Code:
+
 (require 'oracle-query)
 (require 'anything nil t)
 
