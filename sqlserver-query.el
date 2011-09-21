@@ -88,7 +88,6 @@
 
 ;;; Code:
 
-(require 'sql)
 
 (defgroup sqlserver-query nil
   "SQL SERVER QUERY"
@@ -208,10 +207,8 @@ sqlserver 2005 add new cmd sqlcmd.exe. and osql.exe is not recommended."
          (kill-buffer  (process-buffer proc)))))
     (list process
           (process-buffer process)
-          connection-info)
-    ;; (set-process-filter process 'sqlserver-filter-fun)
-    ))
-;;
+          connection-info)))
+
 ;;;###autoload
 (defun sqlserver-query-close-connection(connection)
   "close connection.kill sqlplus process and buffer ."
@@ -257,20 +254,6 @@ sqlserver 2005 add new cmd sqlcmd.exe. and osql.exe is not recommended."
         (setq end (max start  (1- (match-beginning 0))))
         (sqlserver-parse-result-as-list  (buffer-substring-no-properties start end))
         ))))
-
-;;
-;; (setq sqlserver-connection-info
-;;       '((username . "haihua")
-;;         (password . "hh")
-;;         (server-instance . "172.20.68.10")
-;;         (dbname . "hh))
-;;       )
-;; (setq  sqlserver-cmd 'sqlcmd)
-;; (setq c (sqlserver-query-create-connection sqlserver-connection-info))
-;; ;; (print c)
-;; ;;
-;; (print (sqlserver-query "select * from sys.columns" ))
-;; ;; (print (length  (sqlserver-query "select name from sys.columns " c)))
 
 (provide 'sqlserver-query)
 ;;; sqlserver-query.el ends here
