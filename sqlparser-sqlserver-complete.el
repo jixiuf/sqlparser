@@ -35,33 +35,61 @@
 ;; 4.1 after keyword 'into' but there is a "(" between 'into' and current
 ;; position  :complete columnname
 ;; 5 after keyword 'values'  :complete nothing.
+
 ;;; Installation
 ;; 1 it required sqlserver-query.el you should download and add it to you load-path.
 ;; http://www.emacswiki.org/emacs/download/sqlserver-query.el
 
-;; 2  (setq sqlserver-username "sa")
-;;    (setq  sqlserver-password "sa")
-;;    (setq sqlserver-server-instance "localhost\\SQLEXPRESS" )
-;;    or  (setq sqlserver-server-instance "localhost" )
-;;    (setq sqlserver-dbname "master")
-;;    (setq sqlserver-cmd 'sqlcmd) or  (setq sqlserver-cmd 'osql)
-;;    or call command:(sqlserver-query-init-interactive)
-;;
-;; keybinding
+;;  there is a minor mode defined here
+;;       (sqlserver-complete-minor-mode)
+;; you can add it to sql-mode-hook
+;; (add-hook  'sql-mode-hook 'sqlserver-complete-minor-mode)
+;; or call M-x sqlserver-complete-minor-mode
 
-;;  1). if you using anything.el  you can binding it like this .
-;;     (define-key sql-mode-map (quote [tab]) 'anything-sqlserver-complete)
-;;     (define-key sql-interactive-mode-map  (quote [tab]) 'anything-sqlserver-complete)
-;;  2). use Emacs default completing system.
-;;     (define-key sql-mode-map (quote [tab]) 'sqlparser-sqlserver-complete)
-;;     (define-key sql-interactive-mode-map  (quote [tab]) 'sqlparser-sqlserver-complete)
-
+;;  and complete command is binded on `TAB' .
 ;;
+;; 1. you should custom these variable
+;; `sqlserver-connection-info'
+;;  `sqlserver-cmd' ;sqlcmd or osql
+;; for example
+;; (setq sqlserver-connection-info
+;;       '((username . "sa")
+;;         (password . "sa")
+;;         (server-instance . "localhost\\SQLEXPRESS")
+;;         (dbname . "master"))
+;;       )
+;; or sometimes
+;; (setq sqlserver-connection-info
+;;       '((username . "sa")
+;;         (password . "sa")
+;;         (server-instance . "localhost")
+;;         (dbname . "master")))
+
+;; (setq sqlserver-cmd' 'sqlcmd) or (setq sqlserver-cmd' 'osql)
+;;
+;;
+;; my config file about sqlserver-complete-minor-mode looks like this .
+;; (require 'sql)
+;; (require 'sqlparser-sqlserver-complete)
+;; (add-hook  'sql-mode-hook 'sqlserver-complete-minor-mode)
+;; (add-hook  'sqlserver-complete-minor-mode-hook 'sqlserver-complete-minor-mode-setup)
+;; (defun sqlserver-complete-minor-mode-setup()
+;;   (setq sqlserver-connection-info
+;;     '((username . "sa")
+;;       (password . "sa")
+;;       (server-instance . "localhost")
+;;       (dbname . "HAIHUA"))
+;;     )
+;;   (setq sqlserver-cmd 'sqlcmd)
+;;   )
+
 
 ;;; Commands:
 ;;
 ;; Below are complete command list:
 ;;
+;;  `sqlserver-complete-minor-mode'
+;;    mode for editing sqlserver script
 ;;  `sqlparser-sqlserver-complete'
 ;;    complete tablename or column name depending on current point
 ;;
@@ -71,14 +99,33 @@
 ;;
 
 ;;; Code:
-(require 'sql)
+
+
 (require 'sqlserver-query)
 (require 'anything nil t)
-
 
 (defvar sqlparser-sqlserver-connection nil)
 (make-variable-buffer-local 'sqlparser-sqlserver-connection)
 
+(defvar sqlserver-complete-minor-mode-map
+  (let ((map (make-sparse-keymap)))
+    (if (featurep 'anything)
+        (define-key map  (quote [tab]) 'anything-sqlserver-complete)
+      (define-key map  (quote [tab]) 'sqlparser-sqlserver-complete)
+      )
+    map))
+(defvar  sqlserver-complete-minor-mode-hook nil)
+
+;;;###autoload
+(define-minor-mode sqlserver-complete-minor-mode
+  "mode for editing sqlserver script"
+  :lighter " MSSqlC"
+  :keymap sqlserver-complete-minor-mode-map
+  :group 'SQL
+  (if sqlserver-complete-minor-mode
+      (run-hooks 'sqlserver-complete-minor-mode-hook)))
+
+;;;###autoload
 (defun sqlparser-sqlserver-complete()
   "complete tablename or column name depending on current point
 position ."
@@ -102,6 +149,7 @@ position ."
       (candidates . anything-c-source-sqlserver-candidates)
       (action . (("Complete" . (lambda(candidate) (goto-char anything-init-postion-4-sqlserver) (backward-delete-char (length (sqlparser-word-before-point-4-sqlserver))) (insert candidate)))))))
 
+;;;###autoload
   (defun anything-sqlserver-complete()
     "call `anything' to complete tablename and column name for sqlserver."
     (interactive)
