@@ -548,7 +548,7 @@ it will return 'table' ,or 'column' ,or nil.
   "get word before current point or empty string."
   (save-excursion
     (let ((current-pos (point)))
-      (if (search-backward-regexp "\s-\\|[ \t]+\\|\\.\\|," (point-at-bol) t )
+      (if (search-backward-regexp "\s-\\|[ \t]+\\|\\.\\|,\\|(" (point-at-bol) t )
           (buffer-substring-no-properties (match-end 0) current-pos )
         ""))))
 
