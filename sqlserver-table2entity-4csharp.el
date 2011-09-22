@@ -1,7 +1,7 @@
 ;;; sqlserver-table2entity-4csharp.el --- sqlserver table2entity for csharp   -*- coding:utf-8 -*-
 
 ;; Description:sqlserver table2entity for csharp
-;; Time-stamp: <Joseph 2011-09-20 20:45:05 星期二>
+;; Time-stamp: <Joseph 2011-09-22 23:35:49 星期四>
 ;; Created: 2011-09-18 21:44
 ;; Author: 孤峰独秀  jixiuf@gmail.com
 ;; Maintainer:  孤峰独秀  jixiuf@gmail.com
@@ -40,27 +40,35 @@
 ;;
 ;;  `sstec-sqlserver-type-csharp-type-alist'
 ;;    key must be upcase.
-;;    default = (quote (("CHAR" . "string") ("VARCHAR2" . "string") ("NCHAR" . "string") ("NVARCHAR2" . "string") ("DATE" . "string") ...))
+;;    default = (quote ((BIT . "bool") (INT . "int") (SMALLINT . "int") (TINYINT . "int") (NUMERIC . "decimal") ...))
 
 ;;; Code:
 (require 'sqlserver-query)
 (require   'csharp-mode nil t)
 (defcustom sstec-sqlserver-type-csharp-type-alist
-  '(("CHAR" . "string")
-    ("VARCHAR2" . "string")
-    ("NCHAR" . "string")
-    ("NVARCHAR2" . "string")
-    ("DATE" . "string")
-    ("LONG" . "decimal")
-    ("RAW" . "byte[]")
-    ("BLOB" . "byte[]" )
-    ("NCLOB" . "string")
-    ("BFILE" . "byte[]")
-    ("NUMBER" . "decimal")
-    ("DECIMAL" . "decimal")
-    ("INTEGER" . "decimal")
-    ("REAL" . "decimal")
-    ("D" . "decimal")
+  '((BIT . "bool")
+    (INT . "int")
+    (SMALLINT . "int")
+    (TINYINT . "int")
+    (NUMERIC . "decimal")
+    (DECIMAL . "decimal")
+    (MONEY . "decimal")
+    (SMALLMONEY . "decimal")
+    (FLOAT . "decimal")
+    (REAL . "decimal")
+    (DATETIME . "DateTime")
+    (SMALLDATETIME . "DateTime")
+    (TIMESTAMP . "string")
+    (UNIQUEIDENTIFIER . "string")
+    (CHAR . "string")
+    (VARCHAR . "string")
+    (TEXT . "string")
+    (NCHAR . "string")
+    (NVARCHAR . "string")
+    (NTEXT . "string")
+    (BINARY . "byte[]")
+    (VARBINARY . "byte[]")
+    (IMAGE . "byte[]")
     )
   "key must be upcase.
 key 是db类型，value 是csharp 中对应类型.要求key大写"
