@@ -1,7 +1,7 @@
 ;;; oracle-table2entity-4java.el --- oracle table2entity for java   -*- coding:utf-8 -*-
 
 ;; Description:oracle table2entity for java
-;; Time-stamp: <Joseph 2011-09-24 14:25:06 星期六>
+;; Time-stamp: <Joseph 2011-09-24 14:29:59 星期六>
 ;; Created: 2011-09-18 21:44
 ;; Author: 孤峰独秀  jixiuf@gmail.com
 ;; Maintainer:  孤峰独秀  jixiuf@gmail.com
@@ -29,9 +29,25 @@
 ;; 会提示以输入连接oracle 的连接字符串，然后，会查数据字典中的数据,根据当前连接的数据库，
 ;; 将其中所有的表导出为java Entity.
 ;;
+
+;;; Commands:
+;;
+;; Below are complete command list:
+;;
+;;
+;;; Customizable Options:
+;;
+;; Below are customizable option list:
+;;
+;;  `otej-oracle-type-java-type-alist'
+;;    key must be upcase.
+;;    default = (quote (("CHAR" . "String") ("VARCHAR2" . "String") ("NCHAR" . "String") ("NVARCHAR2" . "String") ("DATE" . "String") ...))
+
 ;;; Code:
+
 (require 'oracle-query)
 (require   'java-mode nil t)
+
 (defcustom otej-oracle-type-java-type-alist
   '(("CHAR" . "String")
     ("VARCHAR2" . "String")
@@ -53,21 +69,7 @@ key 是db类型，value 是java 中对应类型.要求key大写"
   :group 'convenience
   )
 
-;;; Commands:
-;;
-;; Below are complete command list:
-;;
-;;
-;;; Customizable Options:
-;;
-;; Below are customizable option list:
-;;
-;;  `otej-oracle-type-java-type-alist'
-;;    key must be upcase.
-;;    default = (quote (("CHAR" . "String") ("VARCHAR2" . "String") ("NCHAR" . "String") ("NVARCHAR2" . "String") ("DATE" . "String") ...))
-
 (defvar sqlplus-connection nil)
-
 
 (defun otej-get-java-type(db-type)
   "find out java type depend on de-type from `otej-oracle-type-java-type-alist'"
@@ -200,6 +202,8 @@ key 是db类型，value 是java 中对应类型.要求key大写"
                          (concat classname ".cs") savepath))
     (erase-buffer)
     (insert (format "package %s;\n" packagename))
+    (insert "\n")
+    (insert "import java.util.*;\n")
     (insert "\n")
     (insert (format "public class %s{\n\n" classname))
     (insert setter-getters)
