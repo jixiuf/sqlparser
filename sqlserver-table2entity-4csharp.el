@@ -1,7 +1,7 @@
 ;;; sqlserver-table2entity-4csharp.el --- sqlserver table2entity for csharp   -*- coding:utf-8 -*-
 
 ;; Description:sqlserver table2entity for csharp
-;; Time-stamp: <Joseph 2011-09-22 23:35:49 星期四>
+;; Time-stamp: <Joseph 2011-09-26 16:41:14 星期一>
 ;; Created: 2011-09-18 21:44
 ;; Author: 孤峰独秀  jixiuf@gmail.com
 ;; Maintainer:  孤峰独秀  jixiuf@gmail.com
@@ -90,7 +90,7 @@ key 是db类型，value 是csharp 中对应类型.要求key大写"
 
 (defun sstec-query-table (tablename)
   (sqlserver-query
-   (format " select c.name ,t.name from sys.columns c ,sys.types t, sys.objects o where c.system_type_id=t.system_type_id and o.object_id = c.object_id and o.name='%s'" tablename)
+   (format " select c.name ,t.name from sys.columns c ,sys.types t, sys.objects o where c.user_type_id=t.user_type_id and o.object_id = c.object_id and o.name='%s'" tablename)
    sqlplus-connection-4-sqlserver
    )
   )
