@@ -1,7 +1,7 @@
 ;;; oracle-table2entity-4java.el --- oracle table2entity for java   -*- coding:utf-8 -*-
 
 ;; Description:oracle table2entity for java
-;; Time-stamp: <Joseph 2011-09-24 14:29:59 星期六>
+;; Time-stamp: <Joseph 2011-09-26 16:53:51 星期一>
 ;; Created: 2011-09-18 21:44
 ;; Author: 孤峰独秀  jixiuf@gmail.com
 ;; Maintainer:  孤峰独秀  jixiuf@gmail.com
@@ -199,7 +199,7 @@ key 是db类型，value 是java 中对应类型.要求key大写"
   `packagename' 的的java 实体保存到`savepath'路径下。"
   (with-current-buffer (find-file-noselect
                         (expand-file-name
-                         (concat classname ".cs") savepath))
+                         (concat classname ".java") savepath))
     (erase-buffer)
     (insert (format "package %s;\n" packagename))
     (insert "\n")
