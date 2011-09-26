@@ -1,7 +1,7 @@
 ;;; sqlserver-table2entity-4csharp.el --- sqlserver table2entity for csharp   -*- coding:utf-8 -*-
 
 ;; Description:sqlserver table2entity for csharp
-;; Time-stamp: <Joseph 2011-09-26 16:48:24 星期一>
+;; Time-stamp: <Joseph 2011-09-26 17:03:45 星期一>
 ;; Created: 2011-09-18 21:44
 ;; Author: 孤峰独秀  jixiuf@gmail.com
 ;; Maintainer:  孤峰独秀  jixiuf@gmail.com
@@ -75,6 +75,71 @@ key 是db类型，value 是csharp 中对应类型.要求key大写"
   :group 'convenience
   )
 
+(defun sstec-tablename2classname(tablename)
+  "从tablename 生成classname，目录直接以tablename作为类名"
+  tablename
+  )
+
+(defun sstec-columnname2fieldname(columnname)
+  "由列名生成csharp Property名.目前直接用`columnname'作为生成的变量名。"
+  columnname
+  )
+
+;; (camelize "hello_world") =="Hello_World"
+;; (camelize "hello_world" "_") =="HelloWorld"
+;; (camelize "HELLO_WORLD" "_") =="HelloWorld"
+;; (camelize "helloworld") =="Helloworld"
+(defun camelize (s &optional separator )
+  "Convert under_score string S to CamelCase string."
+  (mapconcat 'identity (mapcar
+                        '(lambda (word) (capitalize (downcase word)))
+                        (if separator (split-string s "_") (list s))
+                        ) ""))
+
+;; (camelize-method "hello_world_everyone") =="hello_world_everyone"
+;; (camelize-method "HELLO_WORLD_EVERYONE") =="hello_world_everyone"
+;; (camelize-method "hello_world_everyone" "_") =="helloWorldEveryone"
+;; (camelize-method "HELLO_WORLD_EVERYONE" "_")== "helloWorldEveryone"
+(defun camelize-method (s &optional separator)
+  "Convert under_score string S to camelCase string."
+  (mapconcat 'identity (mapcar-head
+                        '(lambda (word) (downcase word))
+                        '(lambda (word) (capitalize (downcase word)))
+                        (if separator (split-string s "_") (list s))) ""))
+
+;; (upcase-first-char "hello") "Hello"
+;; (upcase-first-char "HELLO") "HELLO"
+;; (upcase-first-char "helloWorld") "HelloWorld"
+;; (upcase-first-char "hello_world") "Hello_world"
+;; (capitalize "hello_world") "Hello_World"
+;; (upcase-first-char "helloWorld" "set") "setHelloWorld"
+(defun upcase-first-char (s &optional prefix)
+  "make the first char `upcase' and return (concat prefix upcasedstring)"
+  (when  (>  (length s) 0)
+    (let ( (first-char (substring s 0 1 ))
+           (rest  (substring s  1 )))
+      (concat (or prefix "") (upcase first-char) rest))))
+
+;; (un-camelcase-string "helloWorld") == "hello_world"
+;; (un-camelcase-string "helloWorld" "") == "helloworld"
+(defun un-camelcase-string (s &optional sep start)
+  "Convert CamelCase string S to lower case with word separator SEP.
+    Default for SEP is a hyphen \"-\".
+
+    If third argument START is non-nil, convert words after that
+    index in STRING."
+  (let ((case-fold-search nil))
+    (while (string-match "[A-Z]" s (or start 1))
+      (setq s (replace-match (concat (or sep "-")
+                                     (downcase (match-string 0 s)))
+                             t nil s)))
+    (downcase s)))
+
+(defun mapcar-head (fn-head fn-rest list)
+  "Like MAPCAR, but applies a different function to the first element."
+  (if list
+      (cons (funcall fn-head (car list)) (mapcar fn-rest (cdr list)))))
+
 (defvar sqlplus-connection-4-sqlserver nil)
 
 
@@ -114,18 +179,6 @@ key 是db类型，value 是csharp 中对应类型.要求key大写"
       (insert (format "   get { return %s  ; }\n" field))
       (insert "}\n")
       (buffer-string))))
-
-
-
-(defun sstec-tablename2classname(tablename)
-  "从tablename 生成classname，目录直接以tablename作为类名"
-  tablename
-  )
-(defun sstec-columnname2fieldname(columnname)
-  "由列名生成csharp Property名.目前直接用`columnname'作为生成的变量名。"
-  columnname
-  )
-
 
 ;; (sstec-generate-all-setter-getter-4table "EMP")
 (defun sstec-generate-all-setter-getter-4table(tablename)
