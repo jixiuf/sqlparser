@@ -1,7 +1,7 @@
 ;;; sqlserver-table2entity-4csharp.el --- sqlserver table2entity for csharp   -*- coding:utf-8 -*-
 
 ;; Description:sqlserver table2entity for csharp
-;; Time-stamp: <Joseph 2011-09-26 16:41:14 星期一>
+;; Time-stamp: <Joseph 2011-09-26 16:48:24 星期一>
 ;; Created: 2011-09-18 21:44
 ;; Author: 孤峰独秀  jixiuf@gmail.com
 ;; Maintainer:  孤峰独秀  jixiuf@gmail.com
@@ -80,7 +80,8 @@ key 是db类型，value 是csharp 中对应类型.要求key大写"
 
 (defun sstec-get-csharp-type(db-type)
   "find out csharp type depend on de-type from `sstec-sqlserver-type-csharp-type-alist'"
-  (cdr (assoc (upcase db-type)  sstec-sqlserver-type-csharp-type-alist)))
+  (cdr (assoc (intern (upcase db-type))  sstec-sqlserver-type-csharp-type-alist))
+  )
 ;; (sstec-get-csharp-type "d")
 
 (defun sstec-query-all-tablename-in-db()
