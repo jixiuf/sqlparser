@@ -1,7 +1,7 @@
 ;;; oracle-table2entity-4java.el --- oracle table2entity for java   -*- coding:utf-8 -*-
 
 ;; Description:oracle table2entity for java
-;; Time-stamp: <Joseph 2011-09-26 16:53:51 星期一>
+;; Time-stamp: <Joseph 2011-09-27 14:10:09 星期二>
 ;; Created: 2011-09-18 21:44
 ;; Author: 孤峰独秀  jixiuf@gmail.com
 ;; Maintainer:  孤峰独秀  jixiuf@gmail.com
@@ -25,6 +25,8 @@
 
 ;;; Commentary:
 
+;; screencast:
+;; http://screencast-repos.googlecode.com/files/emacs-sqlserver-oracle-table2entity.mp4.bz2
 ;;  call command : (oracle-table2entity-4java-interactively)
 ;; 会提示以输入连接oracle 的连接字符串，然后，会查数据字典中的数据,根据当前连接的数据库，
 ;; 将其中所有的表导出为java Entity.
