@@ -1,7 +1,7 @@
 ;;; sqlserver-table2entity-4csharp.el --- sqlserver table2entity for csharp   -*- coding:utf-8 -*-
 
 ;; Description:sqlserver table2entity for csharp
-;; Time-stamp: <Joseph 2011-09-26 17:03:45 星期一>
+;; Time-stamp: <Joseph 2011-09-27 14:09:45 星期二>
 ;; Created: 2011-09-18 21:44
 ;; Author: 孤峰独秀  jixiuf@gmail.com
 ;; Maintainer:  孤峰独秀  jixiuf@gmail.com
@@ -25,6 +25,8 @@
 
 ;;; Commentary:
 
+;; screencast:
+;; http://screencast-repos.googlecode.com/files/emacs-sqlserver-oracle-table2entity.mp4.bz2
 ;;  call command : (sqlserver-table2entity-4csharp-interactively)
 ;; 会提示以输入连接sqlserver 的连接字符串，然后，会查数据字典中的数据,根据当前连接的数据库，
 ;; 将其中所有的表导出为csharp Entity.
