@@ -159,13 +159,13 @@ sqlserver 2005 add new cmd sqlcmd.exe. and osql.exe is not recommended."
 (defun sqlserver-format-connect-string(connection-info)
   "default:sqlcmd -S localhost\\SQLEXPRESS -U sa -P sa -d master -h-1 -w 65535   -s \"\^E\" -W"
   (if (equal sqlserver-cmd 'sqlcmd)
-      (format "%s -S %s -U %s -P %s -d %s -h-1  -w 65535  -s \"\^E\" -W"
+      (format "%s -S %s -U %s -P %s -d \"%s\" -h-1  -w 65535  -s \"\^E\" -W"
               (symbol-name sqlserver-cmd)
               (cdr (assoc 'server-instance connection-info))
               (cdr (assoc 'username connection-info))
               (cdr (assoc 'password connection-info))
               (cdr (assoc 'dbname connection-info)))
-    (format "%s -S %s -U %s -P %s -d %s -h-1  -n -w 65535 -s \"\" -r 1 "
+    (format "%s -S %s -U %s -P %s -d \"%s\" -h-1  -n -w 65535 -s \"\" -r 1 "
             ;;            "%s -S %s -U %s -P %s -d %s -h-1  -n -w 65535  -s \"\^E\""
             (symbol-name sqlserver-cmd)
             (cdr (assoc 'server-instance connection-info))
