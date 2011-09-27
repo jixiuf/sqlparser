@@ -7,8 +7,8 @@
 ;; Filename: sqlserver-query.el
 ;; Description:  execute sql select using sqlcmd.exe or osql.exe on SQL SERVER
 ;; Created: 2011年08月17日 星期三 22时11分54秒
-;; Updated 2011-09-20 20:04
-;; Version: 0.1.1
+;; Updated 2011-09-27 11:37
+;; Version: 0.1.2
 ;; URL:http://www.emacswiki.org/emacs/down/sqlserver-query.el
 ;;     https://github.com/jixiuf/sqlparser
 
