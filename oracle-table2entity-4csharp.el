@@ -1,12 +1,13 @@
 ;;; oracle-table2entity-4csharp.el --- oracle table2entity for csharp   -*- coding:utf-8 -*-
 
 ;; Description:oracle table2entity for csharp
-;; Time-stamp: <Joseph 2011-09-27 14:09:58 星期二>
+;; Time-stamp: <Joseph 2011-09-27 14:11:58 星期二>
 ;; Created: 2011-09-18 21:44
 ;; Author: 孤峰独秀  jixiuf@gmail.com
 ;; Maintainer:  孤峰独秀  jixiuf@gmail.com
 ;; Keywords: oracle csharp entity
 ;; URL: http://www.emacswiki.org/emacs/oracle-table2entity-4csharp.el
+;; https://github.com/jixiuf/sqlparser
 
 ;; Copyright (C) 2011, 孤峰独秀, all rights reserved.
 
