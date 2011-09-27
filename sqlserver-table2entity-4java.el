@@ -1,12 +1,13 @@
 ;;; sqlserver-table2entity-4java.el --- sqlserver table2entity for java   -*- coding:utf-8 -*-
 
 ;; Description:sqlserver table2entity for java
-;; Time-stamp: <Joseph 2011-09-27 14:09:34 星期二>
+;; Time-stamp: <Joseph 2011-09-27 14:12:18 星期二>
 ;; Created: 2011-09-18 21:44
 ;; Author: 孤峰独秀  jixiuf@gmail.com
 ;; Maintainer:  孤峰独秀  jixiuf@gmail.com
 ;; Keywords: sqlserver java entity
 ;; URL: http://www.emacswiki.org/emacs/sqlserver-table2entity-4java.el
+;; https://github.com/jixiuf/sqlparser
 
 ;; Copyright (C) 2011, 孤峰独秀, all rights reserved.
 
