@@ -114,7 +114,9 @@ created process"
   (interactive (oracle-query-read-connect-string))
   (let ((oracle-query-process (start-process
                                "sqlplus"
-                               (concat " *oracle-query" (number-to-string (random)) "*")
+                               (concat " *oracle-query-"
+                                       (oracle-query-fetch-username-from-connect-string connect-string) "-"
+                                       (number-to-string (random)) "*")
                                "sqlplus" connect-string)))
     (process-send-string oracle-query-process "set heading off;\n")
     (process-send-string oracle-query-process (format "set linesize %d;\n" oq-linesize))
