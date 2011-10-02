@@ -30,8 +30,10 @@
 
 ;; execute sql using sqlplus and return as list .
 ;;
-;; (oracle-query "select empno,ename from emp where empno<=7499")
-;; got : (("7369" "SMITH") ("7499" "ALLEN"))
+;;       (oracle-query "select empno,ename from emp where empno<=7499")
+;; got :     (("7369" "SMITH") ("7499" "ALLEN"))
+;; or    (oracle-query-with-heading)
+;; got :     (("EMPNO" "ENAME") ("7369" "SMITH") ("7499" "ALLEN"))
 ;; using default connection ,not recommended.
 ;;
 ;; (defvar connection (oracle-query-create-connection "scott/tiger"))
@@ -66,10 +68,14 @@
 
 (defvar oracle-query-default-connection nil)
 
+(defvar oracle-query-heading nil
+  "when set heading on ,the result of heading will be stored in the variable")
+
 (defvar oq-timeout-wait-for-result 300
   "waiting 300s for sql result returned.")
 
 (defvar oq-linesize 20000 "Default linesize for sqlplus")
+(defvar oq-pagesize 50000 "Default pagesize for sqlplus")
 
 ;; (oracle-query-fetch-username-from-connect-string "scott/tiger")
 (defun oracle-query-fetch-username-from-connect-string(connect-string)
@@ -78,7 +84,7 @@
 
 
 (defun oq-parse-result-as-list (raw-result)
-  (let (result row)
+  (let (result row index-of-result)
     (with-temp-buffer
       (insert raw-result)
       (goto-char (point-min))
@@ -88,13 +94,21 @@
       (while (re-search-forward "^[ \t]+" nil t)
         (replace-match "" nil nil))
       (goto-char (point-min))
+      (forward-line 1)
+      (setq oracle-query-heading
+            (split-string (buffer-substring-no-properties
+                           (point-at-bol) (point-at-eol)) "" t))
+      (forward-line 2) (setq index-of-result 3)
       (while (not (= (point-at-eol) (point-max)))
-        (setq row (split-string (buffer-substring-no-properties
-                                 (point-at-bol) (point-at-eol)) "" t))
-        (setq result (append result (list row)))
-        ;;      (add-to-list 'result row t)
-        (forward-line) (beginning-of-line))
-      )result ))
+        (unless (or (= 1  (% index-of-result oq-pagesize))
+                    (= 2  (% index-of-result oq-pagesize))
+                    (= 0 (% index-of-result oq-pagesize)))
+          (setq row (split-string (buffer-substring-no-properties
+                                   (point-at-bol) (point-at-eol)) "" t))
+          (setq result (append result (list row))))
+        (forward-line) (beginning-of-line)
+        (setq index-of-result (1+ index-of-result)))
+      )result))
 
 ;; (defun oq-build-connection-string()
 ;;   " default:sqlplus scott/tiger@localhost:1521/orcl"
@@ -103,6 +117,7 @@
 (defun oracle-query-read-connect-string ()
   (let( (connection-string  (read-string "SqlPlus Connect String:" "" nil)))
     (list connection-string)))
+
 
 ;; (oracle-query-create-connection "scott/tiger")
 ;; (oracle-query-create-connection "scott/tiger@localhost:1521/orcl")
@@ -118,12 +133,12 @@ created process"
                                        (oracle-query-fetch-username-from-connect-string connect-string) "-"
                                        (number-to-string (random)) "*")
                                "sqlplus" connect-string)))
-    (process-send-string oracle-query-process "set heading off;\n")
+    (process-send-string oracle-query-process "set heading on;\n")
     (process-send-string oracle-query-process (format "set linesize %d;\n" oq-linesize))
     (process-send-string oracle-query-process "set colsep '';\n");;column separater
     (process-send-string oracle-query-process "set null 'NULL';\n");;
     (process-send-string oracle-query-process "set wrap off;\n")
-    (process-send-string oracle-query-process "set pagesize 0;\n")
+    (process-send-string oracle-query-process (format "set pagesize %s;\n" oq-pagesize))
     (process-send-string oracle-query-process "set feedback on;\n")
     (process-send-string oracle-query-process "set serveroutput on;\n")
     (set-process-query-on-exit-flag  oracle-query-process nil)
@@ -154,8 +169,11 @@ created process"
   "execute sql using `sqlplus' ,and return the result of it."
   (let( (connection oracle-query-connection) process)
     (unless connection
-      (unless oracle-query-default-connection
-        (setq oracle-query-default-connection (call-interactively   'oracle-query-create-connection)))
+      (unless (and oracle-query-default-connection
+                   (buffer-live-p (nth 1 oracle-query-default-connection))
+                   (equal (process-status (nth 0  oracle-query-default-connection)) 'run)
+                   )
+        (setq oracle-query-default-connection (call-interactively 'oracle-query-create-connection)))
       (setq connection oracle-query-default-connection)
       )
     (setq process (car connection))
@@ -173,6 +191,13 @@ created process"
         (setq end (1- (match-beginning 0)))
         (when (re-search-backward "\\bSQL> " nil t 1) (setq start (match-end 0)))
         (oq-parse-result-as-list (buffer-substring start end))))))
+
+
+(defun oracle-query-with-heading (sql &optional oracle-query-connection)
+  "execute sql using `sqlplus' ,and return the result of it."
+  (let ((result (oracle-query sql oracle-query-connection)))
+    (cons oracle-query-heading result)))
+
 
 (provide 'oracle-query)
 ;;; oracle-query.el ends here
