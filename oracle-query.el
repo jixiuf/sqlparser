@@ -2,13 +2,13 @@
 
 ;; Copyright (C) 2011 孤峰独秀
 
+;; Last Updated: Joseph 2011-10-03 14:03:54 星期一
+;; Created: 2011-7-31
+;; Version: 0.1.4
 ;; Author: 孤峰独秀  jixiuf@gmail.com
 ;; Keywords: oracle sql emacs
 ;; Filename: oracle-query.el
 ;; Description:execute sql select using sqlplus.
-;; Created: 2011-7-31
-;; Updated: 2011-09-18 18:28
-;; Version: 0.1.4
 ;; URL:http://www.emacswiki.org/emacs/download/oracle-query.el
 ;; https://github.com/jixiuf/sqlparser
 ;; Compatibility: Test on Linux
