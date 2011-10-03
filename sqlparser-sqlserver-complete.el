@@ -2,11 +2,11 @@
 
 ;; Copyright (C) 2011 孤峰独秀
 
+;; Created: 2011年08月19日 星期五 00时38分17秒
+;; Last Updated: Joseph 2011-10-03 14:06:18 星期一
+;; Version: 0.1.1
 ;; Author: 孤峰独秀  jixiuf@gmail.com
 ;; Keywords: sql complete sqlserver
-;; Created: 2011年08月19日 星期五 00时38分17秒
-;; Updated: 2011-09-08 00:08
-;; Version: 0.1.1
 ;; URL:http://www.emacswiki.org/emacs/download/sqlparser-sqlserver-complete.el
 ;;     https://github.com/jixiuf/sqlparser
 ;; screencast: http://screencast-repos.googlecode.com/files/emacs-sqlparse-mysql-complete.mkv.bz2
