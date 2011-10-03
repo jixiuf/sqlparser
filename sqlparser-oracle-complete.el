@@ -2,13 +2,13 @@
 
 ;; Copyright (C) 2011 孤峰独秀
 
+;; Created: 2011年07月31日 星期日 20时37分31秒
+;; Last Updated: Joseph 2011-10-03 14:06:01 星期一
+;; Version: 0.1.4
 ;; Author: 孤峰独秀  jixiuf@gmail.com
 ;; Keywords: sql parse oracle complete
 ;; Filename: sqlparser-oracle-complete.el
 ;; Description:  completing tablename column for oracle when editing
-;; Created: 2011年07月31日 星期日 20时37分31秒
-;; Updated: 2011-09-19 19:09
-;; Version: 0.1.4
 ;; URL:http://www.emacswiki.org/emacs/download/sqlparser-oracle-complete.el
 ;;     https://github.com/jixiuf/sqlparser
 ;; screencast:http://screencast-repos.googlecode.com/files/sqlparser0oracle0complete.mkv
