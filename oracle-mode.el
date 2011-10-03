@@ -1,7 +1,7 @@
 ;;; oracle-mode.el --- oracle-mode   -*- coding:utf-8 -*-
 
 ;; Description: oracle-mode
-;; Time-stamp: <Joseph 2011-10-03 03:23:10 星期一>
+;; Time-stamp: <Joseph 2011-10-03 11:42:02 星期一>
 ;; Created: 2011-10-03 01:19
 ;; Author: 孤峰独秀  jixiuf@gmail.com
 ;; Maintainer:  孤峰独秀  jixiuf@gmail.com
@@ -34,7 +34,7 @@
 ;;  `oracle-mode-execute'
 ;;    insert result in current buffer
 ;;  `oracle-mode-execute-other-buffer'
-;;    insert result in current buffer
+;;    insert result in other buffer other window
 ;;
 ;;; Customizable Options:
 ;;
@@ -56,12 +56,12 @@
   )
 
 (defun oracle-mode-execute-other-buffer()
-  "insert result in current buffer"
+  "insert result in other buffer other window"
   (interactive)
   (let* ((sql (sql-sentence-at-point-4-oracle)) mark
          (result-buffer-name "*oracle-mode-result*")
          (result (oracle-query-with-heading sql)))
-    (with-current-buffer (get-buffer-create  "*oracle-mode-result*")
+    (with-current-buffer (get-buffer-create result-buffer-name)
       (goto-char (point-max))
       (insert (concat "\n" sql "\n"))
       (setq mark (point-max))
