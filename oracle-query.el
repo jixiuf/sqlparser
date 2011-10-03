@@ -186,12 +186,13 @@ created process"
         (goto-char (point-max))
         (process-send-string process (format "%s ;\n" sql))
         (goto-char (point-min))
-        (while (not (re-search-forward "^[0-9]+ rows? selected\\|no rows selected" nil t 1))
+        (while (not (re-search-forward "^\\([0-9]+\\|no\\) rows? \\(selected\\|updated\\|deleted\\)" nil t 1))
           (when (accept-process-output process oq-timeout-wait-for-result 0 nil)
             (goto-char (point-min))))
-        (setq end (1- (match-beginning 0)))
-        (when (re-search-backward "\\bSQL> " nil t 1) (setq start (match-end 0)))
-        (oq-parse-result-as-list (buffer-substring start end))))))
+        (when (string=  (match-string 2) "selected")
+          (setq end (1- (match-beginning 0)))
+          (when (re-search-backward "\\bSQL> " nil t 1) (setq start (match-end 0)))
+          (oq-parse-result-as-list (buffer-substring start end)))))))
 
 
 (defun oracle-query-with-heading (sql &optional oracle-query-connection)
