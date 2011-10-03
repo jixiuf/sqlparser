@@ -1,7 +1,7 @@
 ;;; oracle-mode.el --- oracle-mode   -*- coding:utf-8 -*-
 
 ;; Description: oracle-mode
-;; Time-stamp: <Joseph 2011-10-03 11:42:02 星期一>
+;; Time-stamp: <Joseph 2011-10-03 11:43:12 星期一>
 ;; Created: 2011-10-03 01:19
 ;; Author: 孤峰独秀  jixiuf@gmail.com
 ;; Maintainer:  孤峰独秀  jixiuf@gmail.com
@@ -42,6 +42,7 @@
 ;;
 
 ;;; Code:
+
 (require 'oracle-query)
 
 (defun oracle-mode-execute()
