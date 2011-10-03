@@ -1,7 +1,7 @@
 ;;; sqlserver-table2entity-4csharp.el --- sqlserver table2entity for csharp   -*- coding:utf-8 -*-
 
 ;; Description:sqlserver table2entity for csharp
-;; Time-stamp: <Joseph 2011-09-27 14:12:11 星期二>
+;; Last Updated: Joseph 2011-10-03 14:07:16 星期一
 ;; Created: 2011-09-18 21:44
 ;; Author: 孤峰独秀  jixiuf@gmail.com
 ;; Maintainer:  孤峰独秀  jixiuf@gmail.com
