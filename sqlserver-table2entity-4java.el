@@ -1,7 +1,7 @@
 ;;; sqlserver-table2entity-4java.el --- sqlserver table2entity for java   -*- coding:utf-8 -*-
 
 ;; Description:sqlserver table2entity for java
-;; Time-stamp: <Joseph 2011-09-27 14:12:18 星期二>
+;; Last Updated: Joseph 2011-10-03 14:07:33 星期一
 ;; Created: 2011-09-18 21:44
 ;; Author: 孤峰独秀  jixiuf@gmail.com
 ;; Maintainer:  孤峰独秀  jixiuf@gmail.com
