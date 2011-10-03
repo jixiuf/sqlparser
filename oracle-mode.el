@@ -1,7 +1,7 @@
 ;;; oracle-mode.el --- oracle-mode   -*- coding:utf-8 -*-
 
 ;; Description: oracle-mode
-;; Time-stamp: <Joseph 2011-10-03 11:43:12 星期一>
+;; Last Updated: Joseph 2011-10-03 14:03:26 星期一
 ;; Created: 2011-10-03 01:19
 ;; Author: 孤峰独秀  jixiuf@gmail.com
 ;; Maintainer:  孤峰独秀  jixiuf@gmail.com
