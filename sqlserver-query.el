@@ -188,6 +188,7 @@ sqlserver 2005 add new cmd sqlcmd.exe. and osql.exe is not recommended."
     (setcdr  (assoc 'dbname connection-info)
              (read-string (format  "dbname(default:%s):"  (cdr (assoc 'dbname connection-info)))
                           "" nil (cdr (assoc 'dbname connection-info))))
+    (setq-default sqlserver-connection-info connection-info) ;;update default info
     connection-info))
 
 ;; (sqlserver-query-create-connection sqlserver-connection-info)
