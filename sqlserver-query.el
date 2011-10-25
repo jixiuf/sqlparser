@@ -3,7 +3,7 @@
 ;; Copyright (C) 2011 Joseph 纪秀峰
 
 ;; Created: 2011年08月17日 星期三 22时11分54秒
-;; Last Updated: Joseph 2011-11-20 10:40:30 星期日
+;; Last Updated: Joseph 2011-10-25 13:33:17 星期二
 ;; Version: 0.1.4
 ;; Author: Joseph  纪秀峰 jixiuf@gmail.com
 ;; Keywords: sqlserver emacs sql sqlcmd.exe osql.exe
@@ -129,6 +129,7 @@ If you leave it nil, it will search the path for the executable."
 (defvar sqlserver-timeout-wait-for-result 300
   "waiting 300s for sql result returned.")
 (defvar sqlserver-query-default-connection nil)
+(defvar sqlserver-separator (string 5)) ;;^E
 
 (defun sqlserver-parse-result-as-list-4-osql (raw-result)
   (let  (result row line-count line)
@@ -197,11 +198,14 @@ If you leave it nil, it will search the path for the executable."
          "-U" (cdr (assoc 'username connection-info))
          "-P" (cdr (assoc 'password connection-info))
          "-d" (cdr (assoc 'dbname connection-info))
-         (split-string
-          (if (equal sqlserver-cmd 'sqlcmd)
-              "-w 65535 -s \^E -W"   ;; should be actual ^E, not ^ followed by E
-            "-n -w 65535 -s \^E -r 1 ")
-          " " t)))
+         "-w" "65535"
+         "-s"  sqlserver-separator    ;; should be actual ^E, not ^ followed by E
+         (if (equal sqlserver-cmd 'sqlcmd)
+             (list "-W")
+           (list "-n" "-r" "1")
+           )
+         ))
+
 
 (defun sqlserver-query-read-connect-string()
   "set server dbname username password interactive"
