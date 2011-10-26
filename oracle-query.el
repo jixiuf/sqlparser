@@ -2,7 +2,7 @@
 
 ;; Copyright (C) 2011 孤峰独秀
 
-;; Last Updated: Joseph 2011-10-26 16:00:26 星期三
+;; Last Updated: Joseph 2011-10-26 16:06:20 星期三
 ;; Created: 2011-7-31
 ;; Version: 0.1.4
 ;; Author: 孤峰独秀  jixiuf@gmail.com
@@ -68,9 +68,6 @@
 
 (defvar oracle-query-default-connection nil)
 
-(defvar oracle-query-heading nil
-  "when set heading on ,the result of heading will be stored in the variable")
-
 (defvar oq-timeout-wait-for-result 300
   "waiting 300s for sql result returned.")
 
@@ -84,7 +81,7 @@
 
 
 (defun oq-parse-result-as-list (raw-result)
-  (let (result row index-of-result)
+  (let (result row index-of-result oracle-query-heading)
     (with-temp-buffer
       (insert raw-result)
       (goto-char (point-min))
@@ -108,7 +105,7 @@
           (setq result (append result (list row))))
         (forward-line) (beginning-of-line)
         (setq index-of-result (1+ index-of-result)))
-      )result))
+      )(cons oracle-query-heading result)))
 
 ;; (defun oq-build-connection-string()
 ;;   " default:sqlplus scott/tiger@localhost:1521/orcl"
@@ -174,6 +171,11 @@ created process"
 ;;;###autoload
 (defun oracle-query (sql &optional oracle-query-connection)
   "execute sql using `sqlplus' ,and return the result of it."
+  (cdr (oracle-query-with-heading sql oracle-query-connection)))
+
+
+(defun oracle-query-with-heading (sql &optional oracle-query-connection)
+  "execute sql using `sqlplus' ,and return the result of it."
   (let( (connection oracle-query-connection) process)
     (unless connection
       (unless (and oracle-query-default-connection
@@ -201,12 +203,6 @@ created process"
           (setq end (1- (match-beginning 0)))
           (when (re-search-backward "\\bSQL> " nil t 1) (setq start (match-end 0)))
           (oq-parse-result-as-list (buffer-substring start end)))))))
-
-
-(defun oracle-query-with-heading (sql &optional oracle-query-connection)
-  "execute sql using `sqlplus' ,and return the result of it."
-  (let ((result (oracle-query sql oracle-query-connection)))
-    (cons oracle-query-heading result)))
 
 
 (provide 'oracle-query)
