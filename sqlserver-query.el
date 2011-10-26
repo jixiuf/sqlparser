@@ -3,7 +3,7 @@
 ;; Copyright (C) 2011 Joseph 纪秀峰
 
 ;; Created: 2011年08月17日 星期三 22时11分54秒
-;; Last Updated: Joseph 2011-10-26 15:55:15 星期三
+;; Last Updated: Joseph 2011-10-26 16:00:51 星期三
 ;; Version: 0.1.4
 ;; Author: Joseph  纪秀峰 jixiuf@gmail.com
 ;; Keywords: sqlserver emacs sql sqlcmd.exe osql.exe
@@ -65,7 +65,7 @@
 ;; the normal way to use sqlserver-query.el is :
 ;; 1:
 ;; (defvar c nil)
-;; (unless (sqlserver-connection-alive-p c)
+;; (unless (sqlserver-query-connection-alive-p c)
 ;;   (setq c (call-interactively 'sqlserver-query-create-connection)))
 ;; 2:
 ;;   (sqlserver-query "select empno from emp" c)
@@ -245,7 +245,7 @@ If you leave it nil, it will search the path for the executable."
           (process-buffer process)
           connection-info)))
 
-(defun sqlserver-connection-alive-p(connection)
+(defun sqlserver-query-connection-alive-p(connection)
   "test whether the connection is alive."
   (and connection
        (listp connection)
