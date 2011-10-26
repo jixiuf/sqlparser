@@ -3,7 +3,7 @@
 ;; Copyright (C) 2011 Joseph 纪秀峰
 
 ;; Created: 2011年08月17日 星期三 22时11分54秒
-;; Last Updated: Joseph 2011-10-25 13:37:49 星期二
+;; Last Updated: Joseph 2011-10-26 15:55:15 星期三
 ;; Version: 0.1.4
 ;; Author: Joseph  纪秀峰 jixiuf@gmail.com
 ;; Keywords: sqlserver emacs sql sqlcmd.exe osql.exe
@@ -30,27 +30,6 @@
 ;;  execute sql using sqlcmd.exe or osql.exe and return as list .
 ;;  (sqlcmd.exe is recommended. ) (osql.exe is slow)
 
-;;; Commands:
-;;
-;; Below are complete command list:
-;;
-;;  `sqlserver-query-create-connection'
-;;    open connection with sqlcmd.exe or osql.exe.
-;;
-;;; Customizable Options:
-;;
-;; Below are customizable option list:
-;;
-;;  `sqlserver-connection-info'
-;;    sqlserver connection info .
-;;    default = (quote ((username . "sa") (password . "sa") (server-instance . "localhost\\SQLEXPRESS") (dbname . "master")))
-;;  `sqlserver-cmd'
-;;    sqlserver-cmd  now  support sqlcmd.exe and osql.exe
-;;    default = (quote sqlcmd)
-;;  `sqlserver-command-path'
-;;    path (without filename) of the sqlcmd.exe or osql.exe .
-;;    default = nil
-
 ;; (sqlserver-query "select empno,ename from emp where empno<=7499")
 ;; got : (("7369" "SMITH") ("7499" "ALLEN"))
 ;; (sqlserver-query-with-heading "select empno,ename from emp where empno<=7499")
@@ -60,8 +39,8 @@
 ;;
 ;; 1. you should custom these variable
 ;; `sqlserver-connection-info'
-;; `sqlserver-command-path' not needn't if `sqlserver-cmd' in under your PATH
-;;  `sqlserver-cmd' ;sqlcmd or osql
+;; `sqlserver-cmd' ;sqlcmd or osql
+;; `sqlserver-command-path' (not needn't if `sqlserver-cmd' in under your PATH)
 ;; for example
 ;; (setq sqlserver-connection-info
 ;;       '((username . "sa")
@@ -86,14 +65,36 @@
 ;; the normal way to use sqlserver-query.el is :
 ;; 1:
 ;; (defvar c nil)
-;; (unless (and c (equal (process-status (nth 0  c)) 'run))
-;;    (setq c (call-interactively 'sqlserver-query-create-connection)))
+;; (unless (sqlserver-connection-alive-p c)
+;;   (setq c (call-interactively 'sqlserver-query-create-connection)))
 ;; 2:
 ;;   (sqlserver-query "select empno from emp" c)
 ;;   or
 ;;   (sqlserver-query-with-heading "select empno from emp" c)
 ;; 3:
 ;;   (sqlserver-query-close-connection c)
+
+;;; Commands:
+;;
+;; Below are complete command list:
+;;
+;;  `sqlserver-query-create-connection'
+;;    open connection with sqlcmd.exe or osql.exe.
+;;
+;;; Customizable Options:
+;;
+;; Below are customizable option list:
+;;
+;;  `sqlserver-connection-info'
+;;    sqlserver connection info .
+;;    default = (quote ((username . "sa") (password . "sa") (server-instance . "localhost\\SQLEXPRESS") (dbname . "master")))
+;;  `sqlserver-cmd'
+;;    sqlserver-cmd  now  support sqlcmd.exe and osql.exe
+;;    default = (quote sqlcmd)
+;;  `sqlserver-command-path'
+;;    path (without filename) of the sqlcmd.exe or osql.exe .
+;;    default = nil
+
 
 
 ;;; Code:
@@ -243,6 +244,13 @@ If you leave it nil, it will search the path for the executable."
     (list process
           (process-buffer process)
           connection-info)))
+
+(defun sqlserver-connection-alive-p(connection)
+  "test whether the connection is alive."
+  (and connection
+       (listp connection)
+       (processp (nth 0 connection))
+       (equal (process-status (nth 0  connection)) 'run)))
 
 ;;;###autoload
 (defun sqlserver-query-close-connection(connection)
