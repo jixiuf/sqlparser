@@ -2,7 +2,7 @@
 
 ;; Copyright (C) 2011 孤峰独秀
 
-;; Last Updated: Joseph 2011-11-20 09:23:38 星期日
+;; Last Updated: Joseph 2011-10-26 16:00:26 星期三
 ;; Created: 2011-7-31
 ;; Version: 0.1.4
 ;; Author: 孤峰独秀  jixiuf@gmail.com
@@ -43,9 +43,9 @@
 ;; the normal way to use oracle-query.el is :
 ;; 1:
 ;; (defvar sqlplus-connection nil)
-;; (unless (and sqlplus-connection
-;;               (equal (process-status (nth 0  sqlplus-connection)) 'run))
-;;    (setq sqlplus-connection (call-interactively 'oracle-query-create-connection)))
+;; (unless (oracle-query-connection-alive-p c)
+;;   (setq sqlplus-connection (call-interactively 'oracle-query-create-connection)))
+;;
 ;; 2:
 ;;   (oracle-query "select empno from emp" sqlplus-connection)
 ;; 3:
@@ -153,6 +153,13 @@ created process"
           (process-buffer oracle-query-process)
           (oracle-query-fetch-username-from-connect-string connect-string))
     ))
+
+(defun oracle-query-connection-alive-p(connection)
+  "test whether the connection is alive."
+  (and connection
+       (listp connection)
+       (processp (nth 0 connection))
+       (equal (process-status (nth 0  connection)) 'run)))
 
 ;;;###autoload
 (defun oracle-query-close-connection(sqlplus-connection)
