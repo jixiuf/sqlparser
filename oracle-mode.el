@@ -1,7 +1,7 @@
 ;;; oracle-mode.el --- oracle-mode   -*- coding:utf-8 -*-
 
 ;; Description: oracle-mode
-;; Last Updated: Joseph 2011-10-03 14:03:26 星期一
+;; Last Updated: Joseph 2011-10-30 16:02:40 星期日
 ;; Created: 2011-10-03 01:19
 ;; Author: 孤峰独秀  jixiuf@gmail.com
 ;; Maintainer:  孤峰独秀  jixiuf@gmail.com
@@ -62,17 +62,16 @@
   (let* ((sql (sql-sentence-at-point-4-oracle)) mark
          (result-buffer-name "*oracle-mode-result*")
          (result (oracle-query-with-heading sql)))
-    (with-current-buffer (get-buffer-create result-buffer-name)
-      (goto-char (point-max))
-      (insert (concat "\n" sql "\n"))
-      (setq mark (point-max))
-      (insert (oracle-mode-format-result result))
-      (switch-to-buffer-other-window result-buffer-name)
-      (goto-char mark)
-      (recenter 1)
-      )
-    )
-  )
+    (when (> (length result) 0)
+      (with-current-buffer (get-buffer-create result-buffer-name)
+        (goto-char (point-max))
+        (insert (concat "\n" sql "\n"))
+        (setq mark (point-max))
+        (insert (oracle-mode-format-result result))
+        (switch-to-buffer-other-window result-buffer-name)
+        (goto-char mark)
+        (recenter 1)))))
+
 ;; (oracle-mode-max-length-of-each-columns '(("a" "bbb" "c") ("aa" "bb" "cc")))= (2 3 2)
 (defun oracle-mode-max-length-of-each-columns(result)
   (let ((head (car result))
