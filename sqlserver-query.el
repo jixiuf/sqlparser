@@ -3,7 +3,7 @@
 ;; Copyright (C) 2011 孤峰独秀
 
 ;; Created: 2011年08月17日 星期三 22时11分54秒
-;; Last Updated: Joseph 2011-10-03 14:06:41 星期一
+;; Last Updated: Joseph 2011-10-30 14:47:21 星期日
 ;; Version: 0.1.2
 ;; Author: 孤峰独秀  jixiuf@gmail.com
 ;; Keywords: sqlserver emacs sql sqlcmd.exe osql.exe
@@ -29,6 +29,24 @@
 
 ;;  execute sql using sqlcmd.exe or osql.exe and return as list .
 ;;  (sqlcmd.exe is recommended. ) (osql.exe is slow)
+
+;;; Commands:
+;;
+;; Below are complete command list:
+;;
+;;  `sqlserver-query-create-connection'
+;;    open connection with sqlcmd.exe or osql.exe.
+;;
+;;; Customizable Options:
+;;
+;; Below are customizable option list:
+;;
+;;  `sqlserver-connection-info'
+;;    sqlserver connection info .
+;;    default = (quote ((username . "sa") (password . "sa") (server-instance . "localhost\\SQLEXPRESS") (dbname . "master")))
+;;  `sqlserver-cmd'
+;;    sqlserver-cmd  now  support sqlcmd.exe and osql.exe
+;;    default = (quote sqlcmd)
 
 ;; (sqlserver-query "select empno,ename from emp where empno<=7499")
 ;; got : (("7369" "SMITH") ("7499" "ALLEN"))
@@ -69,24 +87,6 @@
 ;;   (sqlserver-query-close-connection c)
 
 
-;;; Commands:
-;;
-;; Below are complete command list:
-;;
-;;  `sqlserver-query-create-connection'
-;;    open connection with sqlcmd.exe or osql.exe.
-;;
-;;; Customizable Options:
-;;
-;; Below are customizable option list:
-;;
-;;  `sqlserver-connection-info'
-;;    sqlserver connection info .
-;;    default = (quote ((username . "sa") (password . "sa") (server-instance . "localhost\\SQLEXPRESS") (dbname . "master")))
-;;  `sqlserver-cmd'
-;;    sqlserver-cmd  now  support sqlcmd.exe and osql.exe
-;;    default = (quote sqlcmd)
-
 ;;; Code:
 
 
@@ -118,9 +118,13 @@ sqlserver 2005 add new cmd sqlcmd.exe. and osql.exe is not recommended."
     (with-temp-buffer
       (insert raw-result)
       (goto-char  (point-min))
-      (when (re-search-forward "(.*\\(行受影响\\|rows affected\\))" nil t)
-        (replace-match "" nil nil))
-      (goto-char  (point-min))
+      (when (string-match  "(.*\\(行受影响\\|rows affected\\))"
+                           (buffer-substring-no-properties
+                            (line-beginning-position)(line-end-position)))
+        (delete-region (line-beginning-position) (line-beginning-position 2)))
+      (when (re-search-forward "(.*\\(行受影响\\|rows affected\\))")
+        (delete-region (match-beginning 0)(point-max))
+        )
       (while (re-search-forward "[ \t\n]*[ \t\n]*" nil t)
         (replace-match "" nil nil))
       (goto-char  (point-min))
@@ -129,13 +133,14 @@ sqlserver 2005 add new cmd sqlcmd.exe. and osql.exe is not recommended."
       (setq line-count (count-lines (point-min) (point-max)))
       (goto-char  (point-min))
       (while (< (line-number-at-pos)  line-count )
-	(setq line  (buffer-substring-no-properties
-		     (point-at-bol) (point-at-eol)))
-	(unless (string-match "^[ \t]*$" line)
-	  (setq row (split-string line "" t))
-	  (when row (setq result (append result (list row)))))
-	(forward-line))
-      )result ))
+        (setq line  (buffer-substring-no-properties
+                     (point-at-bol) (point-at-eol)))
+        (unless (string-match "^[ \t]*$" line)
+          (setq row (split-string line "" t))
+          (when row (setq result (append result (list row)))))
+        (forward-line)))
+    (setcdr result (cddr result))
+    result ))
 
 (defun sqlserver-parse-result-as-list-4-sqlcmd (raw-result)
   (let  (result row line-count)
@@ -147,8 +152,9 @@ sqlserver 2005 add new cmd sqlcmd.exe. and osql.exe is not recommended."
         (setq row (split-string (buffer-substring-no-properties
                                  (point-at-bol) (point-at-eol)) "" t))
         (setq result (append result (list row)))
-        (forward-line))
-      )result ))
+        (forward-line)))
+    (setcdr result (cddr result))
+    result))
 
 (defun sqlserver-parse-result-as-list (raw-result)
   (if (equal sqlserver-cmd 'sqlcmd)
@@ -159,13 +165,13 @@ sqlserver 2005 add new cmd sqlcmd.exe. and osql.exe is not recommended."
 (defun sqlserver-format-connect-string(connection-info)
   "default:sqlcmd -S localhost\\SQLEXPRESS -U sa -P sa -d master -h-1 -w 65535   -s \"\^E\" -W"
   (if (equal sqlserver-cmd 'sqlcmd)
-      (format "%s -S %s -U %s -P %s -d \"%s\" -h-1  -w 65535  -s \"\^E\" -W"
+      (format "%s -S %s -U %s -P %s -d \"%s\" -w 65535  -s \"\^E\" -W"
               (symbol-name sqlserver-cmd)
               (cdr (assoc 'server-instance connection-info))
               (cdr (assoc 'username connection-info))
               (cdr (assoc 'password connection-info))
               (cdr (assoc 'dbname connection-info)))
-    (format "%s -S %s -U %s -P %s -d \"%s\" -h-1  -n -w 65535 -s \"\" -r 1 "
+    (format "%s -S %s -U %s -P %s -d \"%s\" -n -w 65535 -s \"\" -r 1 "
             ;;            "%s -S %s -U %s -P %s -d %s -h-1  -n -w 65535  -s \"\^E\""
             (symbol-name sqlserver-cmd)
             (cdr (assoc 'server-instance connection-info))
@@ -221,7 +227,7 @@ sqlserver 2005 add new cmd sqlcmd.exe. and osql.exe is not recommended."
 
 ;;(sqlserver-query "select empno from emp")
 ;;;###autoload
-(defun sqlserver-query (sql &optional sqlserver-query-connection)
+(defun sqlserver-query-with-heading (sql &optional sqlserver-query-connection)
   "execute sql using `sqlcmd' or `osql' ,and return the result of it."
   (let( (connection sqlserver-query-connection) process)
     (unless connection
@@ -255,6 +261,11 @@ sqlserver 2005 add new cmd sqlcmd.exe. and osql.exe is not recommended."
         (setq end (max start  (1- (match-beginning 0))))
         (sqlserver-parse-result-as-list  (buffer-substring-no-properties start end))
         ))))
+
+;;;###autoload
+(defun sqlserver-query(sql &optional sqlserver-query-connection)
+  "execute sql using `sqlcmd' or `osql' ,and return the result of it."
+  (cdr (sqlserver-query-with-heading sql sqlserver-query-connection)))
 
 (provide 'sqlserver-query)
 ;;; sqlserver-query.el ends here
