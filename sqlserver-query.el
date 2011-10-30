@@ -3,7 +3,7 @@
 ;; Copyright (C) 2011 孤峰独秀
 
 ;; Created: 2011年08月17日 星期三 22时11分54秒
-;; Last Updated: Joseph 2011-10-30 14:47:21 星期日
+;; Last Updated: Joseph 2011-10-30 14:49:06 星期日
 ;; Version: 0.1.2
 ;; Author: 孤峰独秀  jixiuf@gmail.com
 ;; Keywords: sqlserver emacs sql sqlcmd.exe osql.exe
@@ -228,7 +228,8 @@ sqlserver 2005 add new cmd sqlcmd.exe. and osql.exe is not recommended."
 ;;(sqlserver-query "select empno from emp")
 ;;;###autoload
 (defun sqlserver-query-with-heading (sql &optional sqlserver-query-connection)
-  "execute sql using `sqlcmd' or `osql' ,and return the result of it."
+  "execute sql using `sqlcmd' or `osql' ,and return the result of it.
+the `car' of result is heading"
   (let( (connection sqlserver-query-connection) process)
     (unless connection
       (unless (and sqlserver-query-default-connection
