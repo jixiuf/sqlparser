@@ -3,7 +3,7 @@
 ;; Copyright (C) 2011 孤峰独秀
 
 ;; Created: 2011年08月17日 星期三 22时11分54秒
-;; Last Updated: Joseph 2011-10-30 14:49:06 星期日
+;; Last Updated: Joseph 2011-10-30 14:49:38 星期日
 ;; Version: 0.1.2
 ;; Author: 孤峰独秀  jixiuf@gmail.com
 ;; Keywords: sqlserver emacs sql sqlcmd.exe osql.exe
@@ -237,12 +237,9 @@ the `car' of result is heading"
                    (equal (process-status (nth 0  sqlserver-query-default-connection)) 'run)
                    )
         (setq sqlserver-query-default-connection (call-interactively 'sqlserver-query-create-connection)))
-      (setq connection sqlserver-query-default-connection)
-      )
+      (setq connection sqlserver-query-default-connection))
     (setq process (car connection))
-
     (when (string-match "\\(.*\\);[ \t]*" sql) (setq sql (match-string 1 sql)))
-
     (with-current-buffer (process-buffer process)
       (delete-region (point-min) (point-max))
       (let ((start (point-min))
