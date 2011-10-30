@@ -3,7 +3,7 @@
 ;; Copyright (C) 2011 孤峰独秀
 
 ;; Created: 2011年08月17日 星期三 22时11分54秒
-;; Last Updated: Joseph 2011-10-30 14:52:37 星期日
+;; Last Updated: Joseph 2011-10-30 15:06:10 星期日
 ;; Version: 0.1.3
 ;; Author: 孤峰独秀  jixiuf@gmail.com
 ;; Keywords: sqlserver emacs sql sqlcmd.exe osql.exe
@@ -144,7 +144,8 @@ sqlserver 2005 add new cmd sqlcmd.exe. and osql.exe is not recommended."
           (setq row (split-string line "" t))
           (when row (setq result (append result (list row)))))
         (forward-line)))
-    (setcdr result (cddr result))
+    (when (and result (> (length result) 1))
+      (setcdr result (cddr result))  )
     result ))
 
 (defun sqlserver-parse-result-as-list-4-sqlcmd (raw-result)
@@ -158,7 +159,8 @@ sqlserver 2005 add new cmd sqlcmd.exe. and osql.exe is not recommended."
                                  (point-at-bol) (point-at-eol)) "" t))
         (setq result (append result (list row)))
         (forward-line)))
-    (setcdr result (cddr result))
+    (when (and result (> (length result) 1))
+      (setcdr result (cddr result))  )
     result))
 
 (defun sqlserver-parse-result-as-list (raw-result)
