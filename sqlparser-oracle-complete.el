@@ -3,7 +3,7 @@
 ;; Copyright (C) 2011 孤峰独秀
 
 ;; Created: 2011年07月31日 星期日 20时37分31秒
-;; Last Updated: Joseph 2011-10-03 14:06:01 星期一
+;; Last Updated: Joseph 2011-10-30 15:52:36 星期日
 ;; Version: 0.1.4
 ;; Author: 孤峰独秀  jixiuf@gmail.com
 ;; Keywords: sql parse oracle complete
@@ -356,7 +356,7 @@ then the `u' is `alias' and `user' is the true table name."
     (save-excursion
       (skip-chars-forward " \t\n\r")
       (re-search-backward ";[ \t\n\r]*\\|\\`\\|\n[\r\t ]*\n[^ \t]" nil t)
-      (setq begin (point)))
+      (setq begin (match-end 0)))
     (save-excursion
       (skip-chars-forward " \t\n\r")
       (re-search-forward "\n[\r\t ]*\n[^ \t]\\|\\'\\|[ \t\n\r]*;" nil t)
