@@ -3,8 +3,8 @@
 ;; Copyright (C) 2011 孤峰独秀
 
 ;; Created: 2011年08月17日 星期三 22时11分54秒
-;; Last Updated: Joseph 2011-10-30 14:49:38 星期日
-;; Version: 0.1.2
+;; Last Updated: Joseph 2011-10-30 14:52:37 星期日
+;; Version: 0.1.3
 ;; Author: 孤峰独秀  jixiuf@gmail.com
 ;; Keywords: sqlserver emacs sql sqlcmd.exe osql.exe
 ;; Filename: sqlserver-query.el
@@ -50,6 +50,8 @@
 
 ;; (sqlserver-query "select empno,ename from emp where empno<=7499")
 ;; got : (("7369" "SMITH") ("7499" "ALLEN"))
+;; (sqlserver-query-with-heading "select empno,ename from emp where empno<=7499")
+;; got : (("empno","ename")("7369" "SMITH") ("7499" "ALLEN"))
 ;; using default connection ,not recommended.
 
 ;;
@@ -74,6 +76,7 @@
 
 ;; (defvar c (sqlserver-query-create-connection sqlserver-connection-info))
 ;; (sqlserver-query "select empno from emp" c)
+;; (sqlserver-query-with-heading "select empno from emp" c)
 ;; recommended
 ;;
 ;; the normal way to use sqlserver-query.el is :
@@ -83,6 +86,8 @@
 ;;    (setq c (call-interactively 'sqlserver-query-create-connection)))
 ;; 2:
 ;;   (sqlserver-query "select empno from emp" c)
+;;   or
+;;   (sqlserver-query-with-heading "select empno from emp" c)
 ;; 3:
 ;;   (sqlserver-query-close-connection c)
 
