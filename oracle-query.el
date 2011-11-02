@@ -2,7 +2,7 @@
 
 ;; Copyright (C) 2011 纪秀峰(Joseph)
 
-;; Last Updated: Joseph 2011-11-02 15:33:24 星期三
+;; Last Updated: Joseph 2011-11-02 15:34:31 星期三
 ;; Created: 2011-7-31
 ;; Version: 0.1.4
 ;; Author: 纪秀峰(Joseph)  jixiuf@gmail.com
@@ -161,12 +161,16 @@ created process"
        (equal (process-status (car connection)) 'run)))
 
 ;;;###autoload
-(defun oracle-query-close-connection(sqlplus-connection)
-  "close connection.kill sqlplus process and buffer ."
-  (kill-process (nth 0 sqlplus-connection))
-  (kill-buffer (nth 1 sqlplus-connection))
-  (setq sqlplus-connection nil)
+(defun oracle-query-close-connection(connection)
+  "close connection.kill oracle process and buffer ."
+  (when (oracle-query-connection-alive-p connection)
+    (process-send-string (car connection)  "exit\n"))
+  (sleep-for 0.1)
+  (when (oracle-query-connection-alive-p connection)
+    (kill-process (car connection))
+    (kill-buffer (nth 1 connection)))
   )
+
 
 ;;(oracle-query "select empno from emp")
 ;; (oracle-query "select empno from emp" (oracle-query-create-connection "scott/tiger"))
