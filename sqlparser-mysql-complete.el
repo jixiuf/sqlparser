@@ -4,7 +4,7 @@
 ;; Copyright (C) 2011 孤峰独秀
 
 ;; Created: 2011年07月21日 星期四 20时03分40秒
-;; Last Updated: Joseph 2011-11-02 10:03:36 星期三
+;; Last Updated: Joseph 2011-11-02 13:06:00 星期三
 ;; Version: 0.1.2
 ;; Author: 孤峰独秀  jixiuf@gmail.com
 ;; Keywords: sql parse mysql
@@ -113,8 +113,8 @@
 
 ;;; Code:
 ;;;尚未完成，可能永远完不成。不幸已经完成。
-(require 'sql)
 (require 'mysql)
+(require 'thingatpt)
 (require 'anything nil t)
 
 (defgroup sqlparser nil
@@ -534,23 +534,19 @@ it will return 'table' ,or 'column' ,or nil.
     returnVal
     ))
 
-
 (defun sqlparser-get-prefix-4-mysql()
   "for example `tablename.col' `table.' `str'"
-  (let ((init-pos (point)) prefix)
-    (when (search-backward-regexp "[ \t\n]+\\|[,\\();=\\+-\\*/%]" (point-min) t)
-      (setq prefix (buffer-substring (match-end 0) init-pos)))
-    (goto-char init-pos)
-    (or prefix "")
-    ))
+  (with-syntax-table (copy-syntax-table (syntax-table))
+    (modify-syntax-entry ?.  "w");treat . as part of word
+    (or (thing-at-point 'word) ""))
+  )
 
 (defun sqlparser-word-before-point-4-mysql()
   "get word before current point or empty string."
-  (save-excursion
-    (let ((current-pos (point)))
-      (if (search-backward-regexp "\s-\\|[ \t\n\r]+\\|[\\.,\\()-=%/]" (point-at-bol) t )
-          (buffer-substring-no-properties (match-end 0) current-pos )
-        ""))))
+  (with-syntax-table (copy-syntax-table (syntax-table))
+    (modify-syntax-entry ?.  ".");treat . as punctuation character
+    (or (thing-at-point 'word) ""))
+  )
 
 
 (provide 'sqlparser-mysql-complete)
