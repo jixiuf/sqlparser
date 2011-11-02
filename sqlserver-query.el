@@ -3,7 +3,7 @@
 ;; Copyright (C) 2011 Joseph 纪秀峰
 
 ;; Created: 2011年08月17日 星期三 22时11分54秒
-;; Last Updated: Joseph 2011-11-02 14:43:34 星期三
+;; Last Updated: Joseph 2011-11-02 15:05:28 星期三
 ;; Version: 0.1.4
 ;; Author: Joseph  纪秀峰 jixiuf@gmail.com
 ;; Keywords: sqlserver emacs sql sqlcmd.exe osql.exe
@@ -240,6 +240,7 @@ If you leave it nil, it will search the path for the executable."
      process
      (lambda (proc change)
        (when (string-match "\\(finished\\|exited\\|exited abnormally with code\\)" change)
+         (kill-buffer (process-buffer proc) )
          (message  (concat  (process-name proc) " exited")))))
     (list process
           (process-buffer process)
@@ -249,18 +250,21 @@ If you leave it nil, it will search the path for the executable."
   "test whether the connection is alive."
   (and connection
        (listp connection)
-       (processp (nth 0 connection))
+       (processp (car connection))
        (bufferp (nth 1 connection))
        (buffer-live-p (nth 1 connection))
-       (equal (process-status (nth 0 connection)) 'run)))
+       (equal (process-status (car connection)) 'run)))
 
 ;;;###autoload
 (defun sqlserver-query-close-connection(connection)
   "close connection.kill sqlserver process and buffer ."
-  (kill-process (nth 0 connection))
-  (kill-buffer (nth 1 connection))
-  (setq connection nil))
-
+  (when (sqlserver-query-connection-alive-p connection)
+    (process-send-string (car connection)  "exit\n"))
+  (sleep-for 0.1)
+  (when (sqlserver-query-connection-alive-p connection)
+    (kill-process (car connection))
+    (kill-buffer (nth 1 connection)))
+  )
 
 ;;(sqlserver-query "select empno from emp")
 ;;;###autoload
