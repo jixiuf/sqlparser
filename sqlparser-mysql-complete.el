@@ -1,12 +1,12 @@
 ;;; sqlparser-mysql-complete.el --- completing tablename,column name for mysql.
 ;; -*- coding:utf-8 -*-
 
-;; Copyright (C) 2011 孤峰独秀
+;; Copyright (C) 2011 纪秀峰(Joseph)
 
 ;; Created: 2011年07月21日 星期四 20时03分40秒
-;; Last Updated: Joseph 2011-11-02 13:06:00 星期三
+;; Last Updated: Joseph 2011-11-02 14:22:14 星期三
 ;; Version: 0.1.2
-;; Author: 孤峰独秀  jixiuf@gmail.com
+;; Author: 孤峰独秀(Joseph)  jixiuf@gmail.com
 ;; Keywords: sql parse mysql
 ;; Filename: sqlparser-mysql-complete.el
 ;; Description:  completing tablename column for mysql when editing
@@ -112,6 +112,7 @@
 ;;    default = sql-database
 
 ;;; Code:
+
 ;;;尚未完成，可能永远完不成。不幸已经完成。
 (require 'mysql)
 (require 'thingatpt)
