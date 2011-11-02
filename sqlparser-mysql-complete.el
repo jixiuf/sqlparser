@@ -4,7 +4,7 @@
 ;; Copyright (C) 2011 孤峰独秀
 
 ;; Created: 2011年07月21日 星期四 20时03分40秒
-;; Last Updated: Joseph 2011-10-03 14:05:20 星期一
+;; Last Updated: Joseph 2011-11-02 10:03:36 星期三
 ;; Version: 0.1.2
 ;; Author: 孤峰独秀  jixiuf@gmail.com
 ;; Keywords: sql parse mysql
@@ -538,7 +538,7 @@ it will return 'table' ,or 'column' ,or nil.
 (defun sqlparser-get-prefix-4-mysql()
   "for example `tablename.col' `table.' `str'"
   (let ((init-pos (point)) prefix)
-    (when (search-backward-regexp "[ \t\n,(;]+" (point-min) t)
+    (when (search-backward-regexp "[ \t\n]+\\|[,\\();=\\+-\\*/%]" (point-min) t)
       (setq prefix (buffer-substring (match-end 0) init-pos)))
     (goto-char init-pos)
     (or prefix "")
@@ -548,7 +548,7 @@ it will return 'table' ,or 'column' ,or nil.
   "get word before current point or empty string."
   (save-excursion
     (let ((current-pos (point)))
-      (if (search-backward-regexp "\s-\\|[ \t]+\\|\\.\\|,\\|(" (point-at-bol) t )
+      (if (search-backward-regexp "\s-\\|[ \t\n\r]+\\|[\\.,\\()-=%/]" (point-at-bol) t )
           (buffer-substring-no-properties (match-end 0) current-pos )
         ""))))
 
