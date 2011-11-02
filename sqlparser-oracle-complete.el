@@ -3,9 +3,9 @@
 ;; Copyright (C) 2011 Joseph
 
 ;; Created: 2011年07月31日 星期日 20时37分31秒
-;; Last Updated: Joseph 2011-11-02 13:04:59 星期三
+;; Last Updated: Joseph 2011-11-02 14:21:07 星期三
 ;; Version: 0.1.4
-;; Author: Joseph  jixiuf@gmail.com
+;; Author: 纪秀峰(Joseph)  jixiuf@gmail.com
 ;; Keywords: sql parse oracle complete
 ;; Filename: sqlparser-oracle-complete.el
 ;; Description:  completing tablename column for oracle when editing
