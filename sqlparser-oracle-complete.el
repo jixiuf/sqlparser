@@ -3,7 +3,7 @@
 ;; Copyright (C) 2011 Joseph
 
 ;; Created: 2011年07月31日 星期日 20时37分31秒
-;; Last Updated: Joseph 2011-11-02 10:01:07 星期三
+;; Last Updated: Joseph 2011-11-02 13:04:59 星期三
 ;; Version: 0.1.4
 ;; Author: Joseph  jixiuf@gmail.com
 ;; Keywords: sql parse oracle complete
@@ -83,6 +83,7 @@
 ;;; Code:
 
 (require 'oracle-query)
+(require 'thingatpt)
 (require 'anything nil t)
 
 (defvar oracle-complete-minor-mode-map
@@ -465,20 +466,17 @@ it will return 'table' ,or 'column' ,or nil.
 
 (defun sqlparser-get-prefix-4-oracle()
   "for example `tablename.col' `table.' `str'"
-  (let ((init-pos (point)) prefix)
-    (when (search-backward-regexp "[ \t\n]+\\|[,\\();=\\+-\\*/%]" (point-min) t)
-      (setq prefix (buffer-substring (match-end 0) init-pos)))
-    (goto-char init-pos)
-    (or prefix "")
-    ))
+  (with-syntax-table (copy-syntax-table (syntax-table))
+    (modify-syntax-entry ?.  "w");treat . as part of word
+    (or (thing-at-point 'word) ""))
+  )
 
 (defun sqlparser-word-before-point-4-oracle()
   "get word before current point or empty string."
-  (save-excursion
-    (let ((current-pos (point)))
-      (if (search-backward-regexp "\s-\\|[ \t\n\r]+\\|[\\.,\\()-=%/]" (point-at-bol) t )
-          (buffer-substring-no-properties (match-end 0) current-pos )
-        ""))))
+  (with-syntax-table (copy-syntax-table (syntax-table))
+    (modify-syntax-entry ?.  ".");treat . as punctuation character
+    (or (thing-at-point 'word) ""))
+  )
 
 
 (provide 'sqlparser-oracle-complete)
