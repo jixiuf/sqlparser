@@ -2,7 +2,7 @@
 
 ;; Copyright (C) 2011 纪秀峰(Joseph)
 
-;; Last Updated: Joseph 2011-11-02 14:25:17 星期三
+;; Last Updated: Joseph 2011-11-02 15:33:24 星期三
 ;; Created: 2011-7-31
 ;; Version: 0.1.4
 ;; Author: 纪秀峰(Joseph)  jixiuf@gmail.com
@@ -155,8 +155,10 @@ created process"
   "test whether the connection is alive."
   (and connection
        (listp connection)
-       (processp (nth 0 connection))
-       (equal (process-status (nth 0  connection)) 'run)))
+       (processp (car connection))
+       (bufferp (nth 1 connection))
+       (buffer-live-p (nth 1 connection))
+       (equal (process-status (car connection)) 'run)))
 
 ;;;###autoload
 (defun oracle-query-close-connection(sqlplus-connection)
