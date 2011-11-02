@@ -3,7 +3,7 @@
 ;; Copyright (C) 2011 Joseph
 
 ;; Created: 2011年08月19日 星期五 00时38分17秒
-;; Last Updated: Joseph 2011-11-12 09:37:06 星期六
+;; Last Updated: Joseph 2011-11-02 09:58:08 星期三
 ;; Version: 0.1.2
 ;; Author: Joseph  jixiuf@gmail.com
 ;; Keywords: sql complete sqlserver
@@ -575,17 +575,17 @@ it will return 'table' ,or 'column' ,or nil.
 (defun sqlparser-get-prefix-4-sqlserver()
   "for example `tablename.col' `table.' `str'"
   (let ((init-pos (point)) prefix)
-    (when (search-backward-regexp "[ \t\n,(;]+" (point-min) t)
+    (when (search-backward-regexp "[ \t\n]+\\|[,\\();=\\+-\\*/%]" (point-min) t)
       (setq prefix (buffer-substring (match-end 0) init-pos)))
     (goto-char init-pos)
     (or prefix "")
-   ))
+    ))
 
 (defun sqlparser-word-before-point-4-sqlserver()
   "get word before current point or empty string."
   (save-excursion
     (let ((current-pos (point)))
-      (if (search-backward-regexp "\s-\\|[ \t]+\\|\\.\\|,\\|(" (point-at-bol) t)
+      (if (search-backward-regexp "\s-\\|[ \t\n\r]+\\|[\\.,\\()-=%/]" (point-at-bol) t)
           (buffer-substring-no-properties (match-end 0) current-pos)
         ""))))
 
