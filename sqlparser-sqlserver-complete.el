@@ -3,7 +3,7 @@
 ;; Copyright (C) 2011 Joseph
 
 ;; Created: 2011年08月19日 星期五 00时38分17秒
-;; Last Updated: Joseph 2011-11-02 13:16:19 星期三
+;; Last Updated: Joseph 2011-11-02 13:31:53 星期三
 ;; Version: 0.1.2
 ;; Author: Joseph  jixiuf@gmail.com
 ;; Keywords: sql complete sqlserver
@@ -159,7 +159,7 @@ position ."
            (lambda () (message "complete failed."))))
       (anything '(anything-c-source-sqlserver)
                 ;; Initialize input with current symbol
-                (sqlparser-word-before-point-4-sqlserver)  nil nil))))
+                (regexp-quote (sqlparser-word-before-point-4-sqlserver))  nil nil))))
 
 (defun  sqlparser-sqlserver-context-candidates()
   "it will decide to complete tablename or columnname depend on
@@ -606,8 +606,8 @@ it will return 'table' ,or 'column' ,or nil.
   "get word before current point or empty string."
   (with-syntax-table (copy-syntax-table (syntax-table))
     (modify-syntax-entry ?.  ".");treat . as punctuation character
-    (modify-syntax-entry ?[  ".");treat [ as punctuation character
-    (modify-syntax-entry ?]  ".");treat ] as punctuation character
+    (modify-syntax-entry ?[  "w");treat [ as part of word
+    (modify-syntax-entry ?]  "w");treat ] as part of word
     (or (thing-at-point 'word) "")))
 
 (provide 'sqlparser-sqlserver-complete)
