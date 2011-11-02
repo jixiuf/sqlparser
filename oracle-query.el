@@ -1,11 +1,11 @@
 ;;; oracle-query.el --- execute sql select using sqlplus. -*- coding:utf-8 -*-
 
-;; Copyright (C) 2011 孤峰独秀
+;; Copyright (C) 2011 纪秀峰(Joseph)
 
-;; Last Updated: Joseph 2011-10-26 16:06:20 星期三
+;; Last Updated: Joseph 2011-11-02 14:25:17 星期三
 ;; Created: 2011-7-31
 ;; Version: 0.1.4
-;; Author: 孤峰独秀  jixiuf@gmail.com
+;; Author: 纪秀峰(Joseph)  jixiuf@gmail.com
 ;; Keywords: oracle sql emacs
 ;; Filename: oracle-query.el
 ;; Description:execute sql select using sqlplus.
