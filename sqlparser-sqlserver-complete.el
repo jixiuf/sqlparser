@@ -3,7 +3,7 @@
 ;; Copyright (C) 2011 Joseph
 
 ;; Created: 2011年08月19日 星期五 00时38分17秒
-;; Last Updated: Joseph 2011-11-02 10:36:26 星期三
+;; Last Updated: Joseph 2011-11-02 11:06:30 星期三
 ;; Version: 0.1.2
 ;; Author: Joseph  jixiuf@gmail.com
 ;; Keywords: sql complete sqlserver
@@ -339,7 +339,12 @@ position ."
     result))
 
 (defun sqlparser-sqlserver-all-procedures-candidates()
-  (mapcar 'car (sqlserver-query "SELECT name FROM sys.all_objects WHERE ([type] = 'P' OR [type] = 'X' OR [type] = 'PC') ORDER BY [name]; ")))
+  (let* ((prefix (sqlparser-word-before-point-4-sqlserver)) ;
+         sql)
+    (if (> (length prefix) 0)
+        (setq sql (format "SELECT name FROM sys.all_objects WHERE ([type] = 'P' OR [type] = 'X' OR [type] = 'PC') and  name like '%s%%'" prefix))
+      (setq sql "SELECT name FROM sys.all_objects WHERE ([type] = 'P' OR [type] = 'X' OR [type] = 'PC')"))
+    (mapcar 'car (sqlserver-query sql))))
 
 (defun sqlparser-sqlserver-all-tablename-candidates()
   (mapcar 'car (sqlserver-query "select name from sys.tables" sqlparser-sqlserver-connection)))
