@@ -3,7 +3,7 @@
 ;; Copyright (C) 2011 Joseph
 
 ;; Created: 2011年07月31日 星期日 20时37分31秒
-;; Last Updated: Joseph 2011-11-12 09:38:09 星期六
+;; Last Updated: Joseph 2011-11-02 10:01:07 星期三
 ;; Version: 0.1.4
 ;; Author: Joseph  jixiuf@gmail.com
 ;; Keywords: sql parse oracle complete
@@ -466,7 +466,7 @@ it will return 'table' ,or 'column' ,or nil.
 (defun sqlparser-get-prefix-4-oracle()
   "for example `tablename.col' `table.' `str'"
   (let ((init-pos (point)) prefix)
-    (when (search-backward-regexp "[ \t\n,(;]+" (point-min) t)
+    (when (search-backward-regexp "[ \t\n]+\\|[,\\();=\\+-\\*/%]" (point-min) t)
       (setq prefix (buffer-substring (match-end 0) init-pos)))
     (goto-char init-pos)
     (or prefix "")
@@ -476,7 +476,7 @@ it will return 'table' ,or 'column' ,or nil.
   "get word before current point or empty string."
   (save-excursion
     (let ((current-pos (point)))
-      (if (search-backward-regexp "\s-\\|[ \t]+\\|\\.\\|,\\|(" (point-at-bol) t )
+      (if (search-backward-regexp "\s-\\|[ \t\n\r]+\\|[\\.,\\()-=%/]" (point-at-bol) t )
           (buffer-substring-no-properties (match-end 0) current-pos )
         ""))))
 
