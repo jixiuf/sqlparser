@@ -3,7 +3,7 @@
 ;; Copyright (C) 2011 Joseph 纪秀峰
 
 ;; Created: 2011年08月17日 星期三 22时11分54秒
-;; Last Updated: Joseph 2011-11-02 15:05:28 星期三
+;; Last Updated: Joseph 2011-11-02 15:08:24 星期三
 ;; Version: 0.1.4
 ;; Author: Joseph  纪秀峰 jixiuf@gmail.com
 ;; Keywords: sqlserver emacs sql sqlcmd.exe osql.exe
@@ -209,7 +209,6 @@ If you leave it nil, it will search the path for the executable."
 (defun sqlserver-query-read-connect-string()
   "set server dbname username password interactive"
   (let ((connection-info (copy-alist sqlserver-connection-info)))
-
     (setcdr  (assoc 'username connection-info)
              (read-string (format  "username(default:%s):"  (cdr (assoc 'username connection-info)))
                           "" nil   (cdr (assoc 'username connection-info))))
