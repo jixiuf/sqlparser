@@ -3,7 +3,7 @@
 ;; Copyright (C) 2011 Joseph
 
 ;; Created: 2011年08月19日 星期五 00时38分17秒
-;; Last Updated: Joseph 2011-11-02 09:58:08 星期三
+;; Last Updated: Joseph 2011-11-02 10:36:26 星期三
 ;; Version: 0.1.2
 ;; Author: Joseph  jixiuf@gmail.com
 ;; Keywords: sql complete sqlserver
@@ -171,13 +171,16 @@ position ."
     (cond
      ((string= "database" context)
       (setq candidats (sqlparser-sqlserver-all-databasename-candidates))
-     )
+      )
      ((string= "table" context)
       (setq candidats (sqlparser-sqlserver-tablename-schemaname-databasename-candidates))
-     )
+      )
      ((string= "column" context)
       (setq candidats ( sqlparser-sqlserver-column-candidates))
-     )
+      )
+     ((string= "procedure" context)
+      (setq candidats (sqlparser-sqlserver-all-procedures-candidates))
+      )
      ((null context) nil))
     candidats))
 
@@ -334,6 +337,9 @@ position ."
              (setq result (sqlparser-sqlserver-get-matched-columns tablename-string (nth 1 sub-prefix)))))
          )
     result))
+
+(defun sqlparser-sqlserver-all-procedures-candidates()
+  (mapcar 'car (sqlserver-query "SELECT name FROM sys.all_objects WHERE ([type] = 'P' OR [type] = 'X' OR [type] = 'PC') ORDER BY [name]; ")))
 
 (defun sqlparser-sqlserver-all-tablename-candidates()
   (mapcar 'car (sqlserver-query "select name from sys.tables" sqlparser-sqlserver-connection)))
@@ -504,6 +510,9 @@ it will return 'table' ,or 'column' ,or nil.
     (when (search-backward-regexp "\\bgroup\\b" sql-start-pos t 1)
       (push   (list (- cur-pos (point)) "group") map))
     (goto-char cur-pos)
+    (when (search-backward-regexp "\\bexec\\b" sql-start-pos t 1)
+      (push (list (- cur-pos (point)) "exec") map))
+    (goto-char cur-pos)
     (setq map   (sort map (lambda (a b) (when (< (car a) (car b)) t))))
     (setq keyword  (car (cdar map)))
     (cond
@@ -522,6 +531,9 @@ it will return 'table' ,or 'column' ,or nil.
      ((string-match "use" keyword)
       (setq returnVal "database")
      )
+     ((string-match "exec" keyword)
+      (setq returnVal "procedure")
+      )
      ((string-match "table\\|from\\|alter\\|update" keyword)
       (setq returnVal "table")
      )
