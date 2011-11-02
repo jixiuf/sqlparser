@@ -3,7 +3,7 @@
 ;; Copyright (C) 2011 Joseph
 
 ;; Created: 2011年08月19日 星期五 00时38分17秒
-;; Last Updated: Joseph 2011-11-02 13:03:37 星期三
+;; Last Updated: Joseph 2011-11-02 13:16:19 星期三
 ;; Version: 0.1.2
 ;; Author: Joseph  jixiuf@gmail.com
 ;; Keywords: sql complete sqlserver
@@ -234,8 +234,10 @@ position ."
                              name2-prefix name2-suffix name1 (replace-regexp-in-string "_" "[_]" name2
                             )))
                 (setq sql (format
-                           "select '%s' + name +'%s' tablename from sys.tables where schema_name(schema_id) ='%s' and name like '%s%%'"
-                             name2-prefix name2-suffix name1  (replace-regexp-in-string "_" "[_]" name2)))
+                           "select '%s' + name +'%s' tablename from sys.tables where schema_name(schema_id) ='%s' and name like '%s%%' union select '%s' + name +'%s' tablename from sys.all_views where schema_name(schema_id) ='%s' and name like '%s%%' "
+                             name2-prefix name2-suffix name1  (replace-regexp-in-string "_" "[_]" name2)
+                             name2-prefix name2-suffix name1  (replace-regexp-in-string "_" "[_]" name2)
+                             ))
                )
              )
            )
@@ -253,8 +255,10 @@ position ."
                    (name3 (nth 1 fullname3))
                    (name3-suffix  (if (equal "[" name3-prefix) "]" ""))
                   )
-              (setq sql (format " SELECT '%s' + name + '%s' tablename FROM sys.tables WHERE exists (select name from sys.databases where name = '%s') and schema_name(schema_id)= '%s' and name LIKE '%s%%'"
-                                name3-prefix name3-suffix name1 name2      (replace-regexp-in-string "_" "[_]" name3))))))
+              (setq sql (format " SELECT '%s' + name + '%s' tablename FROM sys.tables WHERE exists (select name from sys.databases where name = '%s') and schema_name(schema_id)= '%s' and name LIKE '%s%%' union  SELECT '%s' + name + '%s' tablename FROM sys.all_views WHERE exists (select name from sys.databases where name = '%s') and schema_name(schema_id)= '%s' and name LIKE '%s%%'"
+                                name3-prefix name3-suffix name1 name2 (replace-regexp-in-string "_" "[_]" name3)
+                                name3-prefix name3-suffix name1 name2 (replace-regexp-in-string "_" "[_]" name3)
+                                )))))
     (mapcar 'car (sqlserver-query sql sqlparser-sqlserver-connection))))
 
 ;;(sqlparser-sqlserver-split-three "[abc]") return ("[" "abc" "]")
