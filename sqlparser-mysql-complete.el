@@ -4,9 +4,9 @@
 ;; Copyright (C) 2011 纪秀峰(Joseph)
 
 ;; Created: 2011年07月21日 星期四 20时03分40秒
-;; Last Updated: Joseph 2011-11-02 14:22:14 星期三
+;; Last Updated: Joseph 2011-11-02 14:22:31 星期三
 ;; Version: 0.1.2
-;; Author: 孤峰独秀(Joseph)  jixiuf@gmail.com
+;; Author: 纪秀峰(Joseph)  jixiuf@gmail.com
 ;; Keywords: sql parse mysql
 ;; Filename: sqlparser-mysql-complete.el
 ;; Description:  completing tablename column for mysql when editing
