@@ -3,7 +3,7 @@
 ;; Copyright (C) 2011 Joseph 纪秀峰
 
 ;; Created: 2011年08月17日 星期三 22时11分54秒
-;; Last Updated: Joseph 2011-10-26 16:00:51 星期三
+;; Last Updated: Joseph 2011-11-02 14:43:34 星期三
 ;; Version: 0.1.4
 ;; Author: Joseph  纪秀峰 jixiuf@gmail.com
 ;; Keywords: sqlserver emacs sql sqlcmd.exe osql.exe
@@ -112,7 +112,7 @@
   "sqlserver connection info ."
   :group 'sqlserver-query
   :type 'alist)
-(make-variable-buffer-local 'sqlserver-connection-info)
+;; (make-variable-buffer-local 'sqlserver-connection-info)
 
 (defcustom sqlserver-cmd 'sqlcmd
   "sqlserver-cmd  now  support sqlcmd.exe and osql.exe
@@ -250,7 +250,9 @@ If you leave it nil, it will search the path for the executable."
   (and connection
        (listp connection)
        (processp (nth 0 connection))
-       (equal (process-status (nth 0  connection)) 'run)))
+       (bufferp (nth 1 connection))
+       (buffer-live-p (nth 1 connection))
+       (equal (process-status (nth 0 connection)) 'run)))
 
 ;;;###autoload
 (defun sqlserver-query-close-connection(connection)
@@ -265,15 +267,11 @@ If you leave it nil, it will search the path for the executable."
 (defun sqlserver-query-with-heading (sql &optional sqlserver-query-connection)
   "execute sql using `sqlcmd' or `osql' ,and return the result of it.
 the `car' of result is heading"
-  (let( (connection sqlserver-query-connection) process)
-    (unless connection
-      (unless (and sqlserver-query-default-connection
-                   (buffer-live-p (nth 1 sqlserver-query-default-connection))
-                   (equal (process-status (nth 0  sqlserver-query-default-connection)) 'run)
-                   )
-        (setq sqlserver-query-default-connection (call-interactively 'sqlserver-query-create-connection)))
-      (setq connection sqlserver-query-default-connection))
-    (setq process (car connection))
+  (let(  process)
+    (unless (sqlserver-query-connection-alive-p sqlserver-query-connection)
+      (setq-default sqlserver-query-default-connection (call-interactively 'sqlserver-query-create-connection))
+      (setq sqlserver-query-connection sqlserver-query-default-connection))
+    (setq process (car sqlserver-query-connection))
     (when (string-match "\\(.*\\);[ \t]*" sql) (setq sql (match-string 1 sql)))
     (with-current-buffer (process-buffer process)
       (delete-region (point-min) (point-max))
