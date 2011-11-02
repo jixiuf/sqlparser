@@ -3,7 +3,7 @@
 ;; Copyright (C) 2011 纪秀峰(Joseph)
 
 ;; Created: 2011年08月19日 星期五 00时38分17秒
-;; Last Updated: Joseph 2011-11-02 15:12:58 星期三
+;; Last Updated: Joseph 2011-11-02 15:24:58 星期三
 ;; Version: 0.1.2
 ;; Author: 纪秀峰(Joseph)  jixiuf@gmail.com
 ;; Keywords: sql complete sqlserver
@@ -110,6 +110,8 @@
 (defvar sqlparser-sqlserver-connection nil)
 (make-variable-buffer-local 'sqlparser-sqlserver-connection)
 
+(defvar sqlparser-sqlserver-opened-connections nil)
+
 (defvar sqlserver-complete-minor-mode-map
   (let ((map (make-sparse-keymap)))
     (if (featurep 'anything)
@@ -165,10 +167,14 @@ position ."
 (defun  sqlparser-sqlserver-context-candidates()
   "it will decide to complete tablename or columnname depend on
   current position."
-  (unless (and sqlparser-sqlserver-connection
-               (buffer-live-p (nth 1 sqlparser-sqlserver-connection))
-               (equal (process-status (nth 0  sqlparser-sqlserver-connection)) 'run))
-    (setq sqlparser-sqlserver-connection (call-interactively 'sqlserver-query-create-connection)))
+  (unless (sqlserver-query-connection-alive-p  sqlparser-sqlserver-connection)
+    (dolist (buf-conn-alist  sqlparser-sqlserver-opened-connections); close unused connections
+      (unless (and (bufferp (car buf-conn-alist))
+                   (buffer-live-p (car buf-conn-alist)))
+        (sqlserver-query-close-connection (nth 1 buf-conn-alist))))
+    (setq sqlparser-sqlserver-connection (call-interactively 'sqlserver-query-create-connection))
+    (add-to-list 'sqlparser-sqlserver-opened-connections (list (current-buffer) sqlparser-sqlserver-connection)))
+
   (let ((context (sqlparser-parse-4-sqlserver)) candidats)
     (cond
      ((string= "database" context)
