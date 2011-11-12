@@ -1,11 +1,11 @@
 ;;; sqlserver-query.el --- execute sql select using sqlcmd.exe or osql.exe on SQL SERVER. -*- coding:utf-8 -*-
 
-;; Copyright (C) 2011 孤峰独秀
+;; Copyright (C) 2011 Joseph
 
 ;; Created: 2011年08月17日 星期三 22时11分54秒
-;; Last Updated: Joseph 2011-10-30 15:06:10 星期日
+;; Last Updated: Joseph 2011-11-12 09:28:57 星期六
 ;; Version: 0.1.3
-;; Author: 孤峰独秀  jixiuf@gmail.com
+;; Author: Joseph  jixiuf@gmail.com
 ;; Keywords: sqlserver emacs sql sqlcmd.exe osql.exe
 ;; Filename: sqlserver-query.el
 ;; Description:  execute sql select using sqlcmd.exe or osql.exe on SQL SERVER
@@ -190,6 +190,7 @@ sqlserver 2005 add new cmd sqlcmd.exe. and osql.exe is not recommended."
 (defun sqlserver-query-read-connect-string()
   "set server dbname username password interactive"
   (let ((connection-info (copy-alist sqlserver-connection-info)))
+
     (setcdr  (assoc 'username connection-info)
              (read-string (format  "username(default:%s):"  (cdr (assoc 'username connection-info)))
                           "" nil   (cdr (assoc 'username connection-info))))
