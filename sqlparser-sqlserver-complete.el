@@ -1,11 +1,11 @@
 ;;; sqlparser-sqlserver-complete.el --- complete tablename and columnname when editing sql -*- coding:utf-8 -*-
 
-;; Copyright (C) 2011 孤峰独秀
+;; Copyright (C) 2011 Joseph
 
 ;; Created: 2011年08月19日 星期五 00时38分17秒
-;; Last Updated: Joseph 2011-10-30 15:53:04 星期日
-;; Version: 0.1.1
-;; Author: 孤峰独秀  jixiuf@gmail.com
+;; Last Updated: Joseph 2011-11-12 09:37:06 星期六
+;; Version: 0.1.2
+;; Author: Joseph  jixiuf@gmail.com
 ;; Keywords: sql complete sqlserver
 ;; URL:http://www.emacswiki.org/emacs/download/sqlparser-sqlserver-complete.el
 ;;     https://github.com/jixiuf/sqlparser
