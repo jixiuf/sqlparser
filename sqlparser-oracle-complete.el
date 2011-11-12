@@ -1,11 +1,11 @@
 ;;; sqlparser-oracle-complete.el --- completing tablename,column name for oracle. -*- coding:utf-8 -*-
 
-;; Copyright (C) 2011 孤峰独秀
+;; Copyright (C) 2011 Joseph
 
 ;; Created: 2011年07月31日 星期日 20时37分31秒
-;; Last Updated: Joseph 2011-10-30 15:52:36 星期日
+;; Last Updated: Joseph 2011-11-12 09:38:09 星期六
 ;; Version: 0.1.4
-;; Author: 孤峰独秀  jixiuf@gmail.com
+;; Author: Joseph  jixiuf@gmail.com
 ;; Keywords: sql parse oracle complete
 ;; Filename: sqlparser-oracle-complete.el
 ;; Description:  completing tablename column for oracle when editing
