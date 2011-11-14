@@ -3,7 +3,7 @@
 ;; Copyright (C) 2011 纪秀峰(Joseph)
 
 ;; Created: 2011年08月19日 星期五 00时38分17秒
-;; Last Updated: Joseph 2011-11-02 15:24:58 星期三
+;; Last Updated: Joseph 2011-11-14 11:54:04 星期一
 ;; Version: 0.1.2
 ;; Author: 纪秀峰(Joseph)  jixiuf@gmail.com
 ;; Keywords: sql complete sqlserver
@@ -423,11 +423,16 @@ update sentence or alter sentence."
           (delete-region  pt (point))
           (insert "table"))
         (push (buffer-substring (point-min) (point-max))  result-stack)
-       ))
+        ))
     (while (> (length result-stack) 0)
       (setq ele (pop result-stack))
       (with-temp-buffer
         (insert ele)
+        (goto-char (point-min))
+        (when (search-forward-regexp "\\(?:\\([a-zA-Z0-9_]+\\)[ \t\n\r]+\\)?\\(?:\\(?:inner[ \t\r\n]+\\|\\(?:\\(?:left\\|right\\)[ \t\r\n]+\\(?:outer[ \t\r\n]+\\)?\\)\\)join[ \t\n\r]+\\)\\([a-zA-Z0-9_]+\\)[ \t\r\n]+" (point-max) t)
+          (push  (match-string 1) tablename-stack)
+          (push  (match-string 2) tablename-stack)
+          )
         (goto-char (point-min))
         (when  (search-forward-regexp "[ \t\n\r]+from[ \t\n\r]+" (point-max) t)
           (delete-region (point-min) (point))
@@ -438,11 +443,11 @@ update sentence or alter sentence."
           (while (search-forward-regexp "," (point-max) t)
             (push (buffer-substring 1 (1- (point))) tablename-stack)
             (delete-region  1 (point))
-           )
+            )
           (push (buffer-substring (point-min) (point-max)) tablename-stack)
-         )
-       )
-     )
+          )
+        )
+      )
     (while (> (length tablename-stack) 0)
       (setq ele (pop tablename-stack))
       (with-temp-buffer
@@ -465,13 +470,12 @@ update sentence or alter sentence."
           (goto-char 0)
           (when (search-forward-regexp "\\([a-zA-Z0-9_\\$\\.]\\|\\[\\|]\\)+" (point-max) t)
             (push (match-string 0) result-stack)
-           )
-         )
-       )
-     )
+            )
+          )
+        )
+      )
     (delete "table" result-stack)
-    result-stack
-   ))
+    ))
 
 (defun sqlparser-parse-4-sqlserver()
   "judge now need complete tablename or column name or don't complete .
@@ -619,5 +623,3 @@ it will return 'table' ,or 'column' ,or nil.
 
 (provide 'sqlparser-sqlserver-complete)
 ;;; sqlparser-sqlserver-complete.el ends here
-
-
