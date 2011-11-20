@@ -3,7 +3,7 @@
 ;; Copyright (C) 2011 Joseph
 
 ;; Created: 2011年08月17日 星期三 22时11分54秒
-;; Last Updated: Joseph 2011-11-12 09:28:57 星期六
+;; Last Updated: Joseph 2011-11-20 09:05:39 星期日
 ;; Version: 0.1.3
 ;; Author: Joseph  jixiuf@gmail.com
 ;; Keywords: sqlserver emacs sql sqlcmd.exe osql.exe
@@ -227,7 +227,7 @@ sqlserver 2005 add new cmd sqlcmd.exe. and osql.exe is not recommended."
 
 ;;;###autoload
 (defun sqlserver-query-close-connection(connection)
-  "close connection.kill sqlplus process and buffer ."
+  "close connection.kill sqlserver process and buffer ."
   (kill-process (nth 0 connection))
   (kill-buffer (nth 1 connection))
   (setq connection nil))
