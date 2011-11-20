@@ -1,7 +1,7 @@
 ;;; oracle-table2entity-4java.el --- oracle table2entity for java   -*- coding:utf-8 -*-
 
 ;; Description:oracle table2entity for java
-;; Last Updated: Joseph 2011-10-03 14:04:45 星期一
+;; Last Updated: Joseph 2011-11-20 10:45:03 星期日
 ;; Created: 2011-09-18 21:44
 ;; Author: 孤峰独秀  jixiuf@gmail.com
 ;; Maintainer:  孤峰独秀  jixiuf@gmail.com
@@ -200,23 +200,23 @@ key 是db类型，value 是java 中对应类型.要求key大写"
 (defun otej-generate-class (setter-getters packagename classname savepath)
   "利用setter-getters 生成一个以`classname'为类名，package 为
   `packagename' 的的java 实体保存到`savepath'路径下。"
-  (with-current-buffer (find-file-noselect
-                        (expand-file-name
-                         (concat classname ".java") savepath))
-    (erase-buffer)
-    (insert (format "package %s;\n" packagename))
-    (insert "\n")
-    (insert "import java.util.*;\n")
-    (insert "\n")
-    (insert (format "public class %s{\n\n" classname))
-    (insert setter-getters)
-    (insert "}\n")
+  (flet ((flymake-mode (mode-value) nil )) ;; disable flymake mode if it is present
+    (with-current-buffer (find-file-noselect
+                          (expand-file-name
+                           (concat classname ".java") savepath))
+      (erase-buffer)
+      (insert (format "package %s;\n" packagename))
+      (insert "\n")
+      (insert "import java.util.*;\n")
+      (insert "\n")
+      (insert (format "public class %s{\n\n" classname))
+      (insert setter-getters)
+      (insert "}\n")
       (java-mode)
       (indent-region (point-min) (point-max))
-    (save-buffer)
-    (kill-this-buffer)
-    )
-  )
+      (save-buffer)
+      (kill-this-buffer)
+      )))
 
 ;;;###autoload
 (defun otej-generate-all-classes(package savepath)
