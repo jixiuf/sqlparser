@@ -1,13 +1,16 @@
 ;;; sqlserver-table2entity-4java.el --- sqlserver table2entity for java   -*- coding:utf-8 -*-
 
 ;; Description:sqlserver table2entity for java
-;; Last Updated: Joseph 2011-11-20 10:42:59 星期日
+;; Last Updated: Joseph 2011-11-20 10:54:22 星期日
 ;; Created: 2011-09-18 21:44
 ;; Author: 孤峰独秀  jixiuf@gmail.com
 ;; Maintainer:  孤峰独秀  jixiuf@gmail.com
 ;; Keywords: sqlserver java entity
 ;; URL: http://www.emacswiki.org/emacs/sqlserver-table2entity-4java.el
 ;; https://github.com/jixiuf/sqlparser
+;; screencast:
+;; http://screencast-repos.googlecode.com/files/emacs-sqlserver-oracle-table2entity.mp4.bz2
+;;  call command : (sqlserver-table2entity-4java-interactively)
 
 ;; Copyright (C) 2011, 孤峰独秀, all rights reserved.
 
@@ -26,9 +29,10 @@
 
 ;;; Commentary:
 
-;; screencast:
-;; http://screencast-repos.googlecode.com/files/emacs-sqlserver-oracle-table2entity.mp4.bz2
-;;  call command : (sqlserver-table2entity-4java-interactively)
+;; require sqlserver-query.el
+;;  call command : (sqlserver-table2entity-4csharp-interactively)
+;; it will connect to a sqlserver intance ,and export all the tables to csharp entities
+
 ;; 会提示以输入连接sqlserver 的连接字符串，然后，会查数据字典中的数据,根据当前连接的数据库，
 ;; 将其中所有的表导出为java Entity.
 ;;
