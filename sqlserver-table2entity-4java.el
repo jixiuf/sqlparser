@@ -1,7 +1,7 @@
 ;;; sqlserver-table2entity-4java.el --- sqlserver table2entity for java   -*- coding:utf-8 -*-
 
 ;; Description:sqlserver table2entity for java
-;; Last Updated: Joseph 2011-11-20 10:55:36 星期日
+;; Last Updated: Joseph 2011-11-20 10:56:24 星期日
 ;; Created: 2011-09-18 21:44
 ;; Author: 孤峰独秀  jixiuf@gmail.com
 ;; Maintainer:  孤峰独秀  jixiuf@gmail.com
@@ -9,7 +9,7 @@
 ;; URL: http://www.emacswiki.org/emacs/sqlserver-table2entity-4java.el
 ;; https://github.com/jixiuf/sqlparser
 ;; screencast:
-;; http://screencast-repos.googlecode.com/files/emacs-sqlserver-oracle-table2entity.mp4.bz2
+;; http://screencast-repos.googlecode.com/files/emacs-sqlserver-sqlserver-table2entity.mp4.bz2
 ;;  call command : (sqlserver-table2entity-4java-interactively)
 
 ;; Copyright (C) 2011, 孤峰独秀, all rights reserved.
@@ -250,4 +250,4 @@ key 是db类型，value 是java 中对应类型.要求key大写"
 ;; (sqlserver-table2entity-4java-interactively)
 
 (provide 'sqlserver-table2entity-4java)
-;;; oracle-table2entity-4java ends here
+;;; sqlserver-table2entity-4java ends here
