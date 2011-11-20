@@ -1,7 +1,7 @@
 ;;; sqlserver-table2entity-4java.el --- sqlserver table2entity for java   -*- coding:utf-8 -*-
 
 ;; Description:sqlserver table2entity for java
-;; Last Updated: Joseph 2011-11-20 10:54:22 星期日
+;; Last Updated: Joseph 2011-11-20 10:54:46 星期日
 ;; Created: 2011-09-18 21:44
 ;; Author: 孤峰独秀  jixiuf@gmail.com
 ;; Maintainer:  孤峰独秀  jixiuf@gmail.com
@@ -53,7 +53,7 @@
 ;;; Code:
 
 (require 'sqlserver-query)
-(require   'java-mode nil t)
+(require   'cc-mode nil t)
 
 (defcustom stej-sqlserver-type-java-type-alist
   '((BIT . "boolean")
