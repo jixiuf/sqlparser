@@ -1,7 +1,7 @@
 ;;; oracle-table2entity-4csharp.el --- oracle table2entity for csharp   -*- coding:utf-8 -*-
 
 ;; Description:oracle table2entity for csharp
-;; Last Updated: Joseph 2011-11-20 10:44:23 星期日
+;; Last Updated: Joseph 2011-11-20 11:32:49 星期日
 ;; Created: 2011-09-18 21:44
 ;; Author: 孤峰独秀  jixiuf@gmail.com
 ;; Maintainer:  孤峰独秀  jixiuf@gmail.com
@@ -140,29 +140,29 @@ key 是db类型，value 是csharp 中对应类型.要求key大写"
 (defun otec-generate-class (setter-getters namespacename classname savepath)
   "利用setter-getters 生成一个以`classname'为类名，namespace 为
   `namespacename' 的的csharp 实体保存到`savepath'路径下。"
-  (flet ((flymake-mode (mode-value) nil )) ;; disable flymake mode if it is present
-    (with-current-buffer (find-file-noselect
-                          (expand-file-name
-                           (concat classname ".cs") savepath))
-      (erase-buffer)
-      (insert "using System;\n")
-      (insert "using System.Text;\n")
-      (insert (format "namespace %s\n" namespacename))
-      (insert "{\n")
-      (insert (format "public class %s\n" classname))
-      (insert "{\n")
-      (insert "\n  #region Properties\n")
-      (insert setter-getters)
-      (insert "  #endregion\n")
-      (insert "}\n")
-      (insert "}\n")
-      (when (featurep 'csharp-mode)
-        (csharp-mode)
-        (indent-region (point-min) (point-max))
-        )
-      (save-buffer)
-      (kill-this-buffer)
-      )))
+  (with-current-buffer (find-file-noselect
+                        (expand-file-name
+                         (concat classname ".cs") savepath))
+    (when (boundp 'flymake-mode)(flymake-mode -1) )
+    (erase-buffer)
+    (insert "using System;\n")
+    (insert "using System.Text;\n")
+    (insert (format "namespace %s\n" namespacename))
+    (insert "{\n")
+    (insert (format "public class %s\n" classname))
+    (insert "{\n")
+    (insert "\n  #region Properties\n")
+    (insert setter-getters)
+    (insert "  #endregion\n")
+    (insert "}\n")
+    (insert "}\n")
+    (when (featurep 'csharp-mode)
+      (csharp-mode)
+      (indent-region (point-min) (point-max))
+      )
+    (save-buffer)
+    (kill-this-buffer)
+    ))
 
 ;;;###autoload
 (defun otec-generate-all-classes(namespace savepath)
