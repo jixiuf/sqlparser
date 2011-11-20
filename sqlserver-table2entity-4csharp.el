@@ -1,15 +1,15 @@
 ;;; sqlserver-table2entity-4csharp.el --- sqlserver table2entity for csharp   -*- coding:utf-8 -*-
 
 ;; Description:sqlserver table2entity for csharp
-;; Last Updated: Joseph 2011-11-20 10:35:56 星期日
+;; Last Updated: Joseph 2011-11-20 10:38:35 星期日
 ;; Created: 2011-09-18 21:44
-;; Author: 孤峰独秀  jixiuf@gmail.com
-;; Maintainer:  孤峰独秀  jixiuf@gmail.com
+;; Author: 纪秀峰  jixiuf@gmail.com
+;; Maintainer:  纪秀峰  jixiuf@gmail.com
 ;; Keywords: sqlserver csharp entity
 ;; URL: http://www.emacswiki.org/emacs/sqlserver-table2entity-4csharp.el
 ;; https://github.com/jixiuf/sqlparser
 
-;; Copyright (C) 2011, 孤峰独秀, all rights reserved.
+;; Copyright (C) 2011,纪秀峰 all rights reserved.
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
