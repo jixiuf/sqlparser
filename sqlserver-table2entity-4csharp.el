@@ -1,13 +1,15 @@
 ;;; sqlserver-table2entity-4csharp.el --- sqlserver table2entity for csharp   -*- coding:utf-8 -*-
 
 ;; Description:sqlserver table2entity for csharp
-;; Last Updated: Joseph 2011-11-20 10:38:35 星期日
+;; Last Updated: Joseph 2011-11-20 10:52:36 星期日
 ;; Created: 2011-09-18 21:44
 ;; Author: 纪秀峰  jixiuf@gmail.com
 ;; Maintainer:  纪秀峰  jixiuf@gmail.com
 ;; Keywords: sqlserver csharp entity
 ;; URL: http://www.emacswiki.org/emacs/sqlserver-table2entity-4csharp.el
 ;; https://github.com/jixiuf/sqlparser
+;; screencast:
+;; http://screencast-repos.googlecode.com/files/emacs-sqlserver-oracle-table2entity.mp4.bz2
 
 ;; Copyright (C) 2011,纪秀峰 all rights reserved.
 
@@ -26,9 +28,10 @@
 
 ;;; Commentary:
 
-;; screencast:
-;; http://screencast-repos.googlecode.com/files/emacs-sqlserver-oracle-table2entity.mp4.bz2
+;; require sqlserver-query.el
 ;;  call command : (sqlserver-table2entity-4csharp-interactively)
+;; it will connect to a sqlserver intance ,and export all the tables to csharp entities
+;;
 ;; 会提示以输入连接sqlserver 的连接字符串，然后，会查数据字典中的数据,根据当前连接的数据库，
 ;; 将其中所有的表导出为csharp Entity.
 ;;
@@ -46,6 +49,7 @@
 ;;    default = (quote ((BIT . "bool") (INT . "int") (SMALLINT . "int") (TINYINT . "int") (NUMERIC . "decimal") ...))
 
 ;;; Code:
+
 (require 'sqlserver-query)
 (require   'csharp-mode nil t)
 (defcustom sstec-sqlserver-type-csharp-type-alist
