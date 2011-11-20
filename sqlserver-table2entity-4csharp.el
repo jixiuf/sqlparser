@@ -1,7 +1,7 @@
 ;;; sqlserver-table2entity-4csharp.el --- sqlserver table2entity for csharp   -*- coding:utf-8 -*-
 
 ;; Description:sqlserver table2entity for csharp
-;; Last Updated: Joseph 2011-10-03 14:07:16 星期一
+;; Last Updated: Joseph 2011-11-20 09:08:08 星期日
 ;; Created: 2011-09-18 21:44
 ;; Author: 孤峰独秀  jixiuf@gmail.com
 ;; Maintainer:  孤峰独秀  jixiuf@gmail.com
@@ -143,7 +143,7 @@ key 是db类型，value 是csharp 中对应类型.要求key大写"
   (if list
       (cons (funcall fn-head (car list)) (mapcar fn-rest (cdr list)))))
 
-(defvar sqlplus-connection-4-sqlserver nil)
+(defvar sstec-connection-4-sqlserver nil)
 
 
 (defun sstec-get-csharp-type(db-type)
@@ -154,13 +154,13 @@ key 是db类型，value 是csharp 中对应类型.要求key大写"
 
 (defun sstec-query-all-tablename-in-db()
   "从sqlserver 中查询出当前连接的数据库中所有的表名,用到了`sqlserver-query.el'"
-  (mapcar 'car (sqlserver-query "select name from sys.tables"  sqlplus-connection-4-sqlserver)))
+  (mapcar 'car (sqlserver-query "select name from sys.tables"  sstec-connection-4-sqlserver)))
 ;; (sstec-query-all-tablename-in-db)
 
 (defun sstec-query-table (tablename)
   (sqlserver-query
    (format " select c.name ,t.name from sys.columns c ,sys.types t, sys.objects o where c.user_type_id=t.user_type_id and o.object_id = c.object_id and o.name='%s'" tablename)
-   sqlplus-connection-4-sqlserver
+   sstec-connection-4-sqlserver
    )
   )
 ;; (sstec-query-table "EMP")
@@ -229,15 +229,15 @@ key 是db类型，value 是csharp 中对应类型.要求key大写"
 
 ;;;###autoload
 (defun sstec-generate-all-classes(namespace savepath)
-  (unless (and sqlplus-connection-4-sqlserver
-               (equal (process-status (nth 0  sqlplus-connection-4-sqlserver)) 'run))
-    (setq sqlplus-connection-4-sqlserver (call-interactively 'sqlserver-query-create-connection)))
+  (unless (and sstec-connection-4-sqlserver
+               (equal (process-status (nth 0  sstec-connection-4-sqlserver)) 'run))
+    (setq sstec-connection-4-sqlserver (call-interactively 'sqlserver-query-create-connection)))
 
   (dolist (tablename  (sstec-query-all-tablename-in-db))
     (let  ((classname  (sstec-tablename2classname tablename) )
            (setter-getters (sstec-generate-all-setter-getter-4table tablename)))
       (sstec-generate-class setter-getters namespace classname savepath)))
-  (sqlserver-query-close-connection sqlplus-connection-4-sqlserver)
+  (sqlserver-query-close-connection sstec-connection-4-sqlserver)
   )
 
 ;;;###autoload
