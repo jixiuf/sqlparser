@@ -1,7 +1,7 @@
 ;;; oracle-table2entity-4csharp.el --- oracle table2entity for csharp   -*- coding:utf-8 -*-
 
 ;; Description:oracle table2entity for csharp
-;; Last Updated: Joseph 2011-11-20 10:43:44 星期日
+;; Last Updated: Joseph 2011-11-20 10:44:23 星期日
 ;; Created: 2011-09-18 21:44
 ;; Author: 孤峰独秀  jixiuf@gmail.com
 ;; Maintainer:  孤峰独秀  jixiuf@gmail.com
@@ -182,8 +182,9 @@ key 是db类型，value 是csharp 中对应类型.要求key大写"
   (interactive)
   (let ((namespace (read-string  "csharp namespace name:" "" nil ""))
         (savepath (read-directory-name  "save generated class to directory:"  )))
+    (when (not (file-directory-p savepath)) (make-directory savepath))
     (otec-generate-all-classes namespace savepath)
-    )
-  )
+    (dired savepath)))
+
 (provide 'oracle-table2entity-4csharp)
 ;;; oracle-table2entity-4csharp ends here
