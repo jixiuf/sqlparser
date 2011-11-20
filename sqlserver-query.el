@@ -3,7 +3,7 @@
 ;; Copyright (C) 2011 Joseph
 
 ;; Created: 2011年08月17日 星期三 22时11分54秒
-;; Last Updated: Joseph 2011-11-20 10:04:21 星期日
+;; Last Updated: Joseph 2011-11-20 10:18:56 星期日
 ;; Version: 0.1.3
 ;; Author: Joseph  jixiuf@gmail.com
 ;; Keywords: sqlserver emacs sql sqlcmd.exe osql.exe
@@ -155,7 +155,8 @@ If you leave it nil, it will search the path for the executable."
           (setq row (split-string line "" t))
           (when row (setq result (append result (list row)))))
         (forward-line)))
-    (when (and result (> (length result) 1))
+    (when (and result (> (length result) 1)
+               (not (string-match "^-+$" (caar result))))
       (setcdr result (cddr result))  )
     result ))
 
