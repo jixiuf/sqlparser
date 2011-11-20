@@ -3,7 +3,7 @@
 ;; Copyright (C) 2011 Joseph 纪秀峰
 
 ;; Created: 2011年08月17日 星期三 22时11分54秒
-;; Last Updated: Joseph 2011-11-20 10:39:09 星期日
+;; Last Updated: Joseph 2011-11-20 10:40:19 星期日
 ;; Version: 0.1.3
 ;; Author: Joseph  纪秀峰 jixiuf@gmail.com
 ;; Keywords: sqlserver emacs sql sqlcmd.exe osql.exe
@@ -60,6 +60,7 @@
 ;;
 ;; 1. you should custom these variable
 ;; `sqlserver-connection-info'
+;; `sqlserver-command-path' not needn't if `sqlserver-cmd' in under your PATH
 ;;  `sqlserver-cmd' ;sqlcmd or osql
 ;; for example
 ;; (setq sqlserver-connection-info
