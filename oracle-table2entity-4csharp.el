@@ -1,7 +1,7 @@
 ;;; oracle-table2entity-4csharp.el --- oracle table2entity for csharp   -*- coding:utf-8 -*-
 
 ;; Description:oracle table2entity for csharp
-;; Last Updated: Joseph 2012-01-15 21:34:03 星期日
+;; Last Updated: Joseph 2012-01-16 00:11:09 星期一
 ;; Created: 2011-09-18 21:44
 ;; Author: 孤峰独秀  jixiuf@gmail.com
 ;; Maintainer:  孤峰独秀  jixiuf@gmail.com
@@ -166,10 +166,8 @@ key 是db类型，value 是csharp 中对应类型.要求key大写"
 
 ;;;###autoload
 (defun otec-generate-all-classes(namespace savepath)
-  (unless (and sqlplus-connection
-               (equal (process-status (nth 0  sqlplus-connection)) 'run))
+  (unless (oracle-query-connection-alive-p  sqlplus-connection)
     (setq sqlplus-connection (call-interactively 'oracle-query-create-connection)))
-
   (dolist (tablename  (otec-query-all-tablename-in-db))
     (let  ((classname  (otec-tablename2classname tablename) )
            (setter-getters (otec-generate-all-setter-getter-4table tablename)))
