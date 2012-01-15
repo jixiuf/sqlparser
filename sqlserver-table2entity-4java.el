@@ -1,7 +1,7 @@
 ;;; sqlserver-table2entity-4java.el --- sqlserver table2entity for java   -*- coding:utf-8 -*-
 
 ;; Description:sqlserver table2entity for java
-;; Last Updated: Joseph 2012-01-16 00:07:43 星期一
+;; Last Updated: Joseph 2012-01-16 00:09:37 星期一
 ;; Created: 2011-09-18 21:44
 ;; Author: 孤峰独秀  jixiuf@gmail.com
 ;; Maintainer:  孤峰独秀  jixiuf@gmail.com
@@ -149,7 +149,7 @@ key 是db类型，value 是java 中对应类型.要求key大写"
   (if list
       (cons (funcall fn-head (car list)) (mapcar fn-rest (cdr list)))))
 
-(defvar sqlplus-connection-4-sqlserver nil)
+(defvar sqlserver-connection-4-sqlserver nil)
 (defun stej-get-java-type(db-type)
   "find out java type depend on de-type from `stej-sqlserver-type-java-type-alist'"
   (cdr (assoc (intern (upcase db-type))  stej-sqlserver-type-java-type-alist)))
@@ -157,7 +157,7 @@ key 是db类型，value 是java 中对应类型.要求key大写"
 
 (defun stej-query-all-tablename-in-db()
   "从sqlserver 中查询出当前连接的数据库中所有的表名,用到了`sqlserver-query.el'"
-  (mapcar 'car (sqlserver-query "select name from sys.tables"  sqlplus-connection-4-sqlserver))
+  (mapcar 'car (sqlserver-query "select name from sys.tables"  sqlserver-connection-4-sqlserver))
   )
 ;; (stej-query-all-tablename-in-db)
 
@@ -166,7 +166,7 @@ key 是db类型，value 是java 中对应类型.要求key大写"
 (defun stej-query-table (tablename)
   (sqlserver-query
    (format " select c.name ,t.name from sys.columns c ,sys.types t, sys.objects o where c.user_type_id=t.user_type_id and o.object_id = c.object_id and o.name='%s'" tablename)
-   sqlplus-connection-4-sqlserver
+   sqlserver-connection-4-sqlserver
    )
   )
 
@@ -229,13 +229,13 @@ key 是db类型，value 是java 中对应类型.要求key大写"
 
 ;;;###autoload
 (defun stej-generate-all-classes(package savepath)
-  (unless ( sqlserver-query-connection-alive-p sqlplus-connection-4-sqlserver)
-    (setq sqlplus-connection-4-sqlserver (call-interactively 'sqlserver-query-create-connection)))
+  (unless  ( sqlserver-query-connection-alive-p  sqlserver-connection-4-sqlserver)
+    (setq sqlserver-connection-4-sqlserver (call-interactively 'sqlserver-query-create-connection)))
   (dolist (tablename  (stej-query-all-tablename-in-db))
     (let  ((classname  (stej-tablename2classname tablename) )
            (setter-getters (stej-generate-all-setter-getter-4table tablename)))
       (stej-generate-class setter-getters package classname savepath)))
-  (sqlserver-query-close-connection sqlplus-connection-4-sqlserver)
+  (sqlserver-query-close-connection sqlserver-connection-4-sqlserver)
   )
 
 ;;;###autoload
