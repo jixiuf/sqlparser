@@ -1,7 +1,7 @@
 ;;; oracle-table2entity-4java.el --- oracle table2entity for java   -*- coding:utf-8 -*-
 
 ;; Description:oracle table2entity for java
-;; Last Updated: Joseph 2011-11-20 11:33:16 星期日
+;; Last Updated: Joseph 2012-01-15 21:34:13 星期日
 ;; Created: 2011-09-18 21:44
 ;; Author: 孤峰独秀  jixiuf@gmail.com
 ;; Maintainer:  孤峰独秀  jixiuf@gmail.com
@@ -9,7 +9,7 @@
 ;; URL: http://www.emacswiki.org/emacs/oracle-table2entity-4java.el
 ;; https://github.com/jixiuf/sqlparser
 
-;; Copyright (C) 2011, 孤峰独秀, all rights reserved.
+;; Copyright (C) 2011~2012 纪秀峰(Joseph) all rights reserved.
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
