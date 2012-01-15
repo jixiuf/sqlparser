@@ -3,7 +3,7 @@
 ;; Copyright (C) 2011 纪秀峰(Joseph)
 
 ;; Created: 2011年07月21日 星期四 20时03分40秒
-;; Last Updated: Joseph 2012-01-15 21:17:27 星期日
+;; Last Updated: Joseph 2012-01-15 21:29:08 星期日
 ;; Version: 0.1.2
 ;; Author: 纪秀峰(Joseph)  jixiuf@gmail.com
 ;; Keywords: sql parse mysql
@@ -59,9 +59,20 @@
 ;;      (require 'sqlparser-mysql-complete)
 ;;      (define-key sql-mode-map (quote [M-return]) 'sqlparser-mysql-complete)
 ;;      (define-key sql-interactive-mode-map  (quote [M-return]) 'sqlparser-mysql-complete)
-;;       with `C-u' you can change the dbname
-;;       with `C-uC-u' you can use another new mysql connection
+;;  or
+;;     (defadvice sql-mysql (around start-mysql-complete-minor-mode activate)
+;;        "enable `mysql-complete-minor-mode' minor mode."
+;;         ad-do-it
+;;        (mysql-complete-minor-mode))
+;;    (define-derived-mode mysql-mode sql-mode "mysql"
+;;        "mysql mode"
+;;        (mysql-complete-minor-mode))
+
+;; `sqlparser-mysql-complete' default  bind on `TAB' in
+;;   with `C-u' you can change the dbname
+;;   with `C-uC-u' you can use another new mysql connection
 ;;
+
 
 
 ;;; Commands:
