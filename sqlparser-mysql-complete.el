@@ -3,7 +3,7 @@
 ;; Copyright (C) 2011~2012 纪秀峰(Joseph) all rights reserved.
 
 ;; Created: 2011年07月21日 星期四 20时03分40秒
-;; Last Updated: Joseph 2012-01-15 21:46:07 星期日
+;; Last Updated: Joseph 2012-01-15 21:57:40 星期日
 ;; Version: 0.2.0
 ;; Author: 纪秀峰(Joseph)  jixiuf@gmail.com
 ;; Keywords: sql  mysql complete
@@ -109,7 +109,7 @@
 ;;;###autoload
 (define-minor-mode mysql-complete-minor-mode
   "mode for editing mysql script"
-  :lighter " mysql"
+  :lighter " mysqlC"
   :keymap mysql-complete-minor-mode-map
   :group 'sqlparser
   (if mysql-complete-minor-mode
