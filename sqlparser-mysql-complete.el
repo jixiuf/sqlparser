@@ -3,10 +3,10 @@
 ;; Copyright (C) 2011 纪秀峰(Joseph)
 
 ;; Created: 2011年07月21日 星期四 20时03分40秒
-;; Last Updated: Joseph 2012-01-15 21:31:47 星期日
+;; Last Updated: Joseph 2012-01-15 21:32:29 星期日
 ;; Version: 0.2.0
 ;; Author: 纪秀峰(Joseph)  jixiuf@gmail.com
-;; Keywords: sql parse mysql
+;; Keywords: sql  mysql complete
 ;; Description:  completing tablename column for mysql when editing
 ;; URL:http://www.emacswiki.org/emacs/download/sqlparser-mysql-complete.el
 ;; https://github.com/jixiuf/sqlparser
