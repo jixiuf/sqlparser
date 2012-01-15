@@ -2,7 +2,7 @@
 
 ;; Copyright (C) 2011 纪秀峰(Joseph)
 
-;; Last Updated: Joseph 2012-01-15 19:04:48 星期日
+;; Last Updated: Joseph 2012-01-15 19:19:20 星期日
 ;; Created: 2012-01-12 10:52
 ;; Version: 0.1.0
 ;; Author: 纪秀峰(Joseph)  jixiuf@gmail.com
@@ -29,27 +29,23 @@
 ;;; Commentary:
 
 ;; execute sql using mysql and return as list .
+;;  (mysql-query "select 1"  mysql-connection-info)
+;;  (mysql-query "select user ,password from mysql.user limit 0,2"  mysql-connection-info)
+;;  (mysql-query-with-heading "select user ,password from mysql.user limit 0,2"  mysql-connection-info)
 ;;
-;;       (mysql-query "select empno,ename from emp where empno<=7499")
-;; got :     (("7369" "SMITH") ("7499" "ALLEN"))
-;; or    (mysql-query-with-heading)
-;; got :     (("EMPNO" "ENAME") ("7369" "SMITH") ("7499" "ALLEN"))
-;; using default connection ,not recommended.
-;;
-;; (defvar connection (mysql-query-create-connection "scott/tiger"))
-;; (mysql-query "select empno from emp" connection)
 ;; recommended
 ;;
 ;; the normal way to use mysql-query.el is :
 ;; 1:
+;; (defvar mysql-connection (mysql-query-create-connection connection-info))
+;; or
 ;; (defvar mysql-connection nil)
-;; (unless (mysql-query-connection-alive-p c)
+;; (unless (mysql-query-connection-alive-p  mysql-connection)
 ;;   (setq mysql-connection (call-interactively 'mysql-query-create-connection)))
 ;;
 ;; 2:
-;;   (mysql-query "select empno from emp" mysql-connection)
-;; 3:
-;;   (mysql-query-close-connection mysql-connection)
+;;   (mysql-query              "select user from mysql.user" mysql-connection)
+;;   (mysql-query-with-heading "select user from mysql.user" mysql-connection)
 
 ;;; Commands:
 ;;
@@ -74,7 +70,7 @@
 ;;; Code:
 
 (defgroup mysql-query nil
-  "mysql query"
+  "mysql query."
   :group 'SQL)
 
 (defcustom mysql-connection-info
@@ -103,7 +99,6 @@
 (defun mysql-query-read-connect-string()
   "set hostname dbname username password interactive"
   (let ((connection-info (copy-alist mysql-connection-info)))
-
     (setcdr  (assoc 'username connection-info)
              (read-string (format  "username(default:%s):"  (cdr (assoc 'username connection-info)))
                           "" nil   (cdr (assoc 'username connection-info))))
@@ -121,6 +116,12 @@
 
     (setq-default mysql-connection-info connection-info) ;;update default info
     connection-info))
+(defun mysql-query-create-connection (&optional connection-info)
+  (interactive (list (mysql-query-read-connect-string)))
+  connection-info)
+
+(defun mysql-query-connection-alive-p (connection)
+  connection)
 
 ;; ("-h" "localhost" "-u" "root" "-proot" "-P" "3306" "--database=mysql" "--column-names" "-s" "--unbuffered")
 (defun mysql-format-command-args (connection-info)
@@ -172,7 +173,7 @@
 (defun mysql-query-with-heading (sql &optional connection-info)
   "execute query ,using `connection-info' if `connection-info' is nil,
 using `mysql-connection-info' instead"
-  (unless connection-info (setq connection-info ( mysql-query-read-connect-string)))
+  (unless connection-info (setq connection-info (mysql-query-read-connect-string)))
   (let* ((raw-result-buf (mysql-query-raw sql connection-info ))
          (result (mysql-query-parse raw-result-buf)))
     result))
