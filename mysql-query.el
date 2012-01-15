@@ -2,7 +2,7 @@
 
 ;; Copyright (C) 2011 纪秀峰(Joseph)
 
-;; Last Updated: Joseph 2012-01-15 20:33:01 星期日
+;; Last Updated: Joseph 2012-01-15 20:39:37 星期日
 ;; Created: 2012-01-12 10:52
 ;; Version: 0.1.0
 ;; Author: 纪秀峰(Joseph)  jixiuf@gmail.com
@@ -152,13 +152,10 @@
         (unless  (string= "" (buffer-substring-no-properties (point-at-bol) (point-at-eol)))
           (setq row (split-string (buffer-substring-no-properties
                                    (point-at-bol) (point-at-eol)) "\t" nil))
-          (setq result (append result (list row)))
-          )
-        )
-      ;; (kill-buffer raw-result-buf)
-      )
-    result)
-  )
+          (setq result (append result (list row)))))
+      (kill-buffer raw-result-buf))
+    result))
+
 (defun mysql-query-raw ( sql connection-info )
   "Returns a list of all the arguments for the mysql  program.
   default: mysql -h localhost -u root -proot -s  --database=test -e"
