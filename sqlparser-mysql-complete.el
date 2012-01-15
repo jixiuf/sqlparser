@@ -3,7 +3,7 @@
 ;; Copyright (C) 2011~2012 纪秀峰(Joseph) all rights reserved.
 
 ;; Created: 2011年07月21日 星期四 20时03分40秒
-;; Last Updated: Joseph 2012-01-15 21:34:24 星期日
+;; Last Updated: Joseph 2012-01-15 21:46:07 星期日
 ;; Version: 0.2.0
 ;; Author: 纪秀峰(Joseph)  jixiuf@gmail.com
 ;; Keywords: sql  mysql complete
@@ -78,7 +78,7 @@
 ;; Below are complete command list:
 ;;
 ;;  `mysql-complete-minor-mode'
-;;    mode for editing oracle script
+;;    mode for editing mysql script
 ;;  `sqlparser-mysql-complete'
 ;;    complete tablename or column name depending on current point position .
 ;;
@@ -108,8 +108,8 @@
 
 ;;;###autoload
 (define-minor-mode mysql-complete-minor-mode
-  "mode for editing oracle script"
-  :lighter " OracleC"
+  "mode for editing mysql script"
+  :lighter " mysql"
   :keymap mysql-complete-minor-mode-map
   :group 'sqlparser
   (if mysql-complete-minor-mode
