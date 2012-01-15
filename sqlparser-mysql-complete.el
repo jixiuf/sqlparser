@@ -3,7 +3,7 @@
 ;; Copyright (C) 2011 纪秀峰(Joseph)
 
 ;; Created: 2011年07月21日 星期四 20时03分40秒
-;; Last Updated: Joseph 2012-01-15 21:29:08 星期日
+;; Last Updated: Joseph 2012-01-15 21:31:32 星期日
 ;; Version: 0.1.2
 ;; Author: 纪秀峰(Joseph)  jixiuf@gmail.com
 ;; Keywords: sql parse mysql
@@ -72,8 +72,6 @@
 ;;   with `C-u' you can change the dbname
 ;;   with `C-uC-u' you can use another new mysql connection
 ;;
-
-
 
 ;;; Commands:
 ;;
