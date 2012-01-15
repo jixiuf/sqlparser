@@ -3,7 +3,7 @@
 ;; Copyright (C) 2011 纪秀峰(Joseph)
 
 ;; Created: 2011年07月21日 星期四 20时03分40秒
-;; Last Updated: Joseph 2012-01-15 20:37:05 星期日
+;; Last Updated: Joseph 2012-01-15 20:56:43 星期日
 ;; Version: 0.1.2
 ;; Author: 纪秀峰(Joseph)  jixiuf@gmail.com
 ;; Keywords: sql parse mysql
@@ -71,6 +71,8 @@
 ;;
 ;; Below are complete command list:
 ;;
+;;  `mysql-complete-minor-mode'
+;;    mode for editing oracle script
 ;;  `sqlparser-mysql-complete'
 ;;    complete tablename or column name depending on current point position .
 ;;
@@ -90,6 +92,22 @@
   :group 'SQL)
 
 (defvar mysql-connection-4-complete nil)
+
+(defvar mysql-complete-minor-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map  (quote [tab]) 'sqlparser-mysql-complete)
+    map))
+
+(defvar mysql-complete-minor-mode-hook nil)
+
+;;;###autoload
+(define-minor-mode mysql-complete-minor-mode
+  "mode for editing oracle script"
+  :lighter " OracleC"
+  :keymap mysql-complete-minor-mode-map
+  :group 'sqlparser
+  (if mysql-complete-minor-mode
+      (run-hooks 'mysql-complete-minor-mode-hook)))
 
 ;;;###autoload
 (defun sqlparser-mysql-complete(&optional arg)
