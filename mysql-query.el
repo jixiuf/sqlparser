@@ -2,7 +2,7 @@
 
 ;; Copyright (C) 2011 纪秀峰(Joseph)
 
-;; Last Updated: Joseph 2012-01-15 17:24:26 星期日
+;; Last Updated: Joseph 2012-01-15 17:33:31 星期日
 ;; Created: 2012-01-12 10:52
 ;; Version: 0.1.0
 ;; Author: 纪秀峰(Joseph)  jixiuf@gmail.com
@@ -151,13 +151,33 @@
                         ;; (list "-h" "localhost" "-u" "root" "-proot" "-P" "3306" "--database=mysql" "--column-names" "-s" "--unbuffered"  "-e" "select now();")
                         ))
     (if (= result 0)                    ;success
-      (with-current-buffer result-buf
-        (buffer-string))
+        result-buf
       nil
       )
     )
   )
-;; (mysql-query mysql-connection-info "select user from mysql.user")
+(defun mysql-query-parse(raw-result-buf)
+  (let  (result row line-count)
+    (with-current-buffer raw-result-buf
+      (setq line-count (count-lines (point-min) (point-max)))
+      (goto-char  (point-min))
+      (while (< (line-number-at-pos) line-count)
+        (setq row (split-string (buffer-substring-no-properties
+                                 (point-at-bol) (point-at-eol)) "\t" t))
+        (setq result (append result (list row)))
+        (forward-line)))
+    result)
+  )
+
+(defun mysql-query (sql &optional connection-info)
+
+  )
+ ;; (mysql-query mysql-connection-info "select user ,password from mysql.user")
+
+
+
+
+
 
 
 
