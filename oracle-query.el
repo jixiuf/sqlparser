@@ -1,8 +1,8 @@
 ;;; oracle-query.el --- execute sql select using sqlplus. -*- coding:utf-8 -*-
 
-;; Copyright (C) 2011 纪秀峰(Joseph)
+;; Copyright (C) 2011~2012 纪秀峰(Joseph)
 
-;; Last Updated: Joseph 2011-11-02 15:34:31 星期三
+;; Last Updated: Joseph 2012-01-15 21:33:39 星期日
 ;; Created: 2011-7-31
 ;; Version: 0.1.4
 ;; Author: 纪秀峰(Joseph)  jixiuf@gmail.com
@@ -213,5 +213,3 @@ created process"
 
 (provide 'oracle-query)
 ;;; oracle-query.el ends here
-
-
