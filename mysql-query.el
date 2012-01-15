@@ -2,7 +2,7 @@
 
 ;; Copyright (C) 2011 纪秀峰(Joseph)
 
-;; Last Updated: Joseph 2012-01-15 19:19:20 星期日
+;; Last Updated: Joseph 2012-01-15 20:33:01 星期日
 ;; Created: 2012-01-12 10:52
 ;; Version: 0.1.0
 ;; Author: 纪秀峰(Joseph)  jixiuf@gmail.com
@@ -126,13 +126,14 @@
 ;; ("-h" "localhost" "-u" "root" "-proot" "-P" "3306" "--database=mysql" "--column-names" "-s" "--unbuffered")
 (defun mysql-format-command-args (connection-info)
   "Returns a list of all the arguments for the mysql  program.
-  default: mysql -h localhost -u root -proot -s  --database=zaiko "
+  default: mysql -h localhost -u root -proot -s  --database=mysql "
   (apply 'list "-h" (cdr (assoc 'host connection-info))
          "-u" (cdr (assoc 'username connection-info))
          (concat "-p" (cdr (assoc 'password connection-info)))
          "-P" (cdr (assoc 'port connection-info))
-                                        ;use tab as column separator char
-         (concat "--database=" (cdr (assoc 'dbname connection-info)))
+         ;;use tab as column separator char
+         (if (cdr (assoc 'dbname connection-info))
+           (concat "--database=" (cdr (assoc 'dbname connection-info))) "")
          mysql-command-other-options))
 
 (defun mysql-query-parse(raw-result-buf)
