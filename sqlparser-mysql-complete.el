@@ -3,7 +3,7 @@
 ;; Copyright (C) 2011 纪秀峰(Joseph)
 
 ;; Created: 2011年07月21日 星期四 20时03分40秒
-;; Last Updated: Joseph 2012-01-15 20:56:43 星期日
+;; Last Updated: Joseph 2012-01-15 21:17:12 星期日
 ;; Version: 0.1.2
 ;; Author: 纪秀峰(Joseph)  jixiuf@gmail.com
 ;; Keywords: sql parse mysql
@@ -12,9 +12,6 @@
 ;; https://github.com/jixiuf/sqlparser
 ;; screencast :http://screencast-repos.googlecode.com/files/emacs-sqlparse-mysql-complete.mkv.bz2
 ;; Compatibility: Test on Windows Xp ,and Linux
-;;
-;; Features that might be required by this library:
-;; `anything'
 ;;
 ;; Features  that be required by this library
 ;; `mysql.el'
