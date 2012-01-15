@@ -2,7 +2,7 @@
 
 ;; Copyright (C) 2011 纪秀峰(Joseph)
 
-;; Last Updated: Joseph 2012-01-15 17:17:00 星期日
+;; Last Updated: Joseph 2012-01-15 17:24:26 星期日
 ;; Created: 2012-01-12 10:52
 ;; Version: 0.1.0
 ;; Author: 纪秀峰(Joseph)  jixiuf@gmail.com
@@ -51,7 +51,6 @@
 ;; 3:
 ;;   (mysql-query-close-connection mysql-connection)
 
-;;
 ;;; Commands:
 ;;
 ;; Below are complete command list:
@@ -71,6 +70,7 @@
 ;;    default mysql connection info .
 ;;    default = (quote ("--column-names" "-s" "--unbuffered"))
 
+;;
 ;;; Code:
 
 (defgroup mysql-query nil
@@ -138,17 +138,35 @@
          mysql-command-other-options))
 
 
-(defun mysql-query (connection-info sql)
+(defun mysql-query-raw (connection-info sql)
   "Returns a list of all the arguments for the mysql  program.
   default: mysql -h localhost -u root -proot -s  --database=zaiko -e"
-  (append (mysql-format-command-args connection-info) (list "--batch" "-e" sql))
-
+  (let((result-buf " *mysql-query-reslut*")
+       (result)
+       )
+    (when (buffer-live-p (get-buffer result-buf)) (kill-buffer result-buf))
+    (setq result (apply 'call-process
+                        "mysql" nil result-buf nil
+                        (append (mysql-format-command-args connection-info) (list "--batch" "-e" sql))
+                        ;; (list "-h" "localhost" "-u" "root" "-proot" "-P" "3306" "--database=mysql" "--column-names" "-s" "--unbuffered"  "-e" "select now();")
+                        ))
+    (if (= result 0)                    ;success
+      (with-current-buffer result-buf
+        (buffer-string))
+      nil
+      )
+    )
   )
-;; (apply 'call-process
-;;        "mysql" nil "mysql" nil
-;;        (list "-h" "localhost" "-u" "root" "-proot" "-P" "3306" "--database=mysql" "--column-names" "-s" "--unbuffered"  "-e" "select now();")
-;;        ;; (mysql-format-command-args-4-shell  mysql-connection-info  "select now()")
-;;        )
+;; (mysql-query mysql-connection-info "select user from mysql.user")
+
+
+
+
+
+
+
+
+
 
 
 (provide 'mysql-query)
