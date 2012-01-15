@@ -2,7 +2,7 @@
 
 ;; Copyright (C) 2011 纪秀峰(Joseph)
 
-;; Last Updated: Joseph 2012-01-15 19:04:09 星期日
+;; Last Updated: Joseph 2012-01-15 19:04:48 星期日
 ;; Created: 2012-01-12 10:52
 ;; Version: 0.1.0
 ;; Author: 纪秀峰(Joseph)  jixiuf@gmail.com
@@ -11,7 +11,7 @@
 ;; Description:execute sql select using mysql.
 ;; URL:http://www.emacswiki.org/emacs/download/mysql-query.el
 ;; https://github.com/jixiuf/sqlparser
-;; Compatibility: Test on Linux
+;; Compatibility: Test on Linux,Windows
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
