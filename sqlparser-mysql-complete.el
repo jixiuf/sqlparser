@@ -3,7 +3,7 @@
 ;; Copyright (C) 2011 纪秀峰(Joseph)
 
 ;; Created: 2011年07月21日 星期四 20时03分40秒
-;; Last Updated: Joseph 2012-01-15 21:17:12 星期日
+;; Last Updated: Joseph 2012-01-15 21:17:27 星期日
 ;; Version: 0.1.2
 ;; Author: 纪秀峰(Joseph)  jixiuf@gmail.com
 ;; Keywords: sql parse mysql
@@ -14,8 +14,8 @@
 ;; Compatibility: Test on Windows Xp ,and Linux
 ;;
 ;; Features  that be required by this library
-;; `mysql.el'
-;; http://www.emacswiki.org/emacs/download/mysql.el
+;; `mysql-query.el'
+;; http://www.emacswiki.org/emacs/download/mysql-query.el
 ;;
 
 ;; This program is free software; you can redistribute it and/or modify
