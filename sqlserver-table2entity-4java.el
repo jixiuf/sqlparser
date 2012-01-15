@@ -1,7 +1,7 @@
 ;;; sqlserver-table2entity-4java.el --- sqlserver table2entity for java   -*- coding:utf-8 -*-
 
 ;; Description:sqlserver table2entity for java
-;; Last Updated: Joseph 2012-01-15 21:35:31 星期日
+;; Last Updated: Joseph 2012-01-16 00:07:43 星期一
 ;; Created: 2011-09-18 21:44
 ;; Author: 孤峰独秀  jixiuf@gmail.com
 ;; Maintainer:  孤峰独秀  jixiuf@gmail.com
@@ -229,10 +229,8 @@ key 是db类型，value 是java 中对应类型.要求key大写"
 
 ;;;###autoload
 (defun stej-generate-all-classes(package savepath)
-  (unless (and sqlplus-connection-4-sqlserver
-               (equal (process-status (nth 0  sqlplus-connection-4-sqlserver)) 'run))
+  (unless ( sqlserver-query-connection-alive-p sqlplus-connection-4-sqlserver)
     (setq sqlplus-connection-4-sqlserver (call-interactively 'sqlserver-query-create-connection)))
-
   (dolist (tablename  (stej-query-all-tablename-in-db))
     (let  ((classname  (stej-tablename2classname tablename) )
            (setter-getters (stej-generate-all-setter-getter-4table tablename)))
