@@ -1,8 +1,8 @@
 ;;; mysql-table2entity-4csharp.el --- mysql table2entity for csharp   -*- coding:utf-8 -*-
 
 ;; Description:mysql table2entity for csharp
-;; Last Updated: Joseph 2012-01-15 23:52:53 星期日
-;; Created: 2011-09-18 21:44
+;; Last Updated: Joseph 2012-01-15 23:55:15 星期日
+;; Created: 2012-01-15 23:55
 ;; Author: 纪秀峰(Joseph)  jixiuf@gmail.com
 ;; Keywords: mysql csharp entity
 ;; URL: http://www.emacswiki.org/emacs/mysql-table2entity-4csharp.el
