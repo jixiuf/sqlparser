@@ -1,7 +1,7 @@
 ;;; sqlserver-table2entity-4csharp.el --- sqlserver table2entity for csharp   -*- coding:utf-8 -*-
 
 ;; Description:sqlserver table2entity for csharp
-;; Last Updated: Joseph 2011-11-20 11:31:40 星期日
+;; Last Updated: Joseph 2012-01-15 21:35:17 星期日
 ;; Created: 2011-09-18 21:44
 ;; Author: 纪秀峰  jixiuf@gmail.com
 ;; Maintainer:  纪秀峰  jixiuf@gmail.com
@@ -11,7 +11,7 @@
 ;; screencast:
 ;; http://screencast-repos.googlecode.com/files/emacs-sqlserver-oracle-table2entity.mp4.bz2
 
-;; Copyright (C) 2011,纪秀峰 all rights reserved.
+;; Copyright (C) 2011~2012 纪秀峰(Joseph) all rights reserved.
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
