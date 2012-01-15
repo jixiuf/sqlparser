@@ -1,8 +1,8 @@
 ;;; mysql-query.el --- execute sql select using mysql. -*- coding:utf-8 -*-
 
-;; Copyright (C) 2011 纪秀峰(Joseph)
+;; Copyright (C) 2011~2012 纪秀峰(Joseph)
 
-;; Last Updated: Joseph 2012-01-15 20:39:37 星期日
+;; Last Updated: Joseph 2012-01-15 21:33:25 星期日
 ;; Created: 2012-01-12 10:52
 ;; Version: 0.1.0
 ;; Author: 纪秀峰(Joseph)  jixiuf@gmail.com
