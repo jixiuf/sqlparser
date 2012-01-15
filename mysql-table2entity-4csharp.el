@@ -1,7 +1,7 @@
 ;;; mysql-table2entity-4csharp.el --- mysql table2entity for csharp   -*- coding:utf-8 -*-
 
 ;; Description:mysql table2entity for csharp
-;; Last Updated: Joseph 2012-01-15 23:55:15 星期日
+;; Last Updated: Joseph 2012-01-15 23:56:06 星期日
 ;; Created: 2012-01-15 23:55
 ;; Author: 纪秀峰(Joseph)  jixiuf@gmail.com
 ;; Keywords: mysql csharp entity
@@ -242,7 +242,7 @@ generated csharp entity . and the entity is saved in `savepath'"
 ;;;###autoload
 (defun mysql-table2entity-4csharp-interactively()
   (interactive)
-  (let ((namespace (read-string  "csharp namespace name:" "" nil ""))
+  (let ((namespace (read-string  "csharp namespace for generate entities:" "" nil ""))
         (savepath (read-directory-name  "save generated class to directory:"  )))
     (when (not (file-directory-p savepath)) (make-directory savepath))
     (mtec-generate-all-classes namespace savepath)
