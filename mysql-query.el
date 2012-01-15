@@ -2,7 +2,7 @@
 
 ;; Copyright (C) 2011 纪秀峰(Joseph)
 
-;; Last Updated: Joseph 2012-01-15 17:33:31 星期日
+;; Last Updated: Joseph 2012-01-15 19:04:09 星期日
 ;; Created: 2012-01-12 10:52
 ;; Version: 0.1.0
 ;; Author: 纪秀峰(Joseph)  jixiuf@gmail.com
@@ -68,7 +68,7 @@
 ;;    default = "mysql"
 ;;  `mysql-command-other-options'
 ;;    default mysql connection info .
-;;    default = (quote ("--column-names" "-s" "--unbuffered"))
+;;    default = (quote ("--column-names" "--unbuffered"))
 
 ;;
 ;;; Code:
@@ -76,8 +76,6 @@
 (defgroup mysql-query nil
   "mysql query"
   :group 'SQL)
-
-
 
 (defcustom mysql-connection-info
   '((host . "localhost")
@@ -90,31 +88,22 @@
   :group 'mysql-query
   :type 'alist)
 
-(defcustom mysql-command
-  "mysql"
+(defcustom mysql-command "mysql"
   "default mysql command ,."
   :group 'mysql-query
   :type 'string)
 
 
 (defcustom mysql-command-other-options
-  '("--column-names" "-s"  "--unbuffered")
+  '("--column-names" "--unbuffered")
   "default mysql connection info ."
   :group 'mysql-query)
 
-(defvar mysql-query-default-connection nil)
-(defvar mysql-timeout-wait-for-result 300
-  "waiting 300s for sql result returned.")
 
 (defun mysql-query-read-connect-string()
   "set hostname dbname username password interactive"
   (let ((connection-info (copy-alist mysql-connection-info)))
-    (setcdr  (assoc 'host connection-info)
-             (read-string (format  "host(default:%s):"  (cdr (assoc 'host connection-info)))
-                          "" nil (cdr (assoc 'host connection-info))))
-    (setcdr  (assoc 'port connection-info)
-             (read-string (format  "port(default:%s):"  (cdr (assoc 'port connection-info)))
-                          "" nil   (cdr (assoc 'port connection-info))))
+
     (setcdr  (assoc 'username connection-info)
              (read-string (format  "username(default:%s):"  (cdr (assoc 'username connection-info)))
                           "" nil   (cdr (assoc 'username connection-info))))
@@ -123,9 +112,17 @@
     (setcdr  (assoc 'dbname connection-info)
              (read-string (format  "dbname(default:%s):"  (cdr (assoc 'dbname connection-info)))
                           "" nil (cdr (assoc 'dbname connection-info))))
+    (setcdr  (assoc 'host connection-info)
+             (read-string (format  "host(default:%s):"  (cdr (assoc 'host connection-info)))
+                          "" nil (cdr (assoc 'host connection-info))))
+    (setcdr  (assoc 'port connection-info)
+             (read-string (format  "port(default:%s):"  (cdr (assoc 'port connection-info)))
+                          "" nil   (cdr (assoc 'port connection-info))))
+
     (setq-default mysql-connection-info connection-info) ;;update default info
     connection-info))
 
+;; ("-h" "localhost" "-u" "root" "-proot" "-P" "3306" "--database=mysql" "--column-names" "-s" "--unbuffered")
 (defun mysql-format-command-args (connection-info)
   "Returns a list of all the arguments for the mysql  program.
   default: mysql -h localhost -u root -proot -s  --database=zaiko "
@@ -137,57 +134,57 @@
          (concat "--database=" (cdr (assoc 'dbname connection-info)))
          mysql-command-other-options))
 
-
-(defun mysql-query-raw (connection-info sql)
-  "Returns a list of all the arguments for the mysql  program.
-  default: mysql -h localhost -u root -proot -s  --database=zaiko -e"
-  (let((result-buf " *mysql-query-reslut*")
-       (result)
-       )
-    (when (buffer-live-p (get-buffer result-buf)) (kill-buffer result-buf))
-    (setq result (apply 'call-process
-                        "mysql" nil result-buf nil
-                        (append (mysql-format-command-args connection-info) (list "--batch" "-e" sql))
-                        ;; (list "-h" "localhost" "-u" "root" "-proot" "-P" "3306" "--database=mysql" "--column-names" "-s" "--unbuffered"  "-e" "select now();")
-                        ))
-    (if (= result 0)                    ;success
-        result-buf
-      nil
-      )
-    )
-  )
 (defun mysql-query-parse(raw-result-buf)
+  "parse the result of mysql -e 'sql' ,the separator char is \t."
   (let  (result row line-count)
-    (with-current-buffer raw-result-buf
-      (setq line-count (count-lines (point-min) (point-max)))
-      (goto-char  (point-min))
-      (while (< (line-number-at-pos) line-count)
-        (setq row (split-string (buffer-substring-no-properties
-                                 (point-at-bol) (point-at-eol)) "\t" t))
-        (setq result (append result (list row)))
-        (forward-line)))
+    (when raw-result-buf
+      (with-current-buffer raw-result-buf
+        (setq line-count (count-lines (point-min) (point-max)))
+        (goto-char  (point-min))
+        (while (< (line-number-at-pos) line-count)
+          (setq row (split-string (buffer-substring-no-properties
+                                   (point-at-bol) (point-at-eol)) "\t" nil))
+          (setq result (append result (list row)))
+          (forward-line))
+        ;;the last line always \n on windows,but not no linux
+        (unless  (string= "" (buffer-substring-no-properties (point-at-bol) (point-at-eol)))
+          (setq row (split-string (buffer-substring-no-properties
+                                   (point-at-bol) (point-at-eol)) "\t" nil))
+          (setq result (append result (list row)))
+          )
+        )
+      ;; (kill-buffer raw-result-buf)
+      )
     result)
   )
+(defun mysql-query-raw ( sql connection-info )
+  "Returns a list of all the arguments for the mysql  program.
+  default: mysql -h localhost -u root -proot -s  --database=test -e"
+  (let((result-buf-name  (concat " *mysql-query-" (number-to-string (random)) "*"))
+       (result))
+    (setq result
+          (apply 'call-process mysql-command nil result-buf-name nil
+                 (append (mysql-format-command-args connection-info) (list "--batch" "-e" sql))))
+    (if (= result 0)                    ;success
+        result-buf-name nil)))
+
+;; (mysql-query-with-heading "select user ,password from mysql.user"  mysql-connection-info)
+(defun mysql-query-with-heading (sql &optional connection-info)
+  "execute query ,using `connection-info' if `connection-info' is nil,
+using `mysql-connection-info' instead"
+  (unless connection-info (setq connection-info ( mysql-query-read-connect-string)))
+  (let* ((raw-result-buf (mysql-query-raw sql connection-info ))
+         (result (mysql-query-parse raw-result-buf)))
+    result))
+
+
+;; (mysql-query "select user ,password from mysql.user"  mysql-connection-info)
+;; (mysql-query "select 1"  mysql-connection-info)
 
 (defun mysql-query (sql &optional connection-info)
-
-  )
- ;; (mysql-query mysql-connection-info "select user ,password from mysql.user")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  (let ((result (mysql-query-with-heading sql connection-info)))
+    (when (and result (listp result))
+      (cdr result))))
 
 (provide 'mysql-query)
 ;;; mysql-query.el ends here
