@@ -1,7 +1,7 @@
 ;;; sqlserver-table2entity-4java.el --- sqlserver table2entity for java   -*- coding:utf-8 -*-
 
 ;; Description:sqlserver table2entity for java
-;; Last Updated: Joseph 2011-11-20 11:28:28 星期日
+;; Last Updated: Joseph 2012-01-15 21:35:31 星期日
 ;; Created: 2011-09-18 21:44
 ;; Author: 孤峰独秀  jixiuf@gmail.com
 ;; Maintainer:  孤峰独秀  jixiuf@gmail.com
@@ -12,7 +12,7 @@
 ;; http://screencast-repos.googlecode.com/files/emacs-sqlserver-sqlserver-table2entity.mp4.bz2
 ;;  call command : (sqlserver-table2entity-4java-interactively)
 
-;; Copyright (C) 2011, 孤峰独秀, all rights reserved.
+;; Copyright (C) 2011~2012 纪秀峰(Joseph) all rights reserved.
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
