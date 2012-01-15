@@ -2,7 +2,7 @@
 
 ;; Copyright (C) 2011 纪秀峰(Joseph)
 
-;; Last Updated: Joseph 2012-01-12 15:30:31 星期四
+;; Last Updated: Joseph 2012-01-15 17:17:00 星期日
 ;; Created: 2012-01-12 10:52
 ;; Version: 0.1.0
 ;; Author: 纪秀峰(Joseph)  jixiuf@gmail.com
@@ -56,8 +56,6 @@
 ;;
 ;; Below are complete command list:
 ;;
-;;  `mysql-query-create-connection'
-;;    create a connection to mysql ,and return the
 ;;
 ;;; Customizable Options:
 ;;
@@ -71,7 +69,7 @@
 ;;    default = "mysql"
 ;;  `mysql-command-other-options'
 ;;    default mysql connection info .
-;;    default = (quote ("--column-names" "-s" " --unbuffered"))
+;;    default = (quote ("--column-names" "-s" "--unbuffered"))
 
 ;;; Code:
 
@@ -100,7 +98,7 @@
 
 
 (defcustom mysql-command-other-options
-  '("--column-names" "-s"  " --unbuffered")
+  '("--column-names" "-s"  "--unbuffered")
   "default mysql connection info ."
   :group 'mysql-query)
 
@@ -114,12 +112,12 @@
     (setcdr  (assoc 'host connection-info)
              (read-string (format  "host(default:%s):"  (cdr (assoc 'host connection-info)))
                           "" nil (cdr (assoc 'host connection-info))))
-    (setcdr  (assoc 'username connection-info)
-             (read-string (format  "username(default:%s):"  (cdr (assoc 'username connection-info)))
-                          "" nil   (cdr (assoc 'username connection-info))))
     (setcdr  (assoc 'port connection-info)
              (read-string (format  "port(default:%s):"  (cdr (assoc 'port connection-info)))
                           "" nil   (cdr (assoc 'port connection-info))))
+    (setcdr  (assoc 'username connection-info)
+             (read-string (format  "username(default:%s):"  (cdr (assoc 'username connection-info)))
+                          "" nil   (cdr (assoc 'username connection-info))))
     (setcdr  (assoc 'password connection-info)
              (read-passwd "password:"  nil ))
     (setcdr  (assoc 'dbname connection-info)
@@ -140,124 +138,17 @@
          mysql-command-other-options))
 
 
-
-(defun mysql-format-command-args-4-shell (connection-info)
+(defun mysql-query (connection-info sql)
   "Returns a list of all the arguments for the mysql  program.
   default: mysql -h localhost -u root -proot -s  --database=zaiko -e"
-  (append (mysql-format-command-args connection-info) (list "--batch" "-e")))
+  (append (mysql-format-command-args connection-info) (list "--batch" "-e" sql))
 
-;; (mysql-format-command-args-4-shell mysql-connection-info)
-;; ("-h" "localhost" "-u" "sa" "-p" "--database=mysql" "--column-names" "-s" "-e")
-(defun mysql-query-create-connection(connection-info)
-  "create a connection to mysql ,and return the
-created process"
-  (interactive (list (mysql-query-read-connect-string)))
-  (let* ((random-str (number-to-string (random)))
-         (process
-          (apply 'start-process ;;
-                 (concat "mysql-query-" random-str)
-                 (concat " *mysql-query-" random-str "*")
-                 mysql-command
-                 (mysql-format-command-args mysql-connection-info))
-          ))
-    (set-process-query-on-exit-flag process nil)
-    (set-process-sentinel
-     process
-     (lambda (proc change)
-       (when (string-match "\\(finished\\|exited\\|exited abnormally with code\\)" change)
-         (kill-buffer (process-buffer proc) )
-         (message  (concat  (process-name proc) " exited")))))
-    (list process
-          (process-buffer process)
-          connection-info)))
-
-;; (mysql-query-create-connection mysql-connection-info)
-
-
-(defun mysql-query-connection-alive-p(connection)
-  "test whether the connection is alive."
-  (and connection
-       (listp connection)
-       (processp (car connection))
-       (bufferp (nth 1 connection))
-       (buffer-live-p (nth 1 connection))
-       (equal (process-status (car connection)) 'run)))
-
-;;;###autoload
-(defun mysql-query-close-connection(connection)
-  "close connection.kill mysql process and buffer ."
-  (when (mysql-query-connection-alive-p connection)
-    (process-send-string (car connection)  "exit\n"))
-  (sleep-for 0.1)
-  (when (mysql-query-connection-alive-p connection)
-    (kill-process (car connection))
-    (kill-buffer (nth 1 connection)))
   )
-
-
-;;(mysql-query "select empno from emp")
-;; (mysql-query "select empno from emp" (mysql-query-create-connection "scott/tiger"))
-;;;###autoload
-(defun mysql-query (sql &optional mysql-query-connection)
-  "execute sql using `mysql' ,and return the result of it."
-  (cdr (mysql-query-with-heading sql mysql-query-connection)))
-
-
-;; (defun mysql-query-with-heading (sql &optional mysql-query-connection)
-;;   "execute sql using `mysql' ,and return the result of it."
-;;   (let( (connection mysql-query-connection) process)
-;;     (unless (mysql-query-connection-alive-p mysql-query-connection)
-;;       (setq-default mysql-query-default-connection (call-interactively 'mysql-query-create-connection))
-;;       (setq mysql-query-connection mysql-query-default-connection))
-;;     (setq process (car connection))
-;;     (when (string-match "\\(.*\\);[ \t\n\r]*" sql)
-;;       (setq sql (match-string 1 sql)))
-;;     (setq sql (replace-regexp-in-string "[\n\r]" " " sql))
-;;     (with-current-buffer (process-buffer process)
-;;       (delete-region (point-min) (point-max))
-;;       (let ((start (point-min)) end)
-;;         (goto-char (point-max))
-;;         (process-send-string process (format "%s ;\n" sql))
-;;         (goto-char (point-min))
-;;         ;; (while (not (re-search-forward "^\\([0-9]+\\|no\\) rows? \\(selected\\|updated\\|deleted\\)" nil t 1))
-;;         ;;   (when (accept-process-output process mysql-timeout-wait-for-result 0 nil)
-;;         ;;     (goto-char (point-min))))
-;;         ;; (if (not  (string=  (match-string 2) "selected"))
-;;         ;;     (match-string 0)
-;;         ;;   ;; (setq end (1- (match-beginning 0)))
-;;         ;;   ;; (when (re-search-backward "\\bSQL> " nil t 1) (setq start (match-end 0)))
-;;         ;;   ;; (oq-parse-result-as-list (buffer-substring start end))
-;;         ;;   )
-;;         ))))
-
-;; (defun oq-parse-result-as-list (raw-result)
-;;   (let (result row index-of-result mysql-query-heading)
-;;     (with-temp-buffer
-;;       (insert raw-result)
-;;       (goto-char (point-min))
-;;       (while (re-search-forward "[ \t\n]*[ \t\n]*" nil t)
-;;         (replace-match "" nil nil))
-;;       (goto-char (point-min))
-;;       (while (re-search-forward "^[ \t]+" nil t)
-;;         (replace-match "" nil nil))
-;;       (goto-char (point-min))
-;;       (forward-line 1)
-;;       (setq mysql-query-heading
-;;             (split-string (buffer-substring-no-properties
-;;                            (point-at-bol) (point-at-eol)) "" t))
-;;       (forward-line 2) (setq index-of-result 3)
-;;       (while (not (= (point-at-eol) (point-max)))
-;;         (unless (or (= 1  (% index-of-result oq-pagesize))
-;;                     (= 2  (% index-of-result oq-pagesize))
-;;                     (= 0 (% index-of-result oq-pagesize)))
-;;           (setq row (split-string (buffer-substring-no-properties
-;;                                    (point-at-bol) (point-at-eol)) "" t))
-;;           (setq result (append result (list row))))
-;;         (forward-line) (beginning-of-line)
-;;         (setq index-of-result (1+ index-of-result)))
-;;       )(cons mysql-query-heading result)))
-
-
+;; (apply 'call-process
+;;        "mysql" nil "mysql" nil
+;;        (list "-h" "localhost" "-u" "root" "-proot" "-P" "3306" "--database=mysql" "--column-names" "-s" "--unbuffered"  "-e" "select now();")
+;;        ;; (mysql-format-command-args-4-shell  mysql-connection-info  "select now()")
+;;        )
 
 
 (provide 'mysql-query)
