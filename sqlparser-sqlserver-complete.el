@@ -1,9 +1,9 @@
 ;;; sqlparser-sqlserver-complete.el --- complete tablename and columnname when editing sql -*- coding:utf-8 -*-
 
-;; Copyright (C) 2011 纪秀峰(Joseph)
+;; Copyright (C) 2011~2012 纪秀峰(Joseph) all rights reserved.
 
 ;; Created: 2011年08月19日 星期五 00时38分17秒
-;; Last Updated: Joseph 2011-11-14 11:54:04 星期一
+;; Last Updated: Joseph 2012-01-15 21:34:54 星期日
 ;; Version: 0.1.2
 ;; Author: 纪秀峰(Joseph)  jixiuf@gmail.com
 ;; Keywords: sql complete sqlserver
