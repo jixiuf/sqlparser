@@ -3,7 +3,7 @@
 ;; Copyright (C) 2011~2012 纪秀峰(Joseph) all rights reserved.
 
 ;; Created: 2011年07月31日 星期日 20时37分31秒
-;; Last Updated: Joseph 2012-02-04 14:04:31 星期六
+;; Last Updated: Joseph 2012-02-04 14:08:20 星期六
 ;; Version: 0.1.4
 ;; Author: 纪秀峰(Joseph)  jixiuf@gmail.com
 ;; Keywords: sql parse oracle complete
@@ -227,7 +227,7 @@ position . with `C-u',use a new connection string to complete."
            sqlparser-sqlplus-connection
            )))
 
-(defun  sqlparser-oracle-column-candidates ()
+(defun sqlparser-oracle-column-candidates ()
   "column name candidates of table in current sql "
   (let* ((sql "select column_name from user_tab_columns where 1=0")
          (table-names (sqlparser-fetch-tablename-from-sql-4-oracle
