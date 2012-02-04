@@ -3,7 +3,7 @@
 ;; Copyright (C) 2011~2012 纪秀峰(Joseph) all rights reserved.
 
 ;; Created: 2011年07月31日 星期日 20时37分31秒
-;; Last Updated: Joseph 2012-01-15 21:34:43 星期日
+;; Last Updated: Joseph 2012-02-04 13:29:53 星期六
 ;; Version: 0.1.4
 ;; Author: 纪秀峰(Joseph)  jixiuf@gmail.com
 ;; Keywords: sql parse oracle complete
@@ -65,6 +65,7 @@
 ;; (add-hook  'sqlplus-mode-hook 'oracle-complete-minor-mode)
 ;; or you can call M-x: oracle-complete-minor-mode
 ;;  and complete command is binded on `TAB' .
+;;  with `C-u' you can complete with new connection string.
 
 ;;; Commands:
 ;;
@@ -72,8 +73,6 @@
 ;;
 ;;  `oracle-complete-minor-mode'
 ;;    mode for editing oracle script
-;;  `anything-oracle-complete'
-;;    call `anything' to complete tablename and column name for oracle.
 ;;  `sqlparser-oracle-complete'
 ;;    complete tablename or column name depending on current point
 ;;
@@ -86,14 +85,15 @@
 
 (require 'oracle-query)
 (require 'thingatpt)
-(require 'anything nil t)
+;; (require 'anything nil t)
 
 (defvar oracle-complete-minor-mode-map
   (let ((map (make-sparse-keymap)))
-    (if (featurep 'anything)
-        (define-key map  (quote [tab]) 'anything-oracle-complete)
-      (define-key map  (quote [tab]) 'sqlparser-oracle-complete)
-      )
+    (define-key map  (quote [tab]) 'sqlparser-oracle-complete)
+    ;; (if (featurep 'anything)
+    ;;     (define-key map  (quote [tab]) 'anything-oracle-complete)
+
+    ;;   )
     map))
 (defvar  oracle-complete-minor-mode-hook nil)
 
@@ -107,48 +107,53 @@
       (run-hooks 'oracle-complete-minor-mode-hook)))
 
 (defvar sqlparser-sqlplus-connection nil)
-(make-variable-buffer-local 'sqlparser-sqlplus-connection)
+;; (make-variable-buffer-local 'sqlparser-sqlplus-connection)
 
-(defvar anything-c-source-oracle-candidates nil)
-(defvar anything-init-postion-4-oracle)
-(defvar anything-c-source-oracle
-  '((name . "SQL Object:")
-    (init (lambda() (setq anything-init-postion-4-oracle (point))(setq anything-c-source-oracle-candidates ( sqlparser-oracle-context-candidates))))
-    (candidates . anything-c-source-oracle-candidates)
-    (action . (("Complete" . (lambda(candidate) (goto-char anything-init-postion-4-oracle)(backward-delete-char (length (sqlparser-word-before-point-4-oracle))) (insert candidate)))))))
+;; (defvar anything-c-source-oracle-candidates nil)
+;; (defvar anything-init-postion-4-oracle)
+;; (defvar anything-c-source-oracle
+;;   '((name . "SQL Object:")
+;;     (init (lambda() (setq anything-init-postion-4-oracle (point))(setq anything-c-source-oracle-candidates ( sqlparser-oracle-context-candidates))))
+;;     (candidates . anything-c-source-oracle-candidates)
+;;     (action . (("Complete" . (lambda(candidate) (goto-char anything-init-postion-4-oracle)(backward-delete-char (length (sqlparser-word-before-point-4-oracle))) (insert candidate)))))))
+;; ;;;###autoload
+;; (defun anything-oracle-complete()
+;;   "call `anything' to complete tablename and column name for oracle."
+;;   (interactive)
+;;   (let ((anything-execute-action-at-once-if-one t)
+;;         (anything-quit-if-no-candidate
+;;          (lambda () (message "complete failed."))))
+;;     (anything '(anything-c-source-oracle)
+;;               ;; Initialize input with current symbol
+;;               (sqlparser-word-before-point-4-oracle)  nil nil)))
+
 ;;;###autoload
-(defun anything-oracle-complete()
-  "call `anything' to complete tablename and column name for oracle."
-  (interactive)
-  (let ((anything-execute-action-at-once-if-one t)
-        (anything-quit-if-no-candidate
-         (lambda () (message "complete failed."))))
-    (anything '(anything-c-source-oracle)
-              ;; Initialize input with current symbol
-              (sqlparser-word-before-point-4-oracle)  nil nil)))
-
-
-;;;###autoload
-(defun sqlparser-oracle-complete()
+(defun sqlparser-oracle-complete(&optional arg)
   "complete tablename or column name depending on current point
-position ."
-  (interactive)
+position . with `C-u',use a new connection string to complete."
+  (interactive "P")
   (let ((prefix  (sqlparser-word-before-point-4-oracle) )
         (init-pos (point))
+        (candidates  (sqlparser-oracle-context-candidates arg))
         last-mark)
-    (insert (completing-read "complete:" (sqlparser-oracle-context-candidates) nil t prefix ))
+    (if (= 1 (length candidates))
+        (insert (car candidates))
+      (insert (completing-read "complete:" candidates nil t prefix )))
     (setq last-mark (point-marker))
     (goto-char init-pos)
     (backward-delete-char (length prefix))
     (goto-char (marker-position last-mark))
     ))
 
-(defun  sqlparser-oracle-context-candidates()
+(defun  sqlparser-oracle-context-candidates(&optional arg)
   "it will decide to complete tablename or columnname depend on
-  current position."
-  (unless (and sqlparser-sqlplus-connection
-               (equal (process-status (nth 0  sqlparser-sqlplus-connection)) 'run))
-    (setq sqlparser-sqlplus-connection (call-interactively 'oracle-query-create-connection)))
+  current position. with `C-u' use a new connection string to complete."
+  (if arg
+      (when (oracle-query-connection-alive-p sqlparser-sqlplus-connection)
+        (oracle-query-close-connection  sqlparser-sqlplus-connection)
+        (setq sqlparser-sqlplus-connection (call-interactively 'oracle-query-create-connection)))
+    (unless  (oracle-query-connection-alive-p sqlparser-sqlplus-connection)
+      (setq sqlparser-sqlplus-connection (call-interactively 'oracle-query-create-connection))))
   (let ((context (sqlparser-parse-4-oracle)) candidats)
     (cond
      ((string= "schema" context)
