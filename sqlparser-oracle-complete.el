@@ -3,7 +3,7 @@
 ;; Copyright (C) 2011~2012 纪秀峰(Joseph) all rights reserved.
 
 ;; Created: 2011年07月31日 星期日 20时37分31秒
-;; Last Updated: Joseph 2012-02-04 13:29:53 星期六
+;; Last Updated: Joseph 2012-02-04 14:04:31 星期六
 ;; Version: 0.1.4
 ;; Author: 纪秀峰(Joseph)  jixiuf@gmail.com
 ;; Keywords: sql parse oracle complete
@@ -175,12 +175,48 @@ position . with `C-u',use a new connection string to complete."
 ;; select table_name from all_tab_privs where grantee = 'U1' and privilege = 'SELECT'
 (defun  sqlparser-oracle-tablename-or-schemaname-candidates ()
   "all tablename viewname i can select."
-  (mapcar 'car
-          (oracle-query
-           (format " select view_name from all_views where upper(owner)=upper('%s') union all select table_name from all_tables where upper(owner)=upper('%s') union all  select table_schema||'.'||table_name from all_tab_privs where lower(grantee) = lower('%s') and privilege = 'SELECT' union all select table_name from dict"
-                   (nth 2 sqlparser-sqlplus-connection)(nth 2 sqlparser-sqlplus-connection)(nth 2 sqlparser-sqlplus-connection))
-           sqlparser-sqlplus-connection
-           )))
+  (let* ((prefix (sqlparser-get-prefix-4-oracle))
+         (tmp-str-array (split-string prefix "\\."))
+         owner table_name sql)
+    (if  (= 2 (length tmp-str-array))
+        (progn (setq owner (car tmp-str-array))
+               (setq table_name (nth 1 tmp-str-array)))
+      (setq table_name  (car tmp-str-array)))
+
+    (if owner
+        (setq sql (format
+                   (concat " select view_name from all_views where upper(owner)=upper('%s') and upper(view_name) like upper('%s%%') "
+                           "union all select table_name from all_tables where upper(owner)=upper('%s') and upper(table_name) like upper('%s%%') "
+                           "union all  select table_schema||'.'||table_name from all_tab_privs where lower(grantee) = lower('%s') and privilege = 'SELECT' and upper(table_schema)=upper('%s') and upper(table_name) like upper('%s%%')"
+                           "union all select table_name from dict where upper(table_name) like upper('%s%%')")
+
+                   (nth 2 sqlparser-sqlplus-connection) table_name
+                   (nth 2 sqlparser-sqlplus-connection) table_name
+                   (nth 2 sqlparser-sqlplus-connection) owner table_name
+                   table_name
+                   ))
+      (setq sql (format
+                 (concat " select view_name from all_views where upper(owner)=upper('%s') and upper(view_name) like upper('%s%%') "
+                         "union all select table_name from all_tables where upper(owner)=upper('%s') and upper(table_name) like upper('%s%%') "
+                         "union all  select table_schema||'.'||table_name from all_tab_privs where lower(grantee) = lower('%s') and privilege = 'SELECT' and upper(table_name) like upper('%s%%')"
+                         "union all select table_name from dict where upper(table_name) like upper('%s%%')"
+                         "union all select USERNAME from ALL_USERS where upper(USERNAME) like upper('%s%%')"
+                         )
+
+                 (nth 2 sqlparser-sqlplus-connection) table_name
+                 (nth 2 sqlparser-sqlplus-connection) table_name
+                 (nth 2 sqlparser-sqlplus-connection) owner table_name
+                 table_name
+                 table_name           ;actual ,maybe username
+                 ))
+      )
+    (mapcar 'car
+            (oracle-query
+             sql
+             sqlparser-sqlplus-connection
+             ))
+    )
+  )
 
 (defun sqlparser-oracle-schemaname-candidates ()
   "all schema-name in oracle database"
