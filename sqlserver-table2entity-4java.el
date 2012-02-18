@@ -1,10 +1,9 @@
 ;;; sqlserver-table2entity-4java.el --- sqlserver table2entity for java   -*- coding:utf-8 -*-
 
 ;; Description:sqlserver table2entity for java
-;; Last Updated: Joseph 2012-01-16 00:09:37 星期一
+;; Last Updated: Joseph 2012-02-18 11:10:12 星期六
 ;; Created: 2011-09-18 21:44
-;; Author: 孤峰独秀  jixiuf@gmail.com
-;; Maintainer:  孤峰独秀  jixiuf@gmail.com
+;; Author: 纪秀峰(Joseph)  jixiuf@gmail.com
 ;; Keywords: sqlserver java entity
 ;; URL: http://www.emacswiki.org/emacs/sqlserver-table2entity-4java.el
 ;; https://github.com/jixiuf/sqlparser
@@ -101,7 +100,7 @@ key 是db类型，value 是java 中对应类型.要求key大写"
 (defun camelize (s &optional separator )
   "Convert under_score string S to CamelCase string."
   (mapconcat 'identity (mapcar
-                        '(lambda (word) (capitalize (downcase word)))
+                        #'(lambda (word) (capitalize (downcase word)))
                         (if separator (split-string s "_") (list s))
                         ) ""))
 
