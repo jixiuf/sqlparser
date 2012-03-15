@@ -3,7 +3,7 @@
 ;; Copyright (C) 2011~2012 纪秀峰(Joseph) all rights reserved.
 
 ;; Created: 2011年08月19日 星期五 00时38分17秒
-;; Last Updated: Joseph 2012-01-15 21:34:54 星期日
+;; Last Updated: Joseph 2012-03-16 01:25:57 星期五
 ;; Version: 0.1.2
 ;; Author: 纪秀峰(Joseph)  jixiuf@gmail.com
 ;; Keywords: sql complete sqlserver
@@ -92,8 +92,8 @@
 ;;    mode for editing sqlserver script
 ;;  `sqlparser-sqlserver-complete'
 ;;    complete tablename or column name depending on current point
-;;  `anything-sqlserver-complete'
-;;    call `anything' to complete tablename and column name for sqlserver.
+;;  `helm-sqlserver-complete'
+;;    call `helm' to complete tablename and column name for sqlserver.
 ;;
 ;;; Customizable Options:
 ;;
@@ -105,7 +105,7 @@
 
 (require 'sqlserver-query)
 (require 'thingatpt)
-(require 'anything nil t)
+(require 'helm nil t)
 
 (defvar sqlparser-sqlserver-connection nil)
 (make-variable-buffer-local 'sqlparser-sqlserver-connection)
@@ -114,8 +114,8 @@
 
 (defvar sqlserver-complete-minor-mode-map
   (let ((map (make-sparse-keymap)))
-    (if (featurep 'anything)
-        (define-key map  (quote [tab]) 'anything-sqlserver-complete)
+    (if (featurep 'helm)
+        (define-key map  (quote [tab]) 'helm-sqlserver-complete)
       (define-key map  (quote [tab]) 'sqlparser-sqlserver-complete)
       )
     map))
@@ -145,22 +145,22 @@ position ."
     (goto-char (marker-position last-mark))
    ))
 
-(defvar anything-c-source-sqlserver-candidates nil)
-(defvar anything-init-postion-4-sqlserver)
-(defvar anything-c-source-sqlserver
+(defvar helm-c-source-sqlserver-candidates nil)
+(defvar helm-init-postion-4-sqlserver)
+(defvar helm-c-source-sqlserver
   '((name . "SQL Object:")
-    (init (lambda() (setq anything-init-postion-4-sqlserver (point))(setq anything-c-source-sqlserver-candidates (sqlparser-sqlserver-context-candidates))))
-    (candidates . anything-c-source-sqlserver-candidates)
-    (action . (("Complete" . (lambda(candidate) (goto-char anything-init-postion-4-sqlserver) (backward-delete-char (length (sqlparser-word-before-point-4-sqlserver))) (insert candidate)))))))
+    (init (lambda() (setq helm-init-postion-4-sqlserver (point))(setq helm-c-source-sqlserver-candidates (sqlparser-sqlserver-context-candidates))))
+    (candidates . helm-c-source-sqlserver-candidates)
+    (action . (("Complete" . (lambda(candidate) (goto-char helm-init-postion-4-sqlserver) (backward-delete-char (length (sqlparser-word-before-point-4-sqlserver))) (insert candidate)))))))
 
 ;;;###autoload
-(defun anything-sqlserver-complete()
-  "call `anything' to complete tablename and column name for sqlserver."
+(defun helm-sqlserver-complete()
+  "call `helm' to complete tablename and column name for sqlserver."
   (interactive)
-  (let ((anything-execute-action-at-once-if-one t)
-        (anything-quit-if-no-candidate
+  (let ((helm-execute-action-at-once-if-one t)
+        (helm-quit-if-no-candidate
          (lambda () (message "complete failed."))))
-    (anything '(anything-c-source-sqlserver)
+    (helm '(helm-c-source-sqlserver)
               ;; Initialize input with current symbol
               (regexp-quote (sqlparser-word-before-point-4-sqlserver))  nil nil)))
 
