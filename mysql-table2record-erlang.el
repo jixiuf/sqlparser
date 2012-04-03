@@ -1,11 +1,10 @@
-;;; mysql-table2record-4erlang.el --- mysql table2record for erlang   -*- coding:utf-8 -*-
+;;; mysql-table2record-4erlang.el --- mysql table2record for erlang
 
 ;; Description:mysql table2record for erlang
-;; Last Updated: Joseph 2012-04-03 17:12:24 星期二
-;; Created: 2011-09-18 21:44
+;; Last Updated: Joseph 2012-04-03 17:15:24 星期二
+;; Created: 2012年04月03日 星期二 17时14分44秒
 ;; Author: 纪秀峰(Joseph)  jixiuf@gmail.com
 ;; Keywords: mysql erlang record
-;; URL: http://www.emacswiki.org/emacs/mysql-table2record-4erlang.el
 ;; https://github.com/jixiuf/sqlparser
 ;;  call command : (mysql-table2record-4erlang-interactively)
 
