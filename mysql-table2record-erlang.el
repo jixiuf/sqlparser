@@ -1,7 +1,7 @@
 ;;; mysql-table2record-4erlang.el --- mysql table2record for erlang
 
 ;; Description:mysql table2record for erlang
-;; Last Updated: Joseph 2012-04-17 12:18:58 星期二
+;; Last Updated: Joseph 2012-04-17 12:28:13 星期二
 ;; Created: 2012年04月03日 星期二 17时14分44秒
 ;; Author: 纪秀峰(Joseph)  jixiuf@gmail.com
 ;; Keywords: mysql erlang record
@@ -115,10 +115,12 @@
  ;; (erlang-mysql-query-all-tablename-in-db mysql-connection-4-mysql-erlang)
 (defun erlang-mysql-query-all-tablename-in-db(mysql-connection-4-mysql-erlang)
   "query all table name from connected mysql `mysql-query.el'"
-  (mapcar 'car (mysql-query
-                (format "select table_name from information_schema.tables where table_schema='%s'"
+   (mysql-query
+                (format "select table_name,table_comment from information_schema.tables where table_schema='%s'"
                         (cdr (assoc 'dbname mysql-connection-4-mysql-erlang)))
-                mysql-connection-4-mysql-erlang)))
+                mysql-connection-4-mysql-erlang)
+  ;; (mapcar 'car)
+   )
 
  ;; (erlang-mysql-query-table "user" mysql-connection-4-mysql-erlang)
 (defun erlang-mysql-query-table (tablename mysql-connection-4-mysql-erlang)
@@ -130,15 +132,15 @@
 )
 
 ;; (erlang-mysql-generate-record "user" mysql-connection-4-mysql-erlang)
-(defun erlang-mysql-generate-record(tablename mysql-connection-4-mysql-erlang)
+(defun erlang-mysql-generate-record(tablename-tablecomment mysql-connection-4-mysql-erlang)
   "generate all setter getter of `tablename'"
   (let (
-        (col-type-alist (erlang-mysql-query-table tablename mysql-connection-4-mysql-erlang))
+        (col-type-alist (erlang-mysql-query-table (car tablename-tablecomment) mysql-connection-4-mysql-erlang))
          field-name)
     (with-temp-buffer
       (insert "-record(" )
-      (insert ( erlang-mysql-tablename2record-name tablename))
-      (insert ",{\n")
+      (insert (format "%s " ( erlang-mysql-tablename2record-name (car tablename-tablecomment)) ))
+      (insert (format ",{%% %s\n"  (nth 1 tablename-tablecomment)) )
       (dolist (colomnname-type-item col-type-alist)
         (setq field-name (erlang-mysql-columnname2fieldname (car colomnname-type-item)))
         (insert (format "%s, %% %s \n" field-name (nth 1 colomnname-type-item)))
@@ -158,8 +160,8 @@
     (with-current-buffer "*erlang records*"
       (erase-buffer)
       (erlang-mode)
-      (dolist (tablename  (erlang-mysql-query-all-tablename-in-db mysql-connection-4-mysql-erlang))
-        (insert (erlang-mysql-generate-record tablename mysql-connection-4-mysql-erlang) "\n")
+      (dolist (tablname-table-comment   (erlang-mysql-query-all-tablename-in-db mysql-connection-4-mysql-erlang))
+        (insert (erlang-mysql-generate-record tablname-table-comment mysql-connection-4-mysql-erlang) "\n")
         )
       (indent-region (point-min) (point-max))
       )
