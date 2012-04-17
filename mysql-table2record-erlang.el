@@ -1,7 +1,7 @@
 ;;; mysql-table2record-4erlang.el --- mysql table2record for erlang
 
 ;; Description:mysql table2record for erlang
-;; Last Updated: Joseph 2012-04-03 17:15:24 星期二
+;; Last Updated: Joseph 2012-04-17 12:18:58 星期二
 ;; Created: 2012年04月03日 星期二 17时14分44秒
 ;; Author: 纪秀峰(Joseph)  jixiuf@gmail.com
 ;; Keywords: mysql erlang record
@@ -124,7 +124,7 @@
 (defun erlang-mysql-query-table (tablename mysql-connection-4-mysql-erlang)
   "query all column name and data type ."
   (mysql-query
-   (format "select column_name,data_type from information_schema.columns where table_schema ='%s' and  table_name='%s' "
+   (format "select column_name,column_comment from information_schema.columns where table_schema ='%s' and  table_name='%s' "
            (cdr (assoc 'dbname mysql-connection-4-mysql-erlang)) tablename)
    mysql-connection-4-mysql-erlang)
 )
@@ -141,7 +141,7 @@
       (insert ",{\n")
       (dolist (colomnname-type-item col-type-alist)
         (setq field-name (erlang-mysql-columnname2fieldname (car colomnname-type-item)))
-        (insert field-name ",\n")
+        (insert (format "%s, %% %s \n" field-name (nth 1 colomnname-type-item)))
         )
       (insert "}.\n")
       (buffer-string)
