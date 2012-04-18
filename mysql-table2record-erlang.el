@@ -1,7 +1,7 @@
 ;;; mysql-table2record-4erlang.el --- mysql table2record for erlang
 
 ;; Description:mysql table2record for erlang
-;; Last Updated: Joseph 2012-04-17 17:31:31 星期二
+;; Last Updated: Joseph 2012-04-18 16:55:37 星期三
 ;; Created: 2012年04月03日 星期二 17时14分44秒
 ;; Author: 纪秀峰(Joseph)  jixiuf@gmail.com
 ;; Keywords: mysql erlang record
@@ -53,7 +53,8 @@
 
 (defun erlang-mysql-columnname2fieldname(columnname)
   "use mysql column name as the field name of generated erlang record."
-  columnname)
+  (downcase-first-char columnname)
+  )
 
 ;; (camelize "hello_world") =="Hello_World"
 ;; (camelize "hello_world" "_") =="HelloWorld"
@@ -89,6 +90,13 @@
     (let ( (first-char (substring s 0 1 ))
            (rest  (substring s  1 )))
       (concat (or prefix "") (upcase first-char) rest))))
+
+(defun downcase-first-char (s &optional prefix)
+  "make the first char `upcase' and return (concat prefix upcasedstring)"
+  (when  (>  (length s) 0)
+    (let ( (first-char (substring s 0 1 ))
+           (rest  (substring s  1 )))
+      (concat (or prefix "") (downcase first-char) rest))))
 
 ;; (un-camelcase-string "helloWorld") == "hello_world"
 ;; (un-camelcase-string "helloWorld" "") == "helloworld"
@@ -145,10 +153,10 @@
       (insert (format ",{%% %s\n"  (nth 1 tablename-tablecomment)) )
       (dolist (colomnname-type-item (cdr  col-type-alist))
         (setq field-name (erlang-mysql-columnname2fieldname (car colomnname-type-item)))
-        (insert (format "%s, %% %s \n" field-name (nth 1 colomnname-type-item)))
+        (insert (format "%-40s, %% %s \n" field-name (nth 1 colomnname-type-item)))
         )
         (setq field-name (erlang-mysql-columnname2fieldname (car (car col-type-alist))))
-        (insert (format "%s %% %s \n" field-name (nth 1 (car col-type-alist))))
+        (insert (format "%-40s %% %s \n" field-name (nth 1 (car col-type-alist))))
       (insert "}).\n")
       (buffer-string)
       )
