@@ -69,7 +69,7 @@
 ;;        (mysql-complete-minor-mode))
 
 ;; `sqlparser-mysql-complete' default  bind on `TAB' in
-;;   with `C-u' you can change the dbname
+;;   with `C-u' you can change the sql-database
 ;;   with `C-uC-u' you can use another new mysql connection
 ;;
 
@@ -96,7 +96,7 @@
   "SQL-PARSE"
   :group 'SQL)
 
-(defvar mysql-connection-4-complete nil)
+(defvar-local mysql-connection-4-complete nil)
 
 (defvar mysql-complete-minor-mode-map
   (let ((map (make-sparse-keymap)))
@@ -117,19 +117,19 @@
 ;;;###autoload
 (defun sqlparser-mysql-complete(&optional arg)
   "complete tablename or column name depending on current point position .
-when you first call this command ,it will ask you for the dbname ,user ,password
+when you first call this command ,it will ask you for the sql-database ,user ,password
 host and port. the info will be stored in `mysql-connection-4-complete'. it can be
 reused . with `C-u' you can change the dbname.
 with `C-uC-u' you can use another new mysql connection"
   (interactive "P")
   (when (or (and arg (> (prefix-numeric-value arg) 4))
             (null mysql-connection-4-complete))
-    (setq mysql-connection-4-complete (call-interactively 'mysql-query-create-connection)))
+    (setq mysql-connection-4-complete (call-interactively 'mysql-query-complete-create-connection)))
   (when (and arg (= (prefix-numeric-value arg) 4) )
-    (setcdr  (assoc 'dbname mysql-connection-4-complete)
-             (completing-read (format  "dbname(default:%s):"  (cdr (assoc 'dbname mysql-connection-4-complete)))
+    (setcdr  (assoc 'sql-database mysql-connection-4-complete)
+             (completing-read (format  "sql-database(default:%s):"  (cdr (assoc 'sql-database mysql-connection-4-complete)))
                               (sqlparser-mysql-schemaname-candidates) nil
-                              nil nil nil  (cdr (assoc 'dbname mysql-connection-4-complete)))))
+                              nil nil nil  (cdr (assoc 'sql-database mysql-connection-4-complete)))))
   (let ((prefix  (sqlparser-word-before-point-4-mysql) )
         (init-pos (point))
         (candidates (sqlparser-mysql-context-candidates))
@@ -182,7 +182,7 @@ candidats"
                    (car sub-prefix) (nth 1 sub-prefix)))
       (setq sql (format
                  "select table_name as tablename from information_schema.tables where table_schema='%s' and table_name like '%s%%' union select concat( schema_name, '.') as tablename from information_schema.schemata where schema_name like '%s%%' "
-                 (cdr (assoc 'dbname  mysql-connection-4-complete))
+                 (cdr (assoc 'sql-database  mysql-connection-4-complete))
                  prefix prefix )))
     (mapcar 'car (mysql-query sql  mysql-connection-4-complete))))
 
